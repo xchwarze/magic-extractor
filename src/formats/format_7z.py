@@ -24,7 +24,7 @@ class Format7zHandler(BaseExtractor):
 
         # Construct the command to execute using the path to 7z executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, '7z.exe'),
+            os.path.join(self.bin_path, self.TOOL_FOLDER, '7z', '7z.exe'),
             'x',  # extract files with full paths
             '-y', # assume Yes on all queries
         ]

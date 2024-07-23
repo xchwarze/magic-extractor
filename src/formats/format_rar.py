@@ -24,7 +24,7 @@ class FormatRarHandler(BaseExtractor):
 
         # Construct the command to execute using the path to unrar executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, 'unrar.exe'), 
+            os.path.join(self.bin_path, self.TOOL_FOLDER, 'rar', 'unrar.exe'), 
             'x',  # Extract files with full paths
             '-y', # Assume Yes on all queries
         ]

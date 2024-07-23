@@ -82,13 +82,13 @@ def main():
     
     ### debug
     #########################
-    logging.debug(
+    logging.error(
         determine_file_type_with_trid(file_path=args.file_path, bin_path=BIN_PATH)
     )
-    #logging.debug(
+    #logging.error(
     #    determine_file_type_with_trid_dll(file_path=args.file_path, bin_path=BIN_PATH)
     #)
-    logging.debug(
+    logging.error(
         determine_file_type_with_die(file_path=args.file_path, bin_path=BIN_PATH)
     )
     #########################
