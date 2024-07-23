@@ -5,8 +5,8 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_trid, determine_file_type_with_trid_dll, determine_file_type_with_die
-from formats import get_handler_from_mime
+from file_type import determine_file_type_with_magic, determine_file_type_with_die
+from formats import get_handler_from_mime, get_handler_from_detection
 
 # Define the path to the 'bin' directory
 BIN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin')
@@ -69,6 +69,29 @@ def configure_settings(args, config):
         if getattr(args, key) is None:
             setattr(args, key, config.get('settings', key, type=bool))
 
+def find_appropriate_handler(file_path, fast_check):
+    """Tries to find an appropriate handler based on the file's MIME type and detection results."""
+    # First check using MIME type detection
+    mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
+    if mime_types:
+        for mime_type in mime_types:
+            handler_class = get_handler_from_mime(mime_type=mime_type)
+            if handler_class:
+                logging.info(f"Handler found for MIME type: {mime_type}")
+                return handler_class
+
+    # If no handler was found, try detection with DIE
+    detection_results = determine_file_type_with_die(file_path=file_path, bin_path=BIN_PATH)
+    if detection_results:
+        for detection in detection_results:
+            handler_class = get_handler_from_detection(detection=detection)
+            if handler_class:
+                logging.info(f"Handler found for detection: {detection}")
+                return handler_class
+
+    # If no handler is found even after the second check
+    return None
+
 def main():
     """Main function to handle file extraction based on command line arguments and configurable settings."""
     parser = configure_parser()
@@ -78,22 +101,7 @@ def main():
     config = Config()
     configure_settings(args, config)
 
-    file_type = determine_file_type_with_magic(file_path=args.file_path, fast_check=args.fast_check)
-    
-    ### debug
-    #########################
-    logging.error(
-        determine_file_type_with_trid(file_path=args.file_path, bin_path=BIN_PATH)
-    )
-    #logging.error(
-    #    determine_file_type_with_trid_dll(file_path=args.file_path, bin_path=BIN_PATH)
-    #)
-    logging.error(
-        determine_file_type_with_die(file_path=args.file_path, bin_path=BIN_PATH)
-    )
-    #########################
-
-    handler_class = get_handler_from_mime(mime_type=file_type)
+    handler_class = find_appropriate_handler(file_path=args.file_path, fast_check=args.fast_check)
     if handler_class:
         handler = handler_class(cli_args=args, bin_path=BIN_PATH)
         success = handler.extract()

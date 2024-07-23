@@ -44,16 +44,19 @@ MIME_HANDLERS = {
     'application/vnd.rar': FormatRarHandler,
 }
 
-EXTENSION_HANDLERS = {
-    '.exe': {
-        '7-zip': Format7zHandler,
-        'winrar': FormatRarHandler,
-        'rar': FormatRarHandler,
-    },
+DETECTION_HANDLERS = {
+    '7-zip': Format7zHandler,
+    'winrar': FormatRarHandler,
 }
 
 def get_handler_from_mime(mime_type):
     """Returns the appropriate handler class for a given MIME type."""
-    logging.info(f"Looking for a handler for this mime type: '{mime_type}'")
+    logging.debug(f"Looking for a handler for this mime type: '{mime_type}'")
     handler_class = MIME_HANDLERS.get(mime_type)
+    return handler_class if handler_class else None
+
+def get_handler_from_detection(detection):
+    """Returns the appropriate handler class based on a detection result."""
+    logging.debug(f"Looking for a handler for this detection: '{detection}'")
+    handler_class = DETECTION_HANDLERS.get(detection.lower())
     return handler_class if handler_class else None

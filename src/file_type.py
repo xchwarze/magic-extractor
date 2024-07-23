@@ -26,17 +26,20 @@ def determine_file_type_with_magic(file_path, fast_check=False):
                        If False, analyzes the entire file for a more comprehensive detection.
 
     Returns:
-    str: The MIME type with the highest confidence based on the file's content if determinable, otherwise None.
+    set: A set of unique MIME types found in the file, if any.
     """
-    possible_types = puremagic.magic_string(open(file_path, "rb").read(2048)) if fast_check else puremagic.magic_file(file_path)
+    try:
+        # Choose the method of analysis based on fast_check
+        possible_types = puremagic.magic_string(open(file_path, "rb").read(2048)) if fast_check else puremagic.magic_file(file_path)
+        logging.debug(f"Puremagic report: {possible_types}")
+        
+        # Create a set of MIME types, excluding empty strings and ensuring uniqueness
+        mime_types = {ptype.mime_type for ptype in possible_types if ptype.mime_type}
 
-    logging.debug(f"Puremagic report: {possible_types}")
-    if possible_types:
-        # Sort by confidence and return the highest one, or the first item if no confidence info is available
-        best_match = sorted(possible_types, key=lambda value: getattr(value, 'confidence', 0), reverse=True)[0]
-        return best_match.mime_type
-
-    return None
+        return mime_types if mime_types else None
+    except Exception as exc:
+        logging.error(f"An error occurred while determining the file type for {file_path}: {exc}")
+        return None
 
 def determine_file_type_with_die(file_path, bin_path):
     """
