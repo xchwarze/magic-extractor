@@ -1,0 +1,148 @@
+
+(C) 2008-2011 By Marco Pontello                Last update: 24/02/2011
+
+============================================
+ T r I D L i b   A P I   r e f e r e n c e
+============================================
+
+
+--------------
+ BASIC HOW-TO
+--------------
+
+  Using the library is very simple.
+  The process goes as follow:
+
+  1) Load the definitions
+  2) Submit a file to be analyzed
+  3)   Perform the analysis
+  4)   Get the results
+  5) Repeat from 2)
+
+
+  For some practical usage samples, refer to the various source
+  code examples.
+
+
+-----------
+ FUNCTIONS
+-----------
+
+  Note: All functions deals with just two kind of parameters:
+
+  INT       = 32 bit signed integer (an "int" in C/C++, "longint"
+              in Delphi, "integer" in .NET, etc.)
+  ASCIIZ    = 32 pointer to an ASCIIZ string / buffer
+  %CONSTANT = numeric constant / mnemonic
+
+
+TrID_LoadDefsPack
+-----------------
+  In : Path (ASCIIZ)
+  Ret: Result (INT)
+
+  Specify the path where to find the "TrIDDefs.TRD" definitions file.
+  The file name itself is fixed / hardcoded, and will simply added at
+  the end.
+  If no path is specified, then the definition file will be assumed to
+  be in the current directory.
+
+  Ex: "", "c:\trid\", "x:\" -> OK
+      "mydefs.trd", "c:\trid\triddefs.trd" -> ERR
+
+  The Result will be the number of definitions loaded.
+  It it's 0, either the definitions file was empty (!) or there were
+  problems locating / opening the file.
+
+
+TrID_SetDefsPack (* FULL VERSION ONLY)
+----------------
+  In : DefsPtr (INT)
+  Ret: Result (INT)
+
+  Used to pass the content of a TrIDDefs.TRD file directly from
+  memory, so that it can be embedded as a resource, compressed, or
+  stored in any other way.
+  Like TrID_LoadDefsPack, return the number of definitions loaded.
+
+
+TrID_SubmitFileA
+----------------
+  In : Filename (ASCIIZ)
+  Ret: Result (INT)
+
+  Indicate to TrIDLib on witch Filename to operate.
+  Return -1 if it was able to open the file and read from it, or 0
+  to indicate a problem.
+
+
+TrID_Analyze
+------------
+  In : -
+  Ret: Result (INT)
+
+  Perform the analysis to identify the file previously submitted.
+  Return -1 if all was OK, or 0 if there were problems.
+
+
+TrID_GetInfo
+------------
+  In : InfoType (INT)
+       InfoIdx (INT)
+       TrIDRes (ASCIIZ)
+  Ret: Result (INT)
+
+  Request various kind of info / results, depending on the InfoType
+  and InfoIdx (if requesting an info that refer to a result, like
+  an Extension) parameter. The info is returned directly in the
+  Result return value (if numeric), or written in the ASCIIZ string /
+  buffer pointed by TrIDRes (if it's a string).
+  N.B. This buffer should be dimensioned to a minimum of 4KB.
+
+  The following table list the constants to be used for the various
+  kind of info, the type of result returned and if it need an InfoIdx.
+
+  I Type Constant                Value Desc
+  --------------------------------------------------------------------
+    Int  %TRID_GET_RES_NUM           1 Get the number of results
+  * Str  %TRID_GET_RES_FILETYPE      2 Filetype descriptions
+  * Str  %TRID_GET_RES_FILEEXT       3 Filetype extension
+  * Int  %TRID_GET_RES_POINTS        4 Matching points
+
+    Int  %TRID_GET_VER            1001 TrIDLib version
+    Int  %TRID_GET_DEFSNUM        1004 # filetypes definitions loaded
+
+  Additionally, there are other constants for the full version.
+  The %TRID_GET_DEF_* ones are fore getting info about the definitions
+  themselves. First, %TRID_GET_DEF_ID is used to get the id of the
+  definition of a certain result, and then that id is used as the
+  index to get all the other info. Like in:
+
+     id =  TrID_GetInfo(%TRID_GET_DEF_ID, 1, 0)
+     tag = TrID_GetInfo(%TRID_GET_DEF_TAG, id, 0)
+
+  I Type Constant                Value Desc
+  --------------------------------------------------------------------
+  * Int  %TRID_GET_DEF_ID          100 Get the def's id for a result
+  * Int  %TRID_GET_DEF_FILESCANNED 101 corresponding info
+  * Str  %TRID_GET_DEF_AUTHORNAME  102         "
+  * Str  %TRID_GET_DEF_AUTHOREMAIL 103         "
+  * Str  %TRID_GET_DEF_AUTHORHOME  104         "
+  * Str  %TRID_GET_DEF_FILE        105         "
+  * Str  %TRID_GET_DEF_REMARK      106         "
+  * Str  %TRID_GET_DEF_RELURL      107         "
+  * Int  %TRID_GET_DEF_TAG         108         "
+  * Str  %TRID_GET_DEF_MIMETYPE    109         "
+
+    Int  %TRID_GET_ISTEXT         1005 Check if file is text/binary
+                                       (return 0 for bin, 1 for text)
+
+  N.B.
+  %TRID_GET_DEF_TAG refer to the element TrID\Info\ExtraInfo\Tag.
+  It's numeric valued stored as an INT that could be added to an XML
+  definition and used as a collection of flags, for grouping purposes,
+  etc.
+
+  %TRID_GET_DEF_MIMETYPE refer to the element TrID\Info\Mime.
+
+

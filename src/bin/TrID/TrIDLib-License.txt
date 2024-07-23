@@ -1,0 +1,36 @@
+TrIDLib - Free version - (C) 2008-2011 By Marco Pontello
+
+Info: http://mark0.net/code-tridlib-e.html
+      http://mark0.net/soft-trid-e.html
+E-Mail: marcopon@gmail.com
+
+License:
+
+This Win32 DLL can be freely redistribuited in this exact form.
+This license file must be included along the DLL.
+A TrID's definitions file package may also be included.
+All these files need to retain the original names:
+TrIDLib.dll, TrIDLib-License.txt, TrIDDefs.trd
+
+This version/edition is free for non commercial, personal, research and
+educational use. It can be included in freeware applications, as long as the
+application, its documentation and its website contain a clear reference to
+TrIDLib & his author name, and a link to TrIDLib mainpage (or to the Online
+TrID, or TrID pages)
+
+Contact the author for agreements in any kind of commercial / for profit /
+business use. The full version also have importants additional features.
+
+
+DISCLAIMER:
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+EVENT SHALL THE COPYRIGHT OWNER BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ( INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT ( INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
