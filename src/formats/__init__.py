@@ -1,6 +1,7 @@
 import logging
 from .format_7z import Format7zHandler
 from .format_rar import FormatRarHandler
+from .format_exe_innosetup import FormatInnoSetupHandler
 
 # Dictionary mapping types to handler classes
 MIME_HANDLERS = {
@@ -47,6 +48,7 @@ MIME_HANDLERS = {
 DETECTION_HANDLERS = {
     '7-zip': Format7zHandler,
     'winrar': FormatRarHandler,
+    'inno setup module': FormatInnoSetupHandler,
 }
 
 def get_handler_from_mime(mime_type):
