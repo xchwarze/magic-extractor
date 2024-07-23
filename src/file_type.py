@@ -49,7 +49,7 @@ def determine_file_type_with_die(file_path, bin_path):
     Returns:
     dict: A dictionary containing detailed information about the file, or None if an error occurs.
     """
-    command = [os.path.join(bin_path, 'DIE', 'diec.exe'), '-j', file_path]
+    command = [os.path.join(bin_path, 'detectors', 'die', 'diec.exe'), '-j', file_path]
     
     try:
         result = subprocess.run(command, text=True, capture_output=True, check=True)
@@ -85,7 +85,7 @@ def determine_file_type_with_trid(file_path, bin_path):
     Returns:
     str: The description of the file type from the last line of TrID's output, or None if an error occurs.
     """
-    command = [os.path.join(bin_path, 'TrID', 'trid.exe'), '-n:1', file_path]
+    command = [os.path.join(bin_path, 'detectors', 'trid', 'trid.exe'), '-n:1', file_path]
     
     try:
         result = subprocess.run(command, text=True, capture_output=True, check=True)
@@ -112,8 +112,8 @@ def determine_file_type_with_trid_dll(file_path, bin_path):
         str: The most likely file type or extension based on TrIDLib analysis, or None if an error occurs.
     """
     # Construct paths to the TrID DLL and definitions file
-    dll_path = os.path.join(bin_path, 'TrID', 'TrIDLib.dll')
-    definitions_path = os.path.join(bin_path, 'TrID', 'triddefs.trd')
+    dll_path = os.path.join(bin_path, 'detectors', 'trid', 'TrIDLib.dll')
+    definitions_path = os.path.join(bin_path, 'detectors', 'trid', 'triddefs.trd')
 
     # Create an instance of TrIDLib using the specified DLL path
     try:
