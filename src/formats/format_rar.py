@@ -34,7 +34,10 @@ class FormatRarHandler(BaseExtractor):
             command_list += [f'-p{self.cli_args.password}']
 
         # Set output directory
-        command_list.extend([file_path, extract_directory])
+        command_list.extend([
+            file_path,
+            extract_directory
+        ])
 
         # Running the command using the base class utility method
         try:

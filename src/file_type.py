@@ -6,8 +6,7 @@ import json
 from trid_wrapper import TrIDLib
 
 #####################################
-# I could use these 4 detection methods:
-#   * python-magic https://pypi.org/project/python-magic
+# I could use these 3 detection methods:
 #   * puremagic https://github.com/cdgriffith/puremagic
 #   * TrID https://mark0.net/soft-trid-e.html
 #   * DIE https://github.com/horsicq/Detect-It-Easy/
@@ -21,24 +20,24 @@ def determine_file_type_with_magic(file_path, fast_check=False):
     or a full check by reading the entire file.
     
     Args:
-    file_path (str): The path to the file whose MIME type is to be determined.
-    fast_check (bool): If True, performs a quick check using only the first 2048 bytes of the file.
+        file_path (str): The path to the file whose MIME type is to be determined.
+        fast_check (bool): If True, performs a quick check using only the first 2048 bytes of the file.
                        If False, analyzes the entire file for a more comprehensive detection.
 
     Returns:
-    set: A set of unique MIME types found in the file, if any.
+        list: A set of unique MIME types found in the file, if any.
     """
     try:
         # Choose the method of analysis based on fast_check
         possible_types = puremagic.magic_string(open(file_path, "rb").read(2048)) if fast_check else puremagic.magic_file(file_path)
-        logging.debug(f"Puremagic report: {possible_types}")
         
         # Create a set of MIME types, excluding empty strings and ensuring uniqueness
         mime_types = {ptype.mime_type for ptype in possible_types if ptype.mime_type}
 
+        logging.debug(f"Puremagic analysis: {mime_types}")  
         return mime_types if mime_types else None
     except Exception as exc:
-        logging.error(f"An error occurred while determining the file type for {file_path}: {exc}")
+        logging.error(f"An error occurred while attempting to identify the magic number for this file: {exc}")
         return None
 
 def determine_file_type_with_die(file_path, bin_path):
@@ -46,11 +45,11 @@ def determine_file_type_with_die(file_path, bin_path):
     Uses DIE (Detect It Easy) to analyze a file and extracts detailed information about the file type.
 
     Args:
-    file_path (str): The path to the file to be analyzed.
-    bin_path (str): The path to the directory containing the DIE executable (diec.exe).
+        file_path (str): The path to the file to be analyzed.
+        bin_path (str): The path to the directory containing the DIE executable (diec.exe).
 
     Returns:
-    dict: A dictionary containing detailed information about the file, or None if an error occurs.
+        list: A dictionary containing detailed information about the file, or None if an error occurs.
     """
     command = [os.path.join(bin_path, 'detectors', 'die', 'diec.exe'), '-j', file_path]
     
@@ -59,7 +58,6 @@ def determine_file_type_with_die(file_path, bin_path):
 
         # Parse the JSON output
         die_output = json.loads(result.stdout)
-        logging.debug(f"DIE analysis for {file_path}: {die_output}")
         
         # Extract names for specific types
         relevant_types = {'Sfx', 'Archive', 'Installer'}
@@ -68,7 +66,8 @@ def determine_file_type_with_die(file_path, bin_path):
             for value in detect.get('values', []):
                 if value.get('type') in relevant_types:
                     names.append(value.get('name'))
-        
+
+        logging.debug(f"DIE analysis: {names}")        
         return names if names else None
     except subprocess.CalledProcessError as exc:
         logging.error(f"DIE analysis failed for {file_path}: {exc}")
@@ -86,17 +85,26 @@ def determine_file_type_with_trid(file_path, bin_path):
     bin_path (str): The path to the bin_path folder.
 
     Returns:
-    str: The description of the file type from the last line of TrID's output, or None if an error occurs.
+        list: A list of descriptions of the file types identified by TrID, or None if an error occurs.
     """
-    command = [os.path.join(bin_path, 'detectors', 'trid', 'trid.exe'), '-n:1', file_path]
+    command = [os.path.join(bin_path, 'detectors', 'trid', 'trid.exe'), '-n:5', file_path]
     
     try:
         result = subprocess.run(command, text=True, capture_output=True, check=True)
-        # Extract the description from the last line of the output
-        last_line = result.stdout.strip().split('\n')[-1]
-        description = " ".join(last_line.split()[2:])  # Skip the initial percentages and get the description part
-        logging.debug(f"TrID analysis for {file_path}: {description}")
-        return description
+        
+        # Extract descriptions from the output
+        descriptions = []
+        lines = result.stdout.strip().split('\n')
+        
+        # Parse each line that contains percentage and description
+        for line in lines:
+            if '%' in line:  # Check if the line contains a percentage which indicates a file type line
+                description_without_percentage = " ".join(line.split()[2:])
+                description = " ".join(description_without_percentage.split()[:-1])
+                descriptions.append(description)
+
+        logging.debug(f"TrID analysis: {descriptions}")
+        return descriptions if descriptions else None
     except subprocess.CalledProcessError as exc:
         logging.error(f"TrID analysis failed for {file_path}: {exc}")
         return None

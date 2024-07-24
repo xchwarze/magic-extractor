@@ -25,17 +25,17 @@ class FormatInnoSetupHandler(BaseExtractor):
         # Construct the command to execute using the path to innounp executable
         command_list = [
             os.path.join(self.bin_path, self.TOOL_FOLDER, 'innounp', 'innounp.exe'),
-            '-e',  # extract files without paths
-            '-m',  # extract internal embedded files
-            '-a',  # extract all copies of duplicate files
-            '-y',  # assume Yes on all queries
-            f'-d"{extract_directory}"'  # directory to extract files
-            f' "{file_path}"',  # setup executable to unpack
+            '-e',                       # extract files without paths
+            '-m',                       # extract internal embedded files
+            '-a',                       # extract all copies of duplicate files
+            '-y',                       # assume Yes on all queries
+            f'-d{extract_directory}',   # directory to extract files
+            file_path,                  # setup executable to unpack
         ]
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list, os.path.join(self.bin_path, self.TOOL_FOLDER, 'innounp'))
+            output = self.run_command(command_list)
             if output:
                 self.post_extraction_cleanup(extract_directory)
                 return True

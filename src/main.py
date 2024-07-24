@@ -5,7 +5,7 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_die
+from file_type import determine_file_type_with_magic, determine_file_type_with_die, determine_file_type_with_trid
 from formats import get_handler_from_mime, get_handler_from_detection
 
 # Define the path to the 'bin' directory
@@ -82,6 +82,15 @@ def find_appropriate_handler(file_path, fast_check):
 
     # If no handler was found, try detection with DIE
     detection_results = determine_file_type_with_die(file_path=file_path, bin_path=BIN_PATH)
+    if detection_results:
+        for detection in detection_results:
+            handler_class = get_handler_from_detection(detection=detection)
+            if handler_class:
+                logging.info(f"Handler found for detection: {detection}")
+                return handler_class
+
+    # If no handler was found, try detection with TRiD
+    detection_results = determine_file_type_with_trid(file_path=file_path, bin_path=BIN_PATH)
     if detection_results:
         for detection in detection_results:
             handler_class = get_handler_from_detection(detection=detection)

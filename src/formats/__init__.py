@@ -2,6 +2,7 @@ import logging
 from .format_7z import Format7zHandler
 from .format_rar import FormatRarHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
+from .format_exe_msi import FormatMsiHandler
 
 # Dictionary mapping types to handler classes
 MIME_HANDLERS = {
@@ -46,9 +47,14 @@ MIME_HANDLERS = {
 }
 
 DETECTION_HANDLERS = {
+    # sfx
     '7-zip': Format7zHandler,
     'winrar': FormatRarHandler,
+
+    # installer
     'inno setup module': FormatInnoSetupHandler,
+    'nullsoft scriptable install system': Format7zHandler,
+    'microsoft windows installer': FormatMsiHandler,
 }
 
 def get_handler_from_mime(mime_type):

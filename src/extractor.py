@@ -66,7 +66,11 @@ class BaseExtractor:
         """
         try:
             logging.debug(f"Executing command: {' '.join(command)} in {workdir}")
-            result = subprocess.run(command, cwd=workdir, text=True, capture_output=True, check=True)
+            print('result??')
+            result = subprocess.run(command, cwd=workdir, text=True, capture_output=True, check=True, env=os.environ, shell=True)
+            print('result!!!!')
+            print(result)
+
             logging.debug(f"Command executed successfully with output: {result.stdout}")
             return result.stdout
         except subprocess.CalledProcessError as error:
