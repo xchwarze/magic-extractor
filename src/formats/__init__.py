@@ -1,6 +1,7 @@
 import logging
 from .format_7z import Format7zHandler
 from .format_rar import FormatRarHandler
+from .format_kgb import FormatKgbHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -55,6 +56,7 @@ DETECTION_HANDLERS = {
     'inno setup module': FormatInnoSetupHandler,
     'nullsoft scriptable install system': Format7zHandler,
     'microsoft windows installer': FormatMsiHandler,
+    'kgb archiver compressed archive': FormatKgbHandler,
 }
 
 def get_handler_from_mime(mime_type):

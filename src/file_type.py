@@ -67,7 +67,8 @@ def determine_file_type_with_die(file_path, bin_path):
                 if value.get('type') in relevant_types:
                     names.append(value.get('name'))
 
-        logging.debug(f"DIE analysis: {names}")        
+        #logging.error(f"DIE complete analysis: {die_output}")
+        logging.debug(f"DIE analysis: {names}")
         return names if names else None
     except subprocess.CalledProcessError as exc:
         logging.error(f"DIE analysis failed for {file_path}: {exc}")
@@ -81,8 +82,8 @@ def determine_file_type_with_trid(file_path, bin_path):
     Uses TrID to analyze a file and extracts the description of the file type from the output.
 
     Args:
-    file_path (str): The path to the .exe file to be analyzed.
-    bin_path (str): The path to the bin_path folder.
+        file_path (str): The path to the .exe file to be analyzed.
+        bin_path (str): The path to the bin_path folder.
 
     Returns:
         list: A list of descriptions of the file types identified by TrID, or None if an error occurs.
