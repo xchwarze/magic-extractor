@@ -32,8 +32,6 @@ MIME_HANDLERS = {
     'application/x-iso9660-image': Format7zHandler,
     'application/x-lzh-compressed': Format7zHandler,
     'application/x-lzma': Format7zHandler,
-    'application/x-msi': Format7zHandler,
-    'application/x-nsis-package': Format7zHandler,
     'application/x-qemu-disk': Format7zHandler,
     'application/x-rpm': Format7zHandler,
     'application/x-squashfs': Format7zHandler,
@@ -49,8 +47,6 @@ MIME_HANDLERS = {
     # others
     'application/vnd.rar': FormatRarHandler,
     'application/x-ace': FormatAceHandler,
-
-    #UHARC compressed archive
 }
 
 DETECTION_HANDLERS = {
