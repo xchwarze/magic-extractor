@@ -4,6 +4,7 @@ from .format_rar import FormatRarHandler
 from .format_ace import FormatAceHandler
 from .format_kgb import FormatKgbHandler
 from .format_uharc import FormatUharcHandler
+from .format_zpaq import FormatZpaqHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -60,6 +61,7 @@ DETECTION_HANDLERS = {
 
     # compresor
     'uharc compressed archive': FormatUharcHandler,
+    'zpaq compressed archive (.zpaq)': FormatZpaqHandler,
 
     # installer
     'inno setup module': FormatInnoSetupHandler,
