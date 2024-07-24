@@ -66,10 +66,7 @@ class BaseExtractor:
         """
         try:
             logging.debug(f"Executing command: {' '.join(command)} in {workdir}")
-            print('result??')
-            result = subprocess.run(command, cwd=workdir, text=True, capture_output=True, check=True, env=os.environ, shell=True)
-            print('result!!!!')
-            print(result)
+            result = subprocess.run(command, cwd=workdir, text=True, capture_output=True, check=True, env=os.environ)
 
             logging.debug(f"Command executed successfully with output: {result.stdout}")
             return result.stdout
