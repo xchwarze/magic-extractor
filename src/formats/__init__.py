@@ -1,7 +1,9 @@
 import logging
 from .format_7z import Format7zHandler
 from .format_rar import FormatRarHandler
+from .format_ace import FormatAceHandler
 from .format_kgb import FormatKgbHandler
+from .format_uharc import FormatUharcHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -45,12 +47,19 @@ MIME_HANDLERS = {
 
     # others
     'application/vnd.rar': FormatRarHandler,
+    'application/x-ace': FormatAceHandler,
+
+    #UHARC compressed archive
 }
 
 DETECTION_HANDLERS = {
     # sfx
     '7-zip': Format7zHandler,
     'winrar': FormatRarHandler,
+    'winace': FormatAceHandler,
+
+    # compresor
+    'uharc compressed archive': FormatUharcHandler,
 
     # installer
     'inno setup module': FormatInnoSetupHandler,
