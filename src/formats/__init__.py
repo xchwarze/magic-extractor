@@ -7,6 +7,7 @@ from .format_uharc import FormatUharcHandler
 from .format_zpaq import FormatZpaqHandler
 from .format_alzip import FormatAlzipHandler
 from .format_egg import FormatEggHandler
+from .format_bcm import FormatBcmHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -63,6 +64,7 @@ DETECTION_HANDLERS = {
     'uharc compressed archive': FormatUharcHandler,
     'zpaq compressed archive (.zpaq)': FormatZpaqHandler,
     'egg compressed archive': FormatEggHandler,
+    'bcm compressed archive': FormatBcmHandler,
 
     # installer
     'inno setup module': FormatInnoSetupHandler,
