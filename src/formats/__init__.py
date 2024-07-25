@@ -5,6 +5,8 @@ from .format_ace import FormatAceHandler
 from .format_kgb import FormatKgbHandler
 from .format_uharc import FormatUharcHandler
 from .format_zpaq import FormatZpaqHandler
+from .format_alzip import FormatAlzipHandler
+from .format_egg import FormatEggHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -47,6 +49,7 @@ MIME_HANDLERS = {
     # others
     'application/vnd.rar': FormatRarHandler,
     'application/x-ace': FormatAceHandler,
+    'application/x-alz': FormatAlzipHandler,
 }
 
 DETECTION_HANDLERS = {
@@ -56,14 +59,15 @@ DETECTION_HANDLERS = {
     'winace': FormatAceHandler,
 
     # compresor
+    'kgb archiver compressed archive': FormatKgbHandler,
     'uharc compressed archive': FormatUharcHandler,
     'zpaq compressed archive (.zpaq)': FormatZpaqHandler,
+    'egg compressed archive': FormatEggHandler,
 
     # installer
     'inno setup module': FormatInnoSetupHandler,
     'nullsoft scriptable install system': Format7zHandler,
     'microsoft windows installer': FormatMsiHandler,
-    'kgb archiver compressed archive': FormatKgbHandler,
 }
 
 def get_handler_from_mime(mime_type):

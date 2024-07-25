@@ -1,0 +1,35 @@
+ALZip is a shareware for individual users. For companies/for-profit (non-profit) corporations / public agencies / institutional agencies / Internet cafes, you have to purchase license for ALZip. 
+Please visit ALTools website (http://www.altools.co.kr) for more information. 
+
+
+[Precautions]
+
+This Software may not be used for commercial purposes without the Company's permission.
+
+You may download the latest version of the Software(or Product) from ESTsoft official website(http://www.altools.co.kr) and freely redistribute the Software(or Product). 
+
+Even if the redistribution authorized by the Company, where the redistribution is made to exceed the authorized purpose or use, or to earn tangible/intangible profit or to be in violation of ESTsoft business policy, the Company may withdraw the redistribution authorization at any time.
+
+
+[About Copyrights]
+
+The 7z extract module uses the open source code at http://www.7-zip.org.
+
+ALZip uses zlib that is public at http://www.zlib.net.
+
+ALZip uses bzip2 library public at http://bzip.org.
+
+ALZip uses lzma library public at http://www.7-zip.org.
+
+ALZip uses icu library public at http://icu-project.org.
+
+ALZip uses PPMd public at http://www.compression.ru/ds/.
+
+ALZip uses UnZip public at http://www.info-zip.org.
+
+ALZip uses cryptopp public at https://www.cryptopp.com.
+
+ALZip uses jsoncpp public at https://github.com/open-source-parsers/jsoncpp.
+
+
+This software is copyrighted by ESTsoft corporation (www.estsoft.ai)
