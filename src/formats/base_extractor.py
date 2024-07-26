@@ -9,6 +9,9 @@ class BaseExtractor:
     Includes common utility methods used across all extractors and utilizes the global logging instance.
     """
 
+    # Common constants
+    TOOL_FOLDER = 'extractors'
+
     def __init__(self, cli_args, bin_path):
         """
         Initialize the extractor with command-line arguments and the binary tools directory.
@@ -18,13 +21,34 @@ class BaseExtractor:
             bin_path (str): Path to the directory containing binary tools.
         """
         self.cli_args = cli_args
-        self.bin_path = bin_path
+        self.extractors_path = os.path.join(bin_path, self.TOOL_FOLDER)
+        self.target_file = str(os.path.abspath(cli_args.file_path))
+        self.extract_directory = None
 
     def extract(self):
         """
         Method to extract files. Must be overridden by specific extractor implementations.
         """
         raise NotImplementedError("Each subclass must implement the 'extract' method.")
+
+    def pre_extract_actions(self):
+        """
+        Perform any necessary actions before starting the extraction process.
+        This method is implemented in subclasses to handle tasks such as setting up temporary directories,
+        validating input files, or logging initial extraction details.
+        Subclasses should ensure that all prerequisites for extraction are met before proceeding.
+        """
+        # Validate and prepare the output directory
+        self.extract_directory = self.validate_output_directory()
+
+    def post_extract_actions(self):
+        """
+        Conduct any required actions after the extraction process completes.
+        This method can be implemented optionally in subclasses to perform clean-up, validation of extracted data,
+        or to move files to a final destination. It could also handle error checking and compilation of extraction logs.
+        This method is optional and may contain minimal or no implementation depending on specific subclass requirements.
+        """
+        pass  # Optional implementation by subclasses
 
     def validate_output_directory(self):
         """

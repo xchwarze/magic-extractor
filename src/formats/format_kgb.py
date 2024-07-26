@@ -1,36 +1,29 @@
 import os
 import subprocess
 import logging
-from extractor import BaseExtractor
+from .base_extractor import BaseExtractor
 
 class FormatKgbHandler(BaseExtractor):
     """
     Handler class for KGB archive files that utilizes kgb2_console for extraction.
     """
 
-    # Common constants
-    TOOL_FOLDER = 'extractors'
-
     def extract(self):
         """
         Extracts KGB files using the kgb2_console command-line tool.
 
         Returns:
-        bool: True if the extraction was successful, False otherwise.
+            bool: True if the extraction was successful, False otherwise.
         """
-        # Validate and prepare the output directory
-        file_path = str(os.path.abspath(self.cli_args.file_path))
-        extract_directory = self.validate_output_directory()
-
         # Construct the command to execute using the path to kgb2_console executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, 'kgb', 'kgb2_console.exe'),
-            file_path  # File to extract
+            os.path.join(self.extractors_path, 'kgb', 'kgb2_console.exe'),
+            self.target_file  # File to extract
         ]
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list, workdir=extract_directory)
+            output = self.run_command(command_list, workdir=self.extract_directory)
             if output:
                 return True
             else:

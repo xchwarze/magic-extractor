@@ -1,43 +1,36 @@
 import os
 import subprocess
 import logging
-from extractor import BaseExtractor
+from .base_extractor import BaseExtractor
 
 class FormatInnoSetupHandler(BaseExtractor):
     """
     Handler class for Inno Setup files that utilizes innounp for extraction.
     """
 
-    # Common constants
-    TOOL_FOLDER = 'extractors'
-
     def extract(self):
         """
         Extracts Inno Setup files to a specified output directory using innounp executable.
 
         Returns:
-        bool: True if the extraction was successful, False otherwise.
+            bool: True if the extraction was successful, False otherwise.
         """
-        # Validate and prepare the output directory
-        file_path = str(os.path.abspath(self.cli_args.file_path))
-        extract_directory = self.validate_output_directory()
-
         # Construct the command to execute using the path to innounp executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, 'innounp', 'innounp.exe'),
-            '-e',                       # extract files without paths
-            '-m',                       # extract internal embedded files
-            '-a',                       # extract all copies of duplicate files
-            '-y',                       # assume Yes on all queries
-            f'-d{extract_directory}',   # directory to extract files
-            file_path,                  # setup executable to unpack
+            os.path.join(self.extractors_path, 'innounp', 'innounp.exe'),
+            '-e',                           # extract files without paths
+            '-m',                           # extract internal embedded files
+            '-a',                           # extract all copies of duplicate files
+            '-y',                           # assume Yes on all queries
+            f'-d{self.extract_directory}',  # directory to extract files
+            self.target_file,               # setup executable to unpack
         ]
 
         # Running the command using the base class utility method
         try:
             output = self.run_command(command_list)
             if output:
-                self.post_extraction_cleanup(extract_directory)
+                self.post_extraction_cleanup(self.extract_directory)
                 return True
             else:
                 logging.error("Failed to extract Inno Setup file with no output.")

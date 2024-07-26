@@ -113,6 +113,7 @@ def main():
     handler_class = find_appropriate_handler(file_path=args.file_path, fast_check=args.fast_check)
     if handler_class:
         handler = handler_class(cli_args=args, bin_path=BIN_PATH)
+        handler.pre_extract_actions()
         success = handler.extract()
         if success:
             logging.info("Extraction completed successfully.")
@@ -120,6 +121,8 @@ def main():
         else:
             logging.error("Extraction failed.")
             sys.exit(1)  # Error exit code
+
+        handler.post_extract_actions()
     else:
         logging.error(f"No suitable handler found for the file: {args.file_path}")
         sys.exit(1)  # Error exit code if no handler is found

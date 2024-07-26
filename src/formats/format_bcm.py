@@ -1,39 +1,31 @@
 import os
 import subprocess
 import logging
-from extractor import BaseExtractor
+from .base_extractor import BaseExtractor
 
 class FormatBcmHandler(BaseExtractor):
     """
     Handler class for BCM archive files that utilizes bcm-v160x32.exe for extraction.
     """
 
-    # Common constants
-    TOOL_FOLDER = 'extractors'
-
     def extract(self):
         """
         Extracts files using the BCM command-line tool.
 
         Returns:
-        bool: True if the extraction was successful, False otherwise.
+            bool: True if the extraction was successful, False otherwise.
         """
-        # Validate and prepare the output directory
-        file_path = str(os.path.abspath(self.cli_args.file_path))
-        extract_directory = os.path.join(self.validate_output_directory(), os.path.basename(file_path))
-
         # Construct the command to execute using the path to BCM executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, 'bcm', 'bcm-v160x32.exe'),
+            os.path.join(self.extractors_path, 'bcm', 'bcm-v160x32.exe'),
             '-d',  # Command to decompress
-            file_path,
-            extract_directory,
-            '-f'   # Force overwrite of output file
+            '-f',  # Force overwrite of output file
+            self.target_file,
         ]
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list)
+            output = self.run_command(command_list, workdir=self.extract_directory)
             return True
         except subprocess.CalledProcessError as exc:
             logging.error(f"Failed to decompress file with BCM with error code {exc.returncode}: {exc.output}")

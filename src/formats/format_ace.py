@@ -1,37 +1,30 @@
 import os
 import subprocess
 import logging
-from extractor import BaseExtractor
+from .base_extractor import BaseExtractor
 
 class FormatAceHandler(BaseExtractor):
     """
     Handler class for ACE archive files that utilizes unace for extraction.
     """
 
-    # Common constants
-    TOOL_FOLDER = 'extractors'
-
     def extract(self):
         """
         Extracts ACE files using the unace command-line tool.
 
         Returns:
-        bool: True if the extraction was successful, False otherwise.
+            bool: True if the extraction was successful, False otherwise.
         """
-        # Validate and prepare the output directory
-        file_path = str(os.path.abspath(self.cli_args.file_path))
-        extract_directory = self.validate_output_directory()
-
         # Construct the command to execute using the path to unace executable
         command_list = [
-            os.path.join(self.bin_path, self.TOOL_FOLDER, 'unace', 'unace.exe'),
-            'x',        # Extract with full paths
-            file_path  # File to extract
+            os.path.join(self.extractors_path, 'unace', 'unace.exe'),
+            'x',              # Extract with full paths
+            self.target_file  # File to extract
         ]
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list, workdir=extract_directory)
+            output = self.run_command(command_list, workdir=self.extract_directory)
             if output:
                 return True
             else:
@@ -43,4 +36,3 @@ class FormatAceHandler(BaseExtractor):
         except Exception as exc:
             logging.error(f"An error occurred during ACE extraction: {exc}")
             return False
-
