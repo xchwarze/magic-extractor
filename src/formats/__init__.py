@@ -8,6 +8,8 @@ from .format_zpaq import FormatZpaqHandler
 from .format_alzip import FormatAlzipHandler
 from .format_egg import FormatEggHandler
 from .format_bcm import FormatBcmHandler
+from .format_arc import FormatArcHandler
+from .format_pea import FormatPeaHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
 
@@ -65,6 +67,8 @@ DETECTION_HANDLERS = {
     'zpaq compressed archive (.zpaq)': FormatZpaqHandler,
     'egg compressed archive': FormatEggHandler,
     'bcm compressed archive': FormatBcmHandler,
+    'freearc compressed archive': FormatArcHandler,
+    'pea compressed archive (v1.x)': FormatPeaHandler,
 
     # installer
     'inno setup module': FormatInnoSetupHandler,

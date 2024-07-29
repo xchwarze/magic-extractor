@@ -21,8 +21,10 @@
 | Zstandard                  | .zst                                                        | Format7zHandler    |
 | cpio                       | .cpio                                                       | Format7zHandler    |
 | XAR                        | .xar                                                        | Format7zHandler    |
-| RPM Package                | .rpm                                                        | Format7zHandler    |
-| squashfs                   | .sqsh                                                       | Format7zHandler    |
+| AlZip                      | .alz                                                        | FormatAlzipHandler |
+| EGG                        | .egg                                                        | FormatEggHandler   |
+| BCM                        | .bcm                                                        | FormatBcmHandler   |
+| ACR                        | .arc                                                        | FormatArcHandler   |
 
 
 ## Executable Installers
@@ -32,6 +34,7 @@
 | Inno Setup Module                   | .exe                     | FormatInnoSetupHandler   |
 | Nullsoft Scriptable Install System  | .exe                     | Format7zHandler          |
 | Microsoft Windows Installer         | .msi                     | FormatMsiHandler         |
+| RPM Package                         | .rpm                     | Format7zHandler          |
 
 
 ## Disk Images
@@ -51,11 +54,11 @@
 | Virtual Hard Disk                    | .vhd, .vhdx                 | Format7zHandler     |
 | VMware Virtual Disk                  | .vmdk                       | Format7zHandler     |
 | cramfs                               | .cramfs                     | Format7zHandler     |
+| squashfs                             | .sqsh                       | Format7zHandler     |
 
 
-## Other generic formats
+## Other formats
 
 | Archive type                         | Common file extension(s)    | Handler Asociado    |
 |--------------------------------------|-----------------------------|---------------------|
 | Microsoft Compiled HTML Help         | .chm                        | Format7zHandler     |
-

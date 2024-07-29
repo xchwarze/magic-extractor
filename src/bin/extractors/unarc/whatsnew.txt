@@ -1,0 +1,11 @@
+Welcome to FreeArc 0.666 (May 20, 2010)
+
+Changes in this version:
+
+    * Multithreaded compression - 1.5-2x faster than before and 5x faster than WinRAR!
+    * Browsing and extracting of many archive types (zip, rar, 7z, gz, bz2, cab, lzh...)
+    * Running files directly from archive
+    * Fixed all problems in Explorer integration
+
+and lot of smaller changes. Full changelog: 
+http://code.google.com/p/freearc/issues/list?can=1&q=status:fixed%20milestone=0.666
