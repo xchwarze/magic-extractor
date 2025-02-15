@@ -12,11 +12,12 @@ from formats import get_handler_from_mime, get_handler_from_detection
 BIN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin')
 
 def file_path_type_check(path):
-    """Custom argparse type to check if a file exists."""
-    if not pathlib.Path(path).is_file():
-        raise argparse.ArgumentTypeError(f"The file {path} does not exist.")
+    """Custom argparse type to check if a file or directory exists."""
+    input_path = pathlib.Path(path)
+    if not (input_path.is_file() or input_path.is_dir()):
+        raise argparse.ArgumentTypeError(f"The path {path} does not exist or is not a file/directory.")
 
-    return pathlib.Path(path)
+    return input_path
 
 def dir_path_type_check(path):
     """Custom argparse type to check if a directory exists and is writable."""
@@ -32,7 +33,7 @@ def dir_path_type_check(path):
 def configure_parser():
     """Configure and return the argument parser."""
     parser = argparse.ArgumentParser(description="Universal Extractor for various file formats")
-    parser.add_argument("file_path", help="Path to the file to be extracted", type=file_path_type_check)
+    parser.add_argument("file_path", help="Path to the file or directory to be extracted", type=file_path_type_check)
     parser.add_argument("output_dir", help="Directory to extract the file to", type=dir_path_type_check, nargs='?', default=None)
     parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
     parser.add_argument("--debug", help="Enable debug logging", action="store_true")
@@ -46,7 +47,6 @@ def configure_parser():
     parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
     parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
     parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
-    parser.add_argument("--fast-check", help="Perform a fast type check by reading only the first 2048 bytes", action='store_true', default=None)
     parser.add_argument("--no-fast-check", help="Disable fast type check", action='store_false', dest='fast_check')
 
     return parser
@@ -70,39 +70,59 @@ def configure_settings(args, config):
             setattr(args, key, config.get('settings', key, type=bool))
 
 def find_appropriate_handler(file_path, fast_check):
-    """Tries to find an appropriate handler based on the file's MIME type and detection results."""
-    # First check using MIME type detection
+    """Return a list of candidate handler classes based on file type detection."""
+    candidates = []
+
+    # MIME type detection
     mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
     if mime_types:
         for mime_type in mime_types:
             handler_class = get_handler_from_mime(mime_type=mime_type)
             if handler_class:
-                logging.info(f"Handler found for MIME type: {mime_type}")
-                return handler_class
+                logging.info(f"Candidate handler for MIME type: {mime_type}")
+                candidates.append(handler_class)
 
-    # If no handler was found, try detection with DIE
+    # DIE detection
     detection_results = determine_file_type_with_die(file_path=file_path, bin_path=BIN_PATH)
     if detection_results:
         for detection in detection_results:
             handler_class = get_handler_from_detection(detection=detection)
             if handler_class:
-                logging.info(f"Handler found for detection: {detection}")
-                return handler_class
+                logging.info(f"Candidate handler for detection: {detection}")
+                candidates.append(handler_class)
 
-    # If no handler was found, try detection with TRiD
+    # TRiD detection
     detection_results = determine_file_type_with_trid(file_path=file_path, bin_path=BIN_PATH)
     if detection_results:
         for detection in detection_results:
             handler_class = get_handler_from_detection(detection=detection)
             if handler_class:
-                logging.info(f"Handler found for detection: {detection}")
-                return handler_class
+                logging.info(f"Candidate handler for detection: {detection}")
+                candidates.append(handler_class)
 
-    # If no handler is found even after the second check
-    return None
+    return candidates
+
+def process_extraction(args):
+    """
+    Process file extraction by iterating over candidate handlers.
+    Waits for a handler to return True from extract().
+    """
+    candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
+    for candidate in candidates:
+        handler = candidate(cli_args=args, bin_path=BIN_PATH)
+        handler.pre_extract_actions()
+        if handler.extract():
+            handler.post_extract_actions()
+            logging.info("Extraction completed successfully.")
+            return True
+        else:
+            logging.error(f"Extraction failed using handler: {candidate.__name__}")
+
+    logging.error(f"No handler succeeded for file: {args.file_path}")
+    return False
 
 def main():
-    """Main function to handle file extraction based on command line arguments and configurable settings."""
+    """Main function to handle file extraction for a file or a directory of files."""
     parser = configure_parser()
     args = parser.parse_args()
     setup_logging(args.debug)
@@ -110,22 +130,22 @@ def main():
     config = Config()
     configure_settings(args, config)
 
-    handler_class = find_appropriate_handler(file_path=args.file_path, fast_check=args.fast_check)
-    if handler_class:
-        handler = handler_class(cli_args=args, bin_path=BIN_PATH)
-        handler.pre_extract_actions()
-        success = handler.extract()
-        if success:
-            logging.info("Extraction completed successfully.")
-            sys.exit(0)  # Success exit code
-        else:
-            logging.error("Extraction failed.")
-            sys.exit(1)  # Error exit code
+    # Process a directory by iterating over its files (non-recursive)
+    if args.file_path.is_dir():
+        for item in args.file_path.iterdir():
+            if item.is_file():
+                logging.info(f"Processing file: {item}")
 
-        handler.post_extract_actions()
+                # Create a temporary args instance for the current file
+                temp_args = argparse.Namespace(**vars(args))
+                temp_args.file_path = item
+                if not process_extraction(temp_args):
+                    logging.error(f"Extraction failed for file: {item}")
+
+        sys.exit(0)
     else:
-        logging.error(f"No suitable handler found for the file: {args.file_path}")
-        sys.exit(1)  # Error exit code if no handler is found
+        success = process_extraction(args)
+        sys.exit(0 if success else 1)
 
 if __name__ == "__main__":
     main()
