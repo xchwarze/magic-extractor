@@ -1,0 +1,17 @@
+// Detect It Easy: detection rule file format
+
+init("format", "Archive");
+
+function detect(bShowType, bShowVersion, bShowOptions) {
+    if (Archive.isVerbose()) {
+        sName = Archive.getFileFormatName();
+        sVersion = Archive.getFileFormatVersion();
+        sOptions = Archive.getFileFormatOptions();
+        
+        if (sName != "") {
+            bDetected = true;
+        }
+    }
+
+    return result(bShowType, bShowVersion, bShowOptions);
+}

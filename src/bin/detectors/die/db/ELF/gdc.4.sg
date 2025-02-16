@@ -1,10 +1,10 @@
-// DIE's signature file
+// Detect It Easy: detection rule file format
 
 init("compiler", "gdc");
 
 function detect(bShowType, bShowVersion, bShowOptions) {
     if (ELF.isLibraryPresent("libgphobos.so.2")) {
-        bDetected = 1;
+        bDetected = true;
     }
 
     _setLang("C/C++", bDetected);

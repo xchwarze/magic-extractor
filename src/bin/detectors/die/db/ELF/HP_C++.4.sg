@@ -1,9 +1,9 @@
-// DIE's signature file
+// Detect It Easy: detection rule file format
 init("compiler", "HP C++");
 
 function detect(bShowType, bShowVersion, bShowOptions) {
     if (ELF.isSectionNamePresent(".HP.init")) {
-        bDetected = 1;
+        bDetected = true;
     }
 
     _setLang("C++", bDetected);

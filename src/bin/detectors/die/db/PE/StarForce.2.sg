@@ -1,4 +1,4 @@
-// DIE's signature file
+// Detect It Easy: detection rule file format
 
 init("protector", "StarForce");
 
@@ -15,6 +15,9 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     } else if (PE.compareEP("E8........000000000000")) {
         sVersion = "3.X";
+        bDetected = true;
+    } else if (PE.compareEP("60e8000000005883c008") && PE.isSectionNamePresent(".brick")) {
+        sVersion = "3.4";
         bDetected = true;
     } else if (PE.compareEP("68........FF25........0000000000")) {
         sVersion = "3.X";

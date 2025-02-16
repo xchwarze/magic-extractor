@@ -1,4 +1,4 @@
-// DIE's signature file
+// Detect It Easy: detection rule file format
 
 init("protector", "Babel .NET");
 
@@ -10,6 +10,12 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         } else if (PE.isNetObjectPresent("BabelObfuscatorAttribute")) {
             sVersion = "1.0-2.X";
             bDetected = true;
+        }
+
+        // fake signatures
+        if (PE.isNetObjectPresent("BabelAttribute") &&
+            PE.isNetObjectPresent("BabelObfuscatorAttribute")) {
+            bDetected = false;
         }
     }
 

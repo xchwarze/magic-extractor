@@ -1,4 +1,4 @@
-// DIE's signature file
+// Detect It Easy: detection rule file format
 
 init("packer", "MEW");
 
@@ -10,6 +10,9 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         sVersion = "SE v1.0";
         bDetected = true;
     } else if (PE.compareEP("E9......FF0C")) {
+        sVersion = "SE v1.1-1.2";
+        bDetected = true;
+    } else if (PE.compareEP("e9$$$$$$$$be........8bdeadad50ad97b2")) {
         sVersion = "SE v1.1-1.2";
         bDetected = true;
     } else if (PE.compareEP("BE5B00....AD91AD9353AD96565FACC0C0")) {
