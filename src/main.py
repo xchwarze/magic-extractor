@@ -69,7 +69,7 @@ def configure_settings(args, config):
         if getattr(args, key) is None:
             setattr(args, key, config.get('settings', key, type=bool))
 
-def find_appropriate_handler(file_path, fast_check):
+def find_candidate_handlers(file_path, fast_check):
     """Return a list of candidate handler classes based on file type detection."""
     candidates = []
 
