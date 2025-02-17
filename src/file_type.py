@@ -154,3 +154,38 @@ def determine_file_type_with_trid_dll(file_path, bin_path):
         logging.error(f"No file type information could be retrieved for {file_path}.")
 
     return None
+
+def determine_file_type_with_binwalk(file_path, bin_path):
+    """
+    Uses Binwalk to analyze a file and extracts embedded file type information in JSON format.
+
+    Args:
+        file_path (str): The path to the file to analyze.
+        bin_path (str): The path to the directory containing the Binwalk executable.
+
+    Returns:
+        list: A list of dictionaries from Binwalk's JSON output, or None if an error occurs.
+    """
+    binwalk_exe = os.path.join(bin_path, 'detectors', 'binwalk', 'binwalk.exe')
+    command = [binwalk_exe, '-q', '-l', '-', file_path]
+    
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=True)
+        binwalk_data = json.loads(result.stdout)
+
+        names = []
+        for item in binwalk_data:
+            analysis = item.get("Analysis", {})
+            for entry in analysis.get("file_map", []):
+                name = entry.get("name")
+                if name and name not in names:
+                    names.append(name)
+
+        logging.debug(f"Binwalk analysis: {names}")
+        return names if names else None
+    except subprocess.CalledProcessError as exc:
+        logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
+        return None
+    except json.JSONDecodeError as exc:
+        logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
+        return None

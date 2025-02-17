@@ -74,12 +74,42 @@ DETECTION_HANDLERS = {
     'inno setup module': FormatInnoSetupHandler,
     'nullsoft scriptable install system': Format7zHandler,
     'microsoft windows installer': FormatMsiHandler,
+
+    # generic
+    'gzip (.gz)': Format7zHandler,
+    'gzipped data': Format7zHandler,
+
+    # from binwalk
+    '7zip': Format7zHandler,
+    'xz': Format7zHandler,
+    'bzip2': Format7zHandler,
+    'compressd': Format7zHandler,
+    'gzip': Format7zHandler,
+    'tar': Format7zHandler,
+    'apfs': Format7zHandler,
+    'cab': Format7zHandler,
+    'chm': Format7zHandler,
+    'cpio': Format7zHandler,
+    'cramfs': Format7zHandler,
+    'dmg': Format7zHandler,
+    'ext': Format7zHandler,
+    'fat': Format7zHandler,
+    'efigpt': Format7zHandler,
+    'iso9660': Format7zHandler,
+    'lzma': Format7zHandler,
+    'mbr': Format7zHandler,
+    'ntfs': Format7zHandler,
+    'squashfs': Format7zHandler,
+    'zip': Format7zHandler,
+    'zlib': Format7zHandler,
+    'zstd': Format7zHandler,
+    'rar': FormatRarHandler,
 }
 
 def get_handler_from_mime(mime_type):
     """Returns the appropriate handler class for a given MIME type."""
     logging.debug(f"Looking for a handler for this mime type: '{mime_type}'")
-    handler_class = MIME_HANDLERS.get(mime_type)
+    handler_class = MIME_HANDLERS.get(mime_type.lower())
     return handler_class if handler_class else None
 
 def get_handler_from_detection(detection):

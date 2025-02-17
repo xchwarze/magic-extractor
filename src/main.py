@@ -5,7 +5,7 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_die, determine_file_type_with_trid
+from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid
 from formats import get_handler_from_mime, get_handler_from_detection
 
 # Define the path to the 'bin' directory
@@ -78,8 +78,17 @@ def find_candidate_handlers(file_path, fast_check):
     if mime_types:
         for mime_type in mime_types:
             handler_class = get_handler_from_mime(mime_type=mime_type)
-            if handler_class:
+            if handler_class and handler_class not in candidates:
                 logging.info(f"Candidate handler for MIME type: {mime_type}")
+                candidates.append(handler_class)
+
+    # Binwalk detection
+    detection_results = determine_file_type_with_binwalk(file_path=file_path, bin_path=BIN_PATH)
+    if detection_results:
+        for detection in detection_results:
+            handler_class = get_handler_from_detection(detection=detection)
+            if handler_class and handler_class not in candidates:
+                logging.info(f"Candidate handler for detection: {detection}")
                 candidates.append(handler_class)
 
     # DIE detection
@@ -87,7 +96,7 @@ def find_candidate_handlers(file_path, fast_check):
     if detection_results:
         for detection in detection_results:
             handler_class = get_handler_from_detection(detection=detection)
-            if handler_class:
+            if handler_class and handler_class not in candidates:
                 logging.info(f"Candidate handler for detection: {detection}")
                 candidates.append(handler_class)
 
@@ -96,7 +105,7 @@ def find_candidate_handlers(file_path, fast_check):
     if detection_results:
         for detection in detection_results:
             handler_class = get_handler_from_detection(detection=detection)
-            if handler_class:
+            if handler_class and handler_class not in candidates:
                 logging.info(f"Candidate handler for detection: {detection}")
                 candidates.append(handler_class)
 
