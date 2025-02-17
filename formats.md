@@ -24,7 +24,7 @@
 | AlZip                      | .alz                                                        | FormatAlzipHandler |
 | EGG                        | .egg                                                        | FormatEggHandler   |
 | BCM                        | .bcm                                                        | FormatBcmHandler   |
-| ACR                        | .arc                                                        | FormatArcHandler   |
+| ARc                        | .arc                                                        | FormatArcHandler   |
 
 
 ## Executable Installers
