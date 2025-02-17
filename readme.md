@@ -53,10 +53,10 @@ A complete list of all supported file formats can be found in the `formats.md` f
 Contributions to Magic Extractor are welcome! Please read the contributing guidelines in `CONTRIBUTING.md` (to be created) before submitting pull requests.
 
 ## License
-This project is licensed under the MIT License - see the `LICENSE` file for details (to be created).
+This project is licensed under the LGPL-3.0-only - see the `LICENSE.txt` file for details.
 
 ## Authors and Acknowledgment
-- Lead Developer: [Your Name]
+- Lead Developer: DSR! - xchwarze@gmail.com
 - Thanks to all contributors who have helped to enhance this project.
 
 ## Support
