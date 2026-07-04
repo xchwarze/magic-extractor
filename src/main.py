@@ -154,10 +154,15 @@ def _candidates_from_outputs(outputs):
 
     return candidates
 
-# Wrapped-exe installers that content detectors see as a generic PE. Their
-# extractors auto-detect their own format, so they are tried as last-resort
-# candidates for any PE that nothing more specific matched.
+# Self-extracting / wrapped-exe archives and installers look like a generic PE
+# to content detectors. Their tools each validate their own format and fail
+# cleanly on a mismatch, so they are tried as last-resort candidates for any PE
+# that nothing more specific matched. 7z is deliberately excluded: it opens any
+# PE as an "archive" (dumping its sections), which would short-circuit the
+# format-specific handlers.
 PE_INSTALLER_FALLBACK = (
+    'FormatInnoSetupHandler', 'FormatRarHandler', 'FormatAceHandler',
+    'FormatArcHandler', 'FormatKgbHandler', 'FormatUharcHandler',
     'FormatBitrockHandler', 'FormatCicdecHandler',
     'FormatPyInstallerHandler', 'FormatWiseHandler',
 )
