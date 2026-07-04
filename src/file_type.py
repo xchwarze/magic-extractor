@@ -193,6 +193,29 @@ def determine_file_type_with_binwalk(file_path, bin_path):
         logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
         return None
 
+def binwalk_file_map(file_path, bin_path):
+    """
+    Return Binwalk's file_map entries for a file: a list of dicts with at least
+    'offset', 'size' and 'name'. Used by the carve mode. Returns [] on error.
+    """
+    binwalk_exe = os.path.join(bin_path, 'detectors', 'binwalk', 'binwalk.exe')
+    command = [binwalk_exe, '-q', '-l', '-', str(file_path)]
+
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=True)
+        binwalk_data = json.loads(result.stdout)
+
+        entries = []
+        for item in binwalk_data:
+            entries.extend(item.get("Analysis", {}).get("file_map", []))
+        return entries
+    except subprocess.CalledProcessError as exc:
+        logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
+        return []
+    except json.JSONDecodeError as exc:
+        logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
+        return []
+
 def determine_file_type_with_magika(file_path, bin_path):
     """
     Uses Magika (Google's AI content-type detector) to analyze a file.

@@ -5,9 +5,9 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika
+from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika, binwalk_file_map
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection
-from detection_filter import init_blacklist, filter_mimes, filter_detections
+from detection_filter import init_blacklist, filter_mimes, filter_detections, is_generic_detection
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
 # When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
@@ -38,7 +38,7 @@ def dir_path_type_check(path):
 
     return dir_path
 
-SUBCOMMANDS = ("extract", "identify", "list")
+SUBCOMMANDS = ("extract", "identify", "list", "carve")
 
 def configure_parser():
     """Configure and return the subcommand argument parser."""
@@ -76,6 +76,12 @@ def configure_parser():
     list_parser = subparsers.add_parser("list", parents=[common], help="List archive contents without extracting")
     list_parser.add_argument("file_path", help="Path to the archive to list", type=file_path_type_check)
     list_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
+
+    # carve: carve embedded archives at binwalk offsets and extract them.
+    carve_parser = subparsers.add_parser("carve", parents=[common], help="Carve embedded archives at binwalk offsets and extract them")
+    carve_parser.add_argument("file_path", help="Path to the file to carve", type=file_path_type_check)
+    carve_parser.add_argument("output_dir", help="Directory to write carved segments to", type=dir_path_type_check, nargs='?', default=None)
+    carve_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
 
     return parser
 
@@ -230,6 +236,47 @@ def process_list(args):
     logging.error(f"No candidate handler could list: {args.file_path}")
     return False
 
+def process_carve(args):
+    """Carve embedded, extractable blobs at binwalk offsets and extract each."""
+    entries = binwalk_file_map(args.file_path, BIN_PATH)
+    if not entries:
+        logging.error(f"Binwalk found nothing to carve in {args.file_path}")
+        return False
+
+    output_dir = str(args.output_dir) if args.output_dir else f"{args.file_path}_carved"
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(args.file_path, 'rb') as source_fh:
+        data = source_fh.read()
+
+    carved_any = False
+    for entry in entries:
+        name = (entry.get('name') or '').lower()
+        offset = entry.get('offset', 0)
+        size = entry.get('size') or 0
+        if size <= 0 or is_generic_detection(name):
+            continue
+        # only carve embedded blobs we have a handler for
+        if not get_handler_from_detection(name):
+            continue
+
+        carved_path = os.path.join(output_dir, f"carved_{offset}_{name}.bin")
+        with open(carved_path, 'wb') as carved_fh:
+            carved_fh.write(data[offset:offset + size])
+        logging.info(f"Carved {name} at offset {offset} ({size} bytes) -> {carved_path}")
+        carved_any = True
+
+        nested_args = argparse.Namespace(
+            file_path=pathlib.Path(carved_path), output_dir=None,
+            fast_check=args.fast_check, password=getattr(args, 'password', None),
+            recursive=False, open_output_folder=False,
+        )
+        process_extraction(nested_args)
+
+    if not carved_any:
+        logging.error(f"No extractable embedded data found to carve in {args.file_path}")
+    return carved_any
+
 def run_extract(args):
     """Extract a single file, or every file in a directory (non-recursive)."""
     if args.file_path.is_dir():
@@ -267,6 +314,9 @@ def main():
 
     if args.command == "list":
         sys.exit(0 if process_list(args) else 1)
+
+    if args.command == "carve":
+        sys.exit(0 if process_carve(args) else 1)
 
     # extract
     config = Config()
