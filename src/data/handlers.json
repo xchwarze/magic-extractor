@@ -39,7 +39,9 @@
     "application/x-alz": "FormatAlzipHandler",
     "application/x-ace-compressed": "FormatAceHandler",
     "application/x-rar": "FormatRarHandler",
-    "application/vnd.squashfs": "Format7zHandler"
+    "application/vnd.squashfs": "Format7zHandler",
+    "application/vnd.debian.binary-package": "Format7zHandler",
+    "application/x-zstd-compressed-tar": "Format7zHandler"
   },
   "detection_handlers": {
     "7-zip": "Format7zHandler",
@@ -129,6 +131,17 @@
     "rar compressed archive (gen)": "FormatRarHandler",
     "rar compressed archive (v5.0)": "FormatRarHandler",
     "winrar self extracting archive (4.x-5.x)": "FormatRarHandler",
-    "zpaq compressed archive": "FormatZpaqHandler"
+    "zpaq compressed archive": "FormatZpaqHandler",
+    "ar archive": "Format7zHandler",
+    "bzip2 compressed archive": "Format7zHandler",
+    "bzip2 compressed data (.bz2)": "Format7zHandler",
+    "microsoft cabinet file": "Format7zHandler",
+    "cpio archive (binary)": "Format7zHandler",
+    "debian linux package": "Format7zHandler",
+    "debian software package (.deb)": "Format7zHandler",
+    "rpm package": "Format7zHandler",
+    "xar": "Format7zHandler",
+    "facebook zstandard/zstd compressed data (.zst)": "Format7zHandler",
+    "zstandard compressed data": "Format7zHandler"
   }
 }
