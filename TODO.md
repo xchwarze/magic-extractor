@@ -3,6 +3,20 @@
 Pending work for magic-extractor. Full design in
 `docs/superpowers/specs/2026-07-04-universal-extractor-roadmap-design.md`.
 
+## Installer/format coverage vs UniExtract2 (needs the extractor binary)
+Direction: add all modern-Windows installers + compression formats. Each needs
+its extractor dropped into `src/bin/extractors/<name>/`; then a handler + JSON map.
+- [ ] InstallShield -> `unshield` (already detected as `installshield setup`, no handler). Top priority.
+- [ ] PyInstaller -> `pyinstxtractor` (modern Python exes).
+- [ ] GOG installers -> `innoextract` (Inno-based; also a better Inno extractor than innounp).
+- [ ] Wise installer -> `e_wise` / wise_unpacker.
+- [ ] Asar (Electron) -> `asar` (needs node) or a small unpacker.
+- [ ] Other UniExtract installers (Setup Factory, Gentee, InstallAware, Installer VISE,
+      Smart Install Maker, Create Install, Actual/Advanced Installer, InstallForge,
+      Ghost Installer, Install4j, MSCF, Netopsystems FEAD): niche/legacy, add on demand.
+Skip (out of scope): 500+ game archives, niche CD-image formats, multimedia tracks,
+legacy archives (StuffIt/Zoo/LBR/LZX), exe packers (UPX/Enigma/MoleBox).
+
 ## Needs Windows / samples
 - [ ] Map detections for the new handlers: add sample dirs `test/bitrock/`,
       `test/cicdec/`, `test/dgca/`, `test/wix/` (or `msi`), then run

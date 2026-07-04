@@ -36,6 +36,9 @@ python src/main.py extract  <path_to_file> [output_directory] [options]
 python src/main.py identify <path_to_file>   # detect type + candidate handlers, no extraction
 python src/main.py list     <path_to_file>   # list archive contents without extracting
 python src/main.py carve    <path_to_file> [output_directory]  # carve embedded archives at binwalk offsets and extract them
+python src/main.py carve    <path_to_file> --list              # list binwalk fragments (index/offset/size/name)
+python src/main.py carve    <path_to_file> --fragment N         # carve a single fragment by index
+python src/main.py carve    <path_to_file> --raw                # carve every fragment (binwalk extract-all)
 ```
 `extract` also supports `-r`/`--recursive` (with `--max-depth N`) to extract archives found inside the output.
 A bare path with no subcommand defaults to `extract` for backward compatibility:
