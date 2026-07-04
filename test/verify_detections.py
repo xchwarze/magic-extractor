@@ -11,9 +11,11 @@ cross-checks the strings they emit against the keys in handlers.json:
 It never writes handlers.json; the map is curated by hand. This must run on
 Windows, where the bundled detector .exe binaries execute.
 
-Usage:  python test/verify_detections.py
+Usage:  python test/verify_detections.py            # gap + unused report
+        python test/verify_detections.py --dump-all # every emitted string per sample
 """
 
+import argparse
 import os
 import sys
 import logging
@@ -71,7 +73,27 @@ def iter_samples():
             yield os.path.join(root, name)
 
 
+def dump_all():
+    """Print every string each sample emits, regardless of whether it is mapped."""
+    logging.disable(logging.CRITICAL)
+    for sample in iter_samples():
+        mimes, detections = collect_for(sample)
+        print(f"[{os.path.relpath(sample, TEST_DIR)}]")
+        for value in sorted(mimes):
+            print(f"   MIME    : {value}")
+        for value in sorted(detections):
+            print(f"   detect  : {value}")
+
+
 def main():
+    parser = argparse.ArgumentParser(description="Verify the detection -> handler routing map.")
+    parser.add_argument('--dump-all', action='store_true',
+                        help="Print every emitted string per sample instead of the gap/unused report.")
+    args = parser.parse_args()
+    if args.dump_all:
+        dump_all()
+        return
+
     # Detector functions log errors for unmatched files; silence them for a clean report.
     logging.disable(logging.CRITICAL)
     formats.init_handlers(DATA_PATH)

@@ -1,0 +1,36 @@
+{
+  "_comment": "Generic / noise detector outputs that must never map to a handler. Shared by tools/build_handlers.py and the puremagic filter. mime = exact MIME types; detection_exact = exact detection strings; detection_substrings = matched anywhere in a lowercased detection string.",
+  "mime": [
+    "application/octet-stream",
+    "application/x-dosexec",
+    "application/vnd.microsoft.portable-executable",
+    "text/plain",
+    "image/x-xbitmap",
+    "application/x-bytecode.python"
+  ],
+  "detection_exact": [
+    "unknown",
+    "txt",
+    "ini",
+    "pe",
+    "pebin",
+    "png",
+    "sha256",
+    "aes_sbox",
+    "copyright",
+    "pythonbytecode"
+  ],
+  "detection_substrings": [
+    "executable (generic)",
+    "dynamic link library (generic)",
+    "llvm bitcode",
+    "compiled executable",
+    "os/2 executable",
+    "yoda's crypter",
+    "upx compressed",
+    "petite compressed",
+    "pecompact compressed",
+    "control panel item",
+    "delphi generic"
+  ]
+}
