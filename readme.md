@@ -11,12 +11,14 @@ Although the Magic Extractor is fully functional, it is still under active devel
 The project is organized into several main folders:
 - `src`: Contains the source code of the project.
   - `bin`: Includes binary files and detectors for various file types.
+  - `data`: Runtime configuration. Holds `handlers.json`, the detection/MIME → handler routing map, loaded dynamically so it can be updated without rebuilding.
   - `formats`: Contains Python modules for handling specific file formats.
 - `test`: Houses test files and scripts for various compression formats.
 
 ## Features
 - Supports multiple compression formats including 7z, RAR, ALZip, and more.
-- Utilizes MIME type detection and specific binary detections to handle files.
+- Combines several detection engines (puremagic MIME, Magika, binwalk, DIE, TrID) to identify files.
+- Routes detections to extractors through an external, data-driven map (`data/handlers.json`).
 - Offers a configurable setup through command-line arguments for tailored usage.
 
 ## Installation
