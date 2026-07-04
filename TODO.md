@@ -48,6 +48,8 @@ legacy archives (StuffIt/Zoo/LBR/LZX), exe packers (UPX/Enigma/MoleBox).
 - Phase 4 — `check_free_space` (+ Windows disk fix), `open_output_folder`,
   `create_log_files`, `check_unicode`.
 - Phase 8 groundwork — PyInstaller spec + `config.ini` resolved via base path.
+- lzip (.lz) — FormatLzipHandler via plzip, mapped + sample. Only compressor worth
+  adding from the mattmahoney LTCB review (brotli/lrzip/nanozip skipped as niche).
 - Phase 5 — `carve` subcommand (binwalk offsets -> carve -> extract).
 - Phase 6 — bitrock/cicdec/dgca/wix handlers (dgca/cicdec CLIs verified).
 - Phase 7 — recursive extraction (`-r`/`--max-depth`).
