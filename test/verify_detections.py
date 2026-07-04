@@ -29,6 +29,7 @@ from file_type import (
     determine_file_type_with_magic,
     determine_file_type_with_binwalk,
     determine_file_type_with_die,
+    determine_file_type_with_trid,
     determine_file_type_with_magika,
 )
 
@@ -54,8 +55,7 @@ def collect_for(file_path):
         mimes.update(value.lower() for value in magika_result["mime_types"])
         detections.update(value.lower() for value in magika_result["labels"])
 
-    # DIE + magika feed extraction; binwalk feeds carve. TrID is not used by the pipeline.
-    for detector in (determine_file_type_with_binwalk, determine_file_type_with_die):
+    for detector in (determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid):
         result = detector(file_path=file_path, bin_path=BIN_PATH)
         if result:
             detections.update(value.lower() for value in result)

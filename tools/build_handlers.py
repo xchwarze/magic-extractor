@@ -127,7 +127,8 @@ def collect_live():
     logging.disable(logging.CRITICAL)
     from file_type import (
         determine_file_type_with_magic, determine_file_type_with_binwalk,
-        determine_file_type_with_die, determine_file_type_with_magika,
+        determine_file_type_with_die, determine_file_type_with_trid,
+        determine_file_type_with_magika,
     )
     bin_path = os.path.join(SRC_PATH, 'bin')
 
@@ -148,9 +149,8 @@ def collect_live():
             if magika:
                 bucket['mime'].update(v.lower() for v in magika['mime_types'])
                 bucket['detect'].update(v.lower() for v in magika['labels'])
-            # DIE + magika feed extraction; binwalk feeds carve. TrID is not used
-            # by the pipeline, so it is not collected here.
-            for detector in (determine_file_type_with_binwalk, determine_file_type_with_die):
+            for detector in (determine_file_type_with_binwalk, determine_file_type_with_die,
+                             determine_file_type_with_trid):
                 found = detector(file_path=path, bin_path=bin_path)
                 if found:
                     bucket['detect'].update(v.lower() for v in found)
