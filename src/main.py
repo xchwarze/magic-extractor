@@ -6,7 +6,7 @@ import pathlib
 from logger import setup_logging
 from config import Config
 from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika, binwalk_file_map
-from formats import init_handlers, get_handler_from_mime, get_handler_from_detection
+from formats import init_handlers, get_handler_from_mime, get_handler_from_detection, HANDLER_REGISTRY
 from detection_filter import init_blacklist, filter_mimes, filter_detections, is_generic_detection
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
@@ -154,9 +154,35 @@ def _candidates_from_outputs(outputs):
 
     return candidates
 
+# Wrapped-exe installers that content detectors see as a generic PE. Their
+# extractors auto-detect their own format, so they are tried as last-resort
+# candidates for any PE that nothing more specific matched.
+PE_INSTALLER_FALLBACK = (
+    'FormatBitrockHandler', 'FormatCicdecHandler',
+    'FormatPyInstallerHandler', 'FormatWiseHandler',
+)
+
+def _is_pe(file_path):
+    """True if the file starts with the 'MZ' DOS/PE signature."""
+    try:
+        with open(file_path, 'rb') as probe:
+            return probe.read(2) == b'MZ'
+    except OSError:
+        return False
+
 def find_candidate_handlers(file_path, fast_check):
-    """Return a list of candidate handler classes based on file type detection."""
-    return _candidates_from_outputs(_detector_outputs(file_path, fast_check))
+    """Return candidate handler classes from detection, plus PE-installer fallbacks."""
+    candidates = _candidates_from_outputs(_detector_outputs(file_path, fast_check))
+
+    # Wrapped-exe installers can't be identified by content; try them on any PE.
+    if _is_pe(file_path):
+        for name in PE_INSTALLER_FALLBACK:
+            handler_class = HANDLER_REGISTRY.get(name)
+            if handler_class and handler_class not in candidates:
+                logging.info(f"PE installer fallback candidate: {name}")
+                candidates.append(handler_class)
+
+    return candidates
 
 def process_extraction(args, depth=0):
     """
