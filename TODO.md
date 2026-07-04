@@ -3,17 +3,21 @@
 Pending work for magic-extractor. Full design in
 `docs/superpowers/specs/2026-07-04-universal-extractor-roadmap-design.md`.
 
-## Installer/format coverage vs UniExtract2 (needs the extractor binary)
-Direction: add all modern-Windows installers + compression formats. Each needs
-its extractor dropped into `src/bin/extractors/<name>/`; then a handler + JSON map.
-- [ ] InstallShield -> `unshield` (already detected as `installshield setup`, no handler). Top priority.
-- [ ] PyInstaller -> `pyinstxtractor` (modern Python exes).
-- [ ] GOG installers -> `innoextract` (Inno-based; also a better Inno extractor than innounp).
-- [ ] Wise installer -> `e_wise` / wise_unpacker.
-- [ ] Asar (Electron) -> `asar` (needs node) or a small unpacker.
-- [ ] Other UniExtract installers (Setup Factory, Gentee, InstallAware, Installer VISE,
-      Smart Install Maker, Create Install, Actual/Advanced Installer, InstallForge,
-      Ghost Installer, Install4j, MSCF, Netopsystems FEAD): niche/legacy, add on demand.
+## Installer coverage vs UniExtract2
+
+Handlers written, need the binary copied from a UniExtract2 release into the
+given folder, then `build_handlers.py --live` with a sample to map detection:
+- [ ] InstallShield -> `src/bin/extractors/unshield/unshield.exe`
+- [ ] PyInstaller  -> `src/bin/extractors/pyinstxtractor/pyinstxtractor.exe`
+- [ ] Wise         -> `src/bin/extractors/e_wise/e_wise.exe`
+
+Likely already covered (verify): GOG installers (Inno-based -> existing innounp),
+Advanced/Actual Installer (MSI-based -> existing MSI/7z).
+
+Add on demand (niche/legacy): Setup Factory, Gentee, InstallAware, Installer VISE,
+Smart Install Maker, Create Install, InstallForge, Ghost Installer, Install4j,
+MSCF, Netopsystems FEAD, Asar (Electron, needs node).
+
 Skip (out of scope): 500+ game archives, niche CD-image formats, multimedia tracks,
 legacy archives (StuffIt/Zoo/LBR/LZX), exe packers (UPX/Enigma/MoleBox).
 
