@@ -35,7 +35,9 @@ Magic Extractor uses subcommands:
 python src/main.py extract  <path_to_file> [output_directory] [options]
 python src/main.py identify <path_to_file>   # detect type + candidate handlers, no extraction
 python src/main.py list     <path_to_file>   # list archive contents without extracting
+python src/main.py carve    <path_to_file> [output_directory]  # carve embedded archives at binwalk offsets and extract them
 ```
+`extract` also supports `-r`/`--recursive` (with `--max-depth N`) to extract archives found inside the output.
 A bare path with no subcommand defaults to `extract` for backward compatibility:
 ```bash
 python src/main.py <path_to_file> <output_directory> [options]
