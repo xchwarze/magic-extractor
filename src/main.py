@@ -5,7 +5,7 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika, binwalk_file_map
+from file_type import determine_file_type_with_magic, determine_file_type_with_die, determine_file_type_with_magika, binwalk_file_map
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection, HANDLER_REGISTRY
 from detection_filter import init_blacklist, filter_mimes, filter_detections, is_generic_detection
 
@@ -66,6 +66,7 @@ def configure_parser():
     extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
     extract_parser.add_argument("-r", "--recursive", help="Recursively extract archives found inside the output", action="store_true")
     extract_parser.add_argument("--max-depth", help="Maximum recursion depth for --recursive", type=int, default=5)
+    extract_parser.add_argument("-b", "--bruteforce", help="Try every handler DIE and Magika detect (no early-exit)", action="store_true")
 
     # identify: run the detectors and report, without extracting.
     identify_parser = subparsers.add_parser("identify", parents=[common], help="Detect file type and candidate handlers without extracting")
@@ -107,49 +108,50 @@ def configure_settings(args, config):
 
 def _detector_outputs(file_path, fast_check):
     """
-    Run the detectors in priority order and normalize each result to
-    (source_name, mime_list, detection_list). Magika (AI, high precision) runs
-    first; puremagic runs last as a pure-python fallback.
+    Yield (source, mime_list, detection_list) per detector, lazily so callers can
+    stop early. Order: puremagic (free, pure-python) first as a cheap short-circuit
+    for well-formed archives, then DIE (signature specialist for archives /
+    installers / PE), then Magika (AI catch-all). binwalk is NOT used here — it is
+    reserved for carve mode (embedded/offset scanning).
     """
-    outputs = []
+    mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
+    yield ("puremagic", list(mime_types) if mime_types else [], [])
+
+    die_detections = determine_file_type_with_die(file_path=file_path, bin_path=BIN_PATH)
+    yield ("DIE", [], die_detections or [])
 
     magika_result = determine_file_type_with_magika(file_path=file_path, bin_path=BIN_PATH)
-    outputs.append((
+    yield (
         "Magika",
         magika_result["mime_types"] if magika_result else [],
         magika_result["labels"] if magika_result else [],
-    ))
+    )
 
-    for source, detector in (
-        ("DIE", determine_file_type_with_die),
-        ("TrID", determine_file_type_with_trid),
-        ("binwalk", determine_file_type_with_binwalk),
-    ):
-        detections = detector(file_path=file_path, bin_path=BIN_PATH)
-        outputs.append((source, [], detections or []))
+def _collect_candidates(output, candidates):
+    """Resolve one detector output into handler candidates; return True if any were added."""
+    source, mimes, detections = output
+    added = False
+    for mime_type in filter_mimes(mimes):
+        handler_class = get_handler_from_mime(mime_type=mime_type)
+        if handler_class and handler_class not in candidates:
+            logging.info(f"Candidate handler from {source} MIME: {mime_type}")
+            candidates.append(handler_class)
+            added = True
 
-    # puremagic last: pure-python fallback; generic MIME is filtered downstream.
-    mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
-    outputs.append(("puremagic", list(mime_types) if mime_types else [], []))
+    for detection in filter_detections(detections):
+        handler_class = get_handler_from_detection(detection=detection)
+        if handler_class and handler_class not in candidates:
+            logging.info(f"Candidate handler from {source} detection: {detection}")
+            candidates.append(handler_class)
+            added = True
 
-    return outputs
+    return added
 
 def _candidates_from_outputs(outputs):
-    """Resolve detector outputs to an ordered, deduped list of handler classes."""
+    """Resolve all detector outputs to an ordered, deduped list of handler classes."""
     candidates = []
-    for source, mimes, detections in outputs:
-        for mime_type in filter_mimes(mimes):
-            handler_class = get_handler_from_mime(mime_type=mime_type)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler from {source} MIME: {mime_type}")
-                candidates.append(handler_class)
-
-        for detection in filter_detections(detections):
-            handler_class = get_handler_from_detection(detection=detection)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler from {source} detection: {detection}")
-                candidates.append(handler_class)
-
+    for output in outputs:
+        _collect_candidates(output, candidates)
     return candidates
 
 # Self-extracting / wrapped-exe archives and installers look like a generic PE
@@ -189,9 +191,18 @@ def confirm_run_installer(file_path):
         return True
     return answer.strip().lower() in ('y', 'yes')
 
-def find_candidate_handlers(file_path, fast_check):
-    """Return candidate handler classes from detection, plus PE-installer fallbacks."""
-    candidates = _candidates_from_outputs(_detector_outputs(file_path, fast_check))
+def find_candidate_handlers(file_path, fast_check, bruteforce=False):
+    """
+    Return candidate handler classes. By default stops at the first detector that
+    yields a mapped handler (early-exit). In bruteforce mode every detector runs
+    and all candidates are returned, so extraction tries everything DIE and Magika
+    detect. PE-installer fallbacks are always appended for executables.
+    """
+    candidates = []
+    for output in _detector_outputs(file_path, fast_check):
+        added = _collect_candidates(output, candidates)
+        if added and not bruteforce:
+            break  # early-exit: first detector with a mapped handler wins
 
     # Wrapped-exe installers can't be identified by content; try them on any PE.
     if _is_pe(file_path):
@@ -209,7 +220,8 @@ def process_extraction(args, depth=0):
     Waits for a handler to return True from extract(). When --recursive is set,
     archives found inside the output are extracted too, up to --max-depth.
     """
-    candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
+    candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check,
+                                         bruteforce=getattr(args, 'bruteforce', False))
     for candidate in candidates:
         handler = candidate(cli_args=args, bin_path=BIN_PATH)
         handler.pre_extract_actions()
@@ -253,7 +265,7 @@ def extract_nested(directory, args, depth):
 
 def process_identify(args):
     """Run the detectors and print detected types + candidate handlers, no extraction."""
-    outputs = _detector_outputs(args.file_path, args.fast_check)
+    outputs = list(_detector_outputs(args.file_path, args.fast_check))
     print(f"File: {args.file_path}")
     for source, mimes, detections in outputs:
         for mime_type in filter_mimes(mimes):
@@ -300,9 +312,15 @@ def process_carve(args):
         return False
 
     if getattr(args, 'list_fragments', False):
+        print(f"{'IDX':>3}  {'OFFSET':>10}  {'SIZE':>12}  {'NAME':<20}  DESCRIPTION")
+        print(f"{'-' * 3}  {'-' * 10}  {'-' * 12}  {'-' * 20}  {'-' * 11}")
         for index, entry in enumerate(entries):
-            print(f"[{index}] offset={entry.get('offset')} size={entry.get('size')} "
-                  f"name={entry.get('name')}  {entry.get('description', '')}")
+            offset = entry.get('offset', 0) or 0
+            size = entry.get('size', 0) or 0
+            name = (entry.get('name') or '')
+            description = (entry.get('description') or '')
+            print(f"{index:>3}  {offset:#010x}  {size:>12,}  {name:<20.20}  {description}")
+        print(f"\n{len(entries)} fragment(s).")
         return True
 
     if args.fragment is not None:
