@@ -61,7 +61,6 @@ DIR_HANDLERS = {
     'wix':      ('FormatWixHandler',      ['wix', 'msi', 'dark']),
     'installshield': ('FormatInstallShieldHandler', ['installshield', 'install shield']),
     'pyinstaller':   ('FormatPyInstallerHandler',   ['pyinstaller', 'python']),
-    'wise':          ('FormatWiseHandler',          ['wise']),
     # archive formats handled by 7z (samples from extractcode) - fill the map's untested keys
     'cab':   ('Format7zHandler', ['cab', 'cabinet']),
     'iso':   ('Format7zHandler', ['iso', '9660', 'cd image']),
