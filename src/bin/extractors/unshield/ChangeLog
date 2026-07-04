@@ -1,0 +1,33 @@
+2009-07-16  Mark Ellis  <mark@mpellis.org.uk>
+
+	* 0.6 release
+
+2009-06-18  Mark Ellis <mark@mpellis.org.uk>
+
+	* src/unshield.c - fix use of -L (lowercase) option with -d 
+
+2008-05-06  Jonny Lamb  <jonnylamb@jonnylamb.com>
+
+	* .cvsignore:
+	* cvsclean:
+	* lib/.cvsignore:
+	* lib/md5/.cvsignore:
+	* src/.cvsignore: Removed useless CVS ignore and clean files.
+
+	* bootstrap:
+	* unshield.spec.in: Removed spec file.
+
+2008-05-06  Jonny Lamb  <jonnylamb@jonnylamb.com>
+
+	* VERSION: Upped version number to 0.5.1.
+
+2008-02-15  Mark Ellis <mark@mpellis.org.uk>
+
+	* added man page for unshield
+
+2008-01-09  Mark Ellis <mark@mpellis.org.uk>
+
+	* started changelog
+	* added LICENSE to EXTRA_DIST
+	* added cabfile.h to libunshield_la_SOURCES
+
