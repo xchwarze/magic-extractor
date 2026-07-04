@@ -145,6 +145,8 @@
     "facebook zstandard/zstd compressed data (.zst)": "Format7zHandler",
     "zstandard compressed data": "Format7zHandler",
     "lzip": "FormatLzipHandler",
-    "lzip compressed file": "FormatLzipHandler"
+    "lzip compressed file": "FormatLzipHandler",
+    "dgca digital g codec archiver": "FormatDgcaHandler",
+    "lzip compressed archive": "FormatLzipHandler"
   }
 }
