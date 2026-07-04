@@ -61,7 +61,6 @@ def configure_parser():
     # Configurable settings as command-line options
     extract_parser.add_argument("--open-output-folder", help="Open output folder after extraction", type=bool, default=None)
     extract_parser.add_argument("--check-free-space", help="Check disk space before extraction", type=bool, default=None)
-    extract_parser.add_argument("--warn-before-executing", help="Warn before processing an executable file", type=bool, default=None)
     extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
     extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
     extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
@@ -90,7 +89,7 @@ def configure_parser():
 
 def configure_settings(args, config):
     """Update settings from command line arguments if necessary, and apply them."""
-    keys = ["open_output_folder", "check_free_space", "warn_before_executing",
+    keys = ["open_output_folder", "check_free_space",
             "check_unicode", "fix_file_extensions", "create_log_files", "fast_check"]
     
     # Update configuration defaults if requested
@@ -173,17 +172,19 @@ def _is_pe(file_path):
     except OSError:
         return False
 
-def _confirm_executable(file_path):
-    """Warn before processing an executable; prompt only when interactive.
-
-    Non-interactive callers (pipelines, the test runner) are warned via the log
-    and allowed to proceed rather than blocking on input().
+def confirm_run_installer(file_path):
     """
-    logging.warning(f"Processing an executable file: {file_path}")
+    Confirm before extracting by RUNNING the original installer with parameters.
+
+    Reserved for handlers that execute the installer itself (none do yet — the
+    current handlers all parse the file with external tools). Prompts on a tty;
+    non-interactive callers are warned via the log and allowed to proceed.
+    """
+    logging.warning(f"About to run installer to extract: {file_path}")
     if not sys.stdin.isatty():
         return True
     try:
-        answer = input("Process it anyway? [y/N] ")
+        answer = input("Run it anyway? [y/N] ")
     except EOFError:
         return True
     return answer.strip().lower() in ('y', 'yes')
@@ -208,12 +209,6 @@ def process_extraction(args, depth=0):
     Waits for a handler to return True from extract(). When --recursive is set,
     archives found inside the output are extracted too, up to --max-depth.
     """
-    # Safety gate: confirm before processing an untrusted executable (top level only).
-    if depth == 0 and getattr(args, 'warn_before_executing', False) and _is_pe(args.file_path):
-        if not _confirm_executable(args.file_path):
-            logging.warning(f"Skipped executable (not confirmed): {args.file_path}")
-            return False
-
     candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
     for candidate in candidates:
         handler = candidate(cli_args=args, bin_path=BIN_PATH)

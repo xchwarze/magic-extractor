@@ -51,8 +51,6 @@ python src/main.py <path_to_file> <output_directory> [options]
 - Additional flags for customization:
   - `--open-output-folder <bool>`: Open output folder after extraction.
   - `--check-free-space <bool>`: Check disk space before extraction.
-  - `--extract-video-tracks <bool>`: Extract video tracks if available.
-  - `--warn-before-executing <bool>`: Warn before executing any executable file.
   - `--check-unicode <bool>`: Check for unicode characters in file names.
   - `--fix-file-extensions <bool>`: Automatically fix file extensions.
   - `--create-log-files <bool>`: Create log files of the operations.
