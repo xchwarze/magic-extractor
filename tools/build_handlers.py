@@ -181,7 +181,8 @@ def main():
             else:
                 rejected.append((format_dir, 'detect', value))
 
-    with open(HANDLERS_FILE, 'w', encoding='utf-8') as fh:
+    # newline='\n' keeps LF line endings on Windows so re-running does not churn CRLF.
+    with open(HANDLERS_FILE, 'w', encoding='utf-8', newline='\n') as fh:
         json.dump(handlers, fh, indent=2, ensure_ascii=False)
         fh.write('\n')
 
