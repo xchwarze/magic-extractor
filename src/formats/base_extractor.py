@@ -11,6 +11,8 @@ class BaseExtractor:
 
     # Common constants
     TOOL_FOLDER = 'extractors'
+    # Rough multiplier applied to the archive size to estimate extracted size.
+    FREE_SPACE_FACTOR = 3
 
     def __init__(self, cli_args, bin_path):
         """
@@ -48,6 +50,20 @@ class BaseExtractor:
         """
         # Validate and prepare the output directory
         self.extract_directory = self.validate_output_directory()
+
+        if getattr(self.cli_args, 'check_free_space', False):
+            self.ensure_free_space()
+
+    def ensure_free_space(self):
+        """Warn if the output volume likely lacks room for the extraction."""
+        try:
+            required = os.path.getsize(self.target_file) * self.FREE_SPACE_FACTOR
+        except OSError as exc:
+            logging.error(f"Could not size {self.target_file} for free-space check: {exc}")
+            return
+
+        if not self.has_free_space(self.extract_directory, required):
+            logging.warning(f"May lack free space (need ~{required} bytes) in {self.extract_directory}")
 
     def post_extract_actions(self):
         """
@@ -131,8 +147,7 @@ class BaseExtractor:
         bool: True if there is enough space, False otherwise.
         """
         try:
-            statvfs = os.statvfs(path)
-            free_space = statvfs.f_frsize * statvfs.f_bavail
+            free_space = shutil.disk_usage(path).free
             if free_space > required_space:
                 logging.debug(f"Sufficient disk space available: {free_space} bytes available in {path}.")
                 return True
