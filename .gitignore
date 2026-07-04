@@ -136,3 +136,8 @@ dmypy.json
 
 
 .idea/
+
+# reference UniExtract2 install (inspection only)
+UniExtract/
+# dgcac first-run generated config
+src/bin/extractors/dgca/dgca.ini
