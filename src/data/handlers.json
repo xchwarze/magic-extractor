@@ -36,7 +36,10 @@
     "application/zstd": "Format7zHandler",
     "application/vnd.rar": "FormatRarHandler",
     "application/x-ace": "FormatAceHandler",
-    "application/x-alz": "FormatAlzipHandler"
+    "application/x-alz": "FormatAlzipHandler",
+    "application/x-ace-compressed": "FormatAceHandler",
+    "application/x-rar": "FormatRarHandler",
+    "application/vnd.squashfs": "Format7zHandler"
   },
   "detection_handlers": {
     "7-zip": "Format7zHandler",
@@ -116,6 +119,16 @@
     "iso": "Format7zHandler",
     "rpm": "Format7zHandler",
     "deb": "Format7zHandler",
-    "ar": "Format7zHandler"
+    "ar": "Format7zHandler",
+    "ace": "FormatAceHandler",
+    "ace compressed archive": "FormatAceHandler",
+    "alzip compressed archive": "FormatAlzipHandler",
+    "freearc archive (.arc)": "FormatArcHandler",
+    "inno setup installer": "FormatInnoSetupHandler",
+    "peazip archive (.pea)": "FormatPeaHandler",
+    "rar compressed archive (gen)": "FormatRarHandler",
+    "rar compressed archive (v5.0)": "FormatRarHandler",
+    "winrar self extracting archive (4.x-5.x)": "FormatRarHandler",
+    "zpaq compressed archive": "FormatZpaqHandler"
   }
 }
