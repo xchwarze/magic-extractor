@@ -57,6 +57,7 @@ DIR_HANDLERS = {
     'zpaq':     ('FormatZpaqHandler',     ['zpaq']),
     'bitrock':  ('FormatBitrockHandler',  ['bitrock', 'installbuilder']),
     'cicdec':   ('FormatCicdecHandler',   ['clickteam', 'install creator', 'cicdec']),
+    'cic':      ('FormatCicdecHandler',   ['clickteam', 'install creator', 'cicdec']),
     'dgca':     ('FormatDgcaHandler',     ['dgca', 'gca']),
     'wix':      ('FormatWixHandler',      ['wix', 'msi', 'dark']),
     'installshield': ('FormatInstallShieldHandler', ['installshield', 'install shield']),
