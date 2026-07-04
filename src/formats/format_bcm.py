@@ -19,12 +19,17 @@ class FormatBcmHandler(BaseExtractor):
         Returns:
             bool: True if the extraction was successful, False otherwise.
         """
+        # Explicit output file (bcm's outfile arg) so it lands in the output dir.
+        output_name = os.path.splitext(os.path.basename(self.target_file))[0]
+        output_path = os.path.join(self.extract_directory, output_name)
+
         for exe in self.BCM_EXES:
             command_list = [
                 os.path.join(self.extractors_path, 'bcm', exe),
                 '-d',  # Command to decompress
                 '-f',  # Force overwrite of output file
                 self.target_file,
+                output_path,
             ]
             try:
                 self.run_command(command_list, workdir=self.extract_directory)
