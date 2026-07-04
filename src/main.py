@@ -38,24 +38,37 @@ def dir_path_type_check(path):
 
     return dir_path
 
+SUBCOMMANDS = ("extract", "identify")
+
 def configure_parser():
-    """Configure and return the argument parser."""
+    """Configure and return the subcommand argument parser."""
+    # Options shared by every subcommand.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--debug", help="Enable debug logging", action="store_true")
+    common.add_argument("--no-fast-check", help="Disable fast type check", action='store_false', dest='fast_check')
+
     parser = argparse.ArgumentParser(description="Universal Extractor for various file formats")
-    parser.add_argument("file_path", help="Path to the file or directory to be extracted", type=file_path_type_check)
-    parser.add_argument("output_dir", help="Directory to extract the file to", type=dir_path_type_check, nargs='?', default=None)
-    parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
-    parser.add_argument("--debug", help="Enable debug logging", action="store_true")
-    parser.add_argument("--update-defaults", help="Update default configuration values", action="store_true")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # extract: detect and extract (the historical default behaviour).
+    extract_parser = subparsers.add_parser("extract", parents=[common], help="Detect and extract an archive")
+    extract_parser.add_argument("file_path", help="Path to the file or directory to be extracted", type=file_path_type_check)
+    extract_parser.add_argument("output_dir", help="Directory to extract the file to", type=dir_path_type_check, nargs='?', default=None)
+    extract_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
+    extract_parser.add_argument("--update-defaults", help="Update default configuration values", action="store_true")
 
     # Configurable settings as command-line options
-    parser.add_argument("--open-output-folder", help="Open output folder after extraction", type=bool, default=None)
-    parser.add_argument("--check-free-space", help="Check disk space before extraction", type=bool, default=None)
-    parser.add_argument("--extract-video-tracks", help="Extract video tracks if available", type=bool, default=None)
-    parser.add_argument("--warn-before-executing", help="Warn before executing any executable file", type=bool, default=None)
-    parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
-    parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
-    parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
-    parser.add_argument("--no-fast-check", help="Disable fast type check", action='store_false', dest='fast_check')
+    extract_parser.add_argument("--open-output-folder", help="Open output folder after extraction", type=bool, default=None)
+    extract_parser.add_argument("--check-free-space", help="Check disk space before extraction", type=bool, default=None)
+    extract_parser.add_argument("--extract-video-tracks", help="Extract video tracks if available", type=bool, default=None)
+    extract_parser.add_argument("--warn-before-executing", help="Warn before executing any executable file", type=bool, default=None)
+    extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
+    extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
+    extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
+
+    # identify: run the detectors and report, without extracting.
+    identify_parser = subparsers.add_parser("identify", parents=[common], help="Detect file type and candidate handlers without extracting")
+    identify_parser.add_argument("file_path", help="Path to the file to identify", type=file_path_type_check)
 
     return parser
 
@@ -106,11 +119,10 @@ def _detector_outputs(file_path, fast_check):
 
     return outputs
 
-def find_candidate_handlers(file_path, fast_check):
-    """Return a list of candidate handler classes based on file type detection."""
+def _candidates_from_outputs(outputs):
+    """Resolve detector outputs to an ordered, deduped list of handler classes."""
     candidates = []
-
-    for source, mimes, detections in _detector_outputs(file_path, fast_check):
+    for source, mimes, detections in outputs:
         for mime_type in filter_mimes(mimes):
             handler_class = get_handler_from_mime(mime_type=mime_type)
             if handler_class and handler_class not in candidates:
@@ -124,6 +136,10 @@ def find_candidate_handlers(file_path, fast_check):
                 candidates.append(handler_class)
 
     return candidates
+
+def find_candidate_handlers(file_path, fast_check):
+    """Return a list of candidate handler classes based on file type detection."""
+    return _candidates_from_outputs(_detector_outputs(file_path, fast_check))
 
 def process_extraction(args):
     """
@@ -144,20 +160,28 @@ def process_extraction(args):
     logging.error(f"No handler succeeded for file: {args.file_path}")
     return False
 
-def main():
-    """Main function to handle file extraction for a file or a directory of files."""
-    parser = configure_parser()
-    args = parser.parse_args()
-    setup_logging(args.debug)
+def process_identify(args):
+    """Run the detectors and print detected types + candidate handlers, no extraction."""
+    outputs = _detector_outputs(args.file_path, args.fast_check)
+    print(f"File: {args.file_path}")
+    for source, mimes, detections in outputs:
+        for mime_type in filter_mimes(mimes):
+            print(f"  [{source}] MIME     {mime_type}")
+        for detection in filter_detections(detections):
+            print(f"  [{source}] detect   {detection}")
 
-    # Load the detection -> handler routing maps and the generic-token blacklist
-    init_handlers(DATA_PATH)
-    init_blacklist(DATA_PATH)
+    candidates = _candidates_from_outputs(outputs)
+    if candidates:
+        print("Candidate handlers (in order):")
+        for candidate in candidates:
+            print(f"  - {candidate.__name__}")
+        return True
 
-    config = Config()
-    configure_settings(args, config)
+    print("No candidate handler found.")
+    return False
 
-    # Process a directory by iterating over its files (non-recursive)
+def run_extract(args):
+    """Extract a single file, or every file in a directory (non-recursive)."""
     if args.file_path.is_dir():
         for item in args.file_path.iterdir():
             if item.is_file():
@@ -169,10 +193,32 @@ def main():
                 if not process_extraction(temp_args):
                     logging.error(f"Extraction failed for file: {item}")
 
-        sys.exit(0)
-    else:
-        success = process_extraction(args)
-        sys.exit(0 if success else 1)
+        return True
+
+    return process_extraction(args)
+
+def main():
+    """Entry point: dispatch subcommands (extract, identify, ...)."""
+    argv = sys.argv[1:]
+    # Backward compatibility: a bare path (no subcommand) defaults to 'extract'.
+    if argv and not argv[0].startswith('-') and argv[0] not in SUBCOMMANDS:
+        argv = ["extract"] + argv
+
+    parser = configure_parser()
+    args = parser.parse_args(argv)
+    setup_logging(args.debug)
+
+    # Load the detection -> handler routing maps and the generic-token blacklist
+    init_handlers(DATA_PATH)
+    init_blacklist(DATA_PATH)
+
+    if args.command == "identify":
+        sys.exit(0 if process_identify(args) else 1)
+
+    # extract
+    config = Config()
+    configure_settings(args, config)
+    sys.exit(0 if run_extract(args) else 1)
 
 if __name__ == "__main__":
     main()
