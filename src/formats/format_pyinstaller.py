@@ -5,9 +5,10 @@ from .base_extractor import BaseExtractor
 
 class FormatPyInstallerHandler(BaseExtractor):
     """
-    Handler for PyInstaller-built executables using pyinstxtractor.
-    pyinstxtractor has no output-dir switch; it writes '<name>_extracted' into
-    the working directory, so it is run inside the output directory.
+    Handler for PyInstaller-built executables using pyinstxtractor-ng.
+    It has no output-dir switch; it writes '<name>_extracted' into the working
+    directory, so it is run inside the output directory.
+    Usage: pyinstxtractor-ng.exe <filename>
     """
 
     def extract(self):
@@ -18,7 +19,7 @@ class FormatPyInstallerHandler(BaseExtractor):
             bool: True if the extraction was successful, False otherwise.
         """
         command_list = [
-            os.path.join(self.extractors_path, 'pyinstxtractor', 'pyinstxtractor.exe'),
+            os.path.join(self.extractors_path, 'pyinstxtractor-ng', 'pyinstxtractor-ng.exe'),
             self.target_file,
         ]
 
