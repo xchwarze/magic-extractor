@@ -110,6 +110,12 @@
     "virtualbox disk image (qemu)": "Format7zHandler",
     "vmware 4 virtual disk description (generic)": "Format7zHandler",
     "iso 9660 cd image": "Format7zHandler",
-    "iso base media container": "Format7zHandler"
+    "iso base media container": "Format7zHandler",
+    "sevenzip": "Format7zHandler",
+    "bzip": "Format7zHandler",
+    "iso": "Format7zHandler",
+    "rpm": "Format7zHandler",
+    "deb": "Format7zHandler",
+    "ar": "Format7zHandler"
   }
 }

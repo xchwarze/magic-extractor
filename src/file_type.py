@@ -192,3 +192,49 @@ def determine_file_type_with_binwalk(file_path, bin_path):
     except json.JSONDecodeError as exc:
         logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
         return None
+
+def determine_file_type_with_magika(file_path, bin_path):
+    """
+    Uses Magika (Google's AI content-type detector) to analyze a file.
+
+    Args:
+        file_path (str): The path to the file to analyze.
+        bin_path (str): The path to the directory containing the Magika executable.
+
+    Returns:
+        dict: {"mime_types": [...], "labels": [...]} with the detected content types,
+              or None if an error occurs or nothing is identified.
+    """
+    magika_exe = os.path.join(bin_path, 'detectors', 'magika', 'magika.exe')
+    command = [magika_exe, '--json', file_path]
+
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=True)
+        magika_data = json.loads(result.stdout)
+
+        mime_types = []
+        labels = []
+        for item in magika_data:
+            entry = item.get("result", {})
+            if entry.get("status") != "ok":
+                continue
+
+            output = entry.get("value", {}).get("output", {})
+            mime_type = output.get("mime_type")
+            label = output.get("label")
+            if mime_type and mime_type not in mime_types:
+                mime_types.append(mime_type)
+            if label and label not in labels:
+                labels.append(label)
+
+        logging.debug(f"Magika analysis: mime={mime_types} labels={labels}")
+        if not mime_types and not labels:
+            return None
+
+        return {"mime_types": mime_types, "labels": labels}
+    except subprocess.CalledProcessError as exc:
+        logging.error(f"Magika analysis failed for {file_path}: {exc}")
+        return None
+    except json.JSONDecodeError as exc:
+        logging.error(f"Failed to parse Magika JSON output for {file_path}: {exc}")
+        return None

@@ -5,7 +5,7 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid
+from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
@@ -79,6 +79,21 @@ def configure_settings(args, config):
 def find_candidate_handlers(file_path, fast_check):
     """Return a list of candidate handler classes based on file type detection."""
     candidates = []
+
+    # Magika detection (AI-based, high precision) - runs first
+    magika_result = determine_file_type_with_magika(file_path=file_path, bin_path=BIN_PATH)
+    if magika_result:
+        for mime_type in magika_result["mime_types"]:
+            handler_class = get_handler_from_mime(mime_type=mime_type)
+            if handler_class and handler_class not in candidates:
+                logging.info(f"Candidate handler for Magika MIME type: {mime_type}")
+                candidates.append(handler_class)
+
+        for label in magika_result["labels"]:
+            handler_class = get_handler_from_detection(detection=label)
+            if handler_class and handler_class not in candidates:
+                logging.info(f"Candidate handler for Magika label: {label}")
+                candidates.append(handler_class)
 
     # MIME type detection
     mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
