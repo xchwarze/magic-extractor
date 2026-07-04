@@ -30,11 +30,17 @@ pip install -r src/requirements.txt
 ```
 
 ## Usage
-To use Magic Extractor, run the `main.py` script with the necessary arguments:
+Magic Extractor uses subcommands:
+```bash
+python src/main.py extract  <path_to_file> [output_directory] [options]
+python src/main.py identify <path_to_file>   # detect type + candidate handlers, no extraction
+python src/main.py list     <path_to_file>   # list archive contents without extracting
+```
+A bare path with no subcommand defaults to `extract` for backward compatibility:
 ```bash
 python src/main.py <path_to_file> <output_directory> [options]
 ```
-Options include:
+`extract` options include:
 - `--password <password>`: Specify a password for encrypted files.
 - `--debug`: Enable detailed log output for debugging.
 - Additional flags for customization:
