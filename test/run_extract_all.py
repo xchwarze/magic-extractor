@@ -16,8 +16,9 @@ import tempfile
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 MAIN_PY = os.path.join(TEST_DIR, '..', 'src', 'main.py')
 
-# Non-sample files living under test/.
-SKIP_EXTENSIONS = {'.py', '.md', '.txt', '.readme', '.about', '.ini', '.test'}
+# Non-sample files living under test/ (docs, and installer source scripts that
+# are not extraction targets, e.g. .nsi / .iss).
+SKIP_EXTENSIONS = {'.py', '.md', '.txt', '.readme', '.about', '.ini', '.test', '.nsi', '.iss'}
 SKIP_DIRS = {'__pycache__', 'defs'}
 
 
