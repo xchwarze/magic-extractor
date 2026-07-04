@@ -18,6 +18,7 @@ else:
 
 BIN_PATH = os.path.join(BASE_PATH, 'bin')
 DATA_PATH = os.path.join(BASE_PATH, 'data')
+CONFIG_PATH = os.path.join(BASE_PATH, 'config.ini')
 
 def file_path_type_check(path):
     """Custom argparse type to check if a file or directory exists."""
@@ -348,7 +349,7 @@ def main():
         sys.exit(0 if process_carve(args) else 1)
 
     # extract
-    config = Config()
+    config = Config(CONFIG_PATH)
     configure_settings(args, config)
     sys.exit(0 if run_extract(args) else 1)
 

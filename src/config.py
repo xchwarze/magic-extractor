@@ -3,12 +3,17 @@ import configparser
 class Config:
     """A singleton class to manage application configuration."""
     _instance = None  # Private attribute to store the unique instance
-    config_file_path = 'config.ini'  # Path to the configuration file
 
-    def __new__(cls):
-        """Overrides the __new__ method to ensure a single instance."""
+    def __new__(cls, config_path='config.ini'):
+        """Overrides the __new__ method to ensure a single instance.
+
+        config_path should be an absolute path (resolved against the base path
+        by the caller) so the config is found regardless of the working
+        directory or whether the app is frozen. Honored on first instantiation.
+        """
         if cls._instance is None:
             cls._instance = super(Config, cls).__new__(cls)
+            cls._instance.config_file_path = config_path
             cls._instance.load_config()
         return cls._instance
 
