@@ -62,6 +62,19 @@ DIR_HANDLERS = {
     'installshield': ('FormatInstallShieldHandler', ['installshield', 'install shield']),
     'pyinstaller':   ('FormatPyInstallerHandler',   ['pyinstaller', 'python']),
     'wise':          ('FormatWiseHandler',          ['wise']),
+    # archive formats handled by 7z (samples from extractcode) - fill the map's untested keys
+    'cab':   ('Format7zHandler', ['cab', 'cabinet']),
+    'iso':   ('Format7zHandler', ['iso', '9660', 'cd image']),
+    'rpm':   ('Format7zHandler', ['rpm']),
+    'xar':   ('Format7zHandler', ['xar']),
+    'deb':   ('Format7zHandler', ['deb', 'debian']),
+    'ar':    ('Format7zHandler', ['ar archive', 'unix ar', 'static library', 'current ar']),
+    'xz':    ('Format7zHandler', ['xz']),
+    'lzma':  ('Format7zHandler', ['lzma']),
+    'zstd':  ('Format7zHandler', ['zstd', 'zstandard']),
+    'zip':   ('Format7zHandler', ['zip']),
+    'cpio':  ('Format7zHandler', ['cpio']),
+    'bz2':   ('Format7zHandler', ['bzip', 'bz2']),
 }
 
 
