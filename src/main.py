@@ -65,6 +65,8 @@ def configure_parser():
     extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
     extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
     extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
+    extract_parser.add_argument("-r", "--recursive", help="Recursively extract archives found inside the output", action="store_true")
+    extract_parser.add_argument("--max-depth", help="Maximum recursion depth for --recursive", type=int, default=5)
 
     # identify: run the detectors and report, without extracting.
     identify_parser = subparsers.add_parser("identify", parents=[common], help="Detect file type and candidate handlers without extracting")
@@ -146,10 +148,11 @@ def find_candidate_handlers(file_path, fast_check):
     """Return a list of candidate handler classes based on file type detection."""
     return _candidates_from_outputs(_detector_outputs(file_path, fast_check))
 
-def process_extraction(args):
+def process_extraction(args, depth=0):
     """
     Process file extraction by iterating over candidate handlers.
-    Waits for a handler to return True from extract().
+    Waits for a handler to return True from extract(). When --recursive is set,
+    archives found inside the output are extracted too, up to --max-depth.
     """
     candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
     for candidate in candidates:
@@ -158,12 +161,40 @@ def process_extraction(args):
         if handler.extract():
             handler.post_extract_actions()
             logging.info("Extraction completed successfully.")
+            if getattr(args, 'recursive', False):
+                extract_nested(handler.extract_directory, args, depth)
             return True
         else:
             logging.error(f"Extraction failed using handler: {candidate.__name__}")
 
     logging.error(f"No handler succeeded for file: {args.file_path}")
     return False
+
+def extract_nested(directory, args, depth):
+    """Extract any archives found inside a freshly-extracted directory (bounded by --max-depth)."""
+    if depth + 1 > getattr(args, 'max_depth', 1):
+        return
+
+    # Snapshot the files first so newly-created output subdirs are not re-walked.
+    targets = []
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            if name == 'magic-extractor.log':
+                continue
+            targets.append(pathlib.Path(root) / name)
+
+    for nested_path in targets:
+        if not nested_path.is_file():
+            continue
+        if not find_candidate_handlers(file_path=nested_path, fast_check=args.fast_check):
+            continue
+
+        logging.info(f"Recursively extracting: {nested_path}")
+        nested_args = argparse.Namespace(**vars(args))
+        nested_args.file_path = nested_path
+        nested_args.output_dir = None          # extract into a sibling <name>_extracted dir
+        nested_args.open_output_folder = False  # only the top-level extraction opens a folder
+        process_extraction(nested_args, depth + 1)
 
 def process_identify(args):
     """Run the detectors and print detected types + candidate handlers, no extraction."""
