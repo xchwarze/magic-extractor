@@ -6,7 +6,7 @@ import pathlib
 from logger import setup_logging
 from config import Config
 from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid
-from formats import get_handler_from_mime, get_handler_from_detection
+from formats import init_handlers, get_handler_from_mime, get_handler_from_detection
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
 # When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
@@ -16,6 +16,7 @@ else:
     BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 BIN_PATH = os.path.join(BASE_PATH, 'bin')
+DATA_PATH = os.path.join(BASE_PATH, 'data')
 
 def file_path_type_check(path):
     """Custom argparse type to check if a file or directory exists."""
@@ -141,6 +142,9 @@ def main():
     parser = configure_parser()
     args = parser.parse_args()
     setup_logging(args.debug)
+
+    # Load the detection -> handler routing maps from data/handlers.json
+    init_handlers(DATA_PATH)
 
     config = Config()
     configure_settings(args, config)
