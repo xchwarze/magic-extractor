@@ -16,6 +16,7 @@ class FormatArcHandler(BaseExtractor):
             bool: True if the extraction was successful, False otherwise.
         """
         # Construct the command to execute using the path to unarc executable
+        # peazip portable has in its res folder a newer version that supports compression of this binary
         command_list = [
             os.path.join(self.extractors_path, 'unarc', 'unarc.exe'),
             'x',                             # Command to extract files with pathnames

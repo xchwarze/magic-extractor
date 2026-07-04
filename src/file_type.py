@@ -32,12 +32,15 @@ def determine_file_type_with_magic(file_path, fast_check=False):
         possible_types = puremagic.magic_string(open(file_path, "rb").read(2048)) if fast_check else puremagic.magic_file(file_path)
         
         # Create a set of MIME types, excluding empty strings and ensuring uniqueness
+        #logging.debug(f"Puremagic all analysis: {possible_types}")
         mime_types = {ptype.mime_type for ptype in possible_types if ptype.mime_type}
 
-        logging.debug(f"Puremagic analysis: {mime_types}")  
+        logging.debug(f"Puremagic analysis: {mime_types}")
         return mime_types if mime_types else None
     except Exception as exc:
-        logging.error(f"An error occurred while attempting to identify the magic number for this file: {exc}")
+        if str(exc) != "Could not identify file":
+            logging.error(f"An error occurred while attempting to identify the magic number for this file: {exc}")
+
         return None
 
 def determine_file_type_with_die(file_path, bin_path):

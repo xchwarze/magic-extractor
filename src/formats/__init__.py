@@ -19,8 +19,10 @@ MIME_HANDLERS = {
     'application/x-7z-compressed': Format7zHandler,
     'application/x-xz': Format7zHandler,
     'application/x-bzip2': Format7zHandler,
+    'application/gzip': Format7zHandler,
     'application/x-gzip': Format7zHandler,
     'application/x-tar': Format7zHandler,
+    'application/x-gtar': Format7zHandler,
     'application/zip': Format7zHandler,
     'application/x-ms-wim': Format7zHandler,
     'application/x-apfs-image': Format7zHandler,
@@ -104,6 +106,48 @@ DETECTION_HANDLERS = {
     'zlib': Format7zHandler,
     'zstd': Format7zHandler,
     'rar': FormatRarHandler,
+
+    # from DIE/TrID detector names
+    '7-zip compressed archive (gen)': Format7zHandler,
+    '7-zip compressed archive (v0.4)': Format7zHandler,
+    'xz compressed container': Format7zHandler,
+    'bga compressed archive (bzip2)': Format7zHandler,
+    'bga compressed archive (gzip)': Format7zHandler,
+    'zip compressed archive': Format7zHandler,
+    'arj compressed archive': Format7zHandler,
+    'arj compressed archive (standard)': Format7zHandler,
+    'arj self-extracting archive': Format7zHandler,
+    'arjz compressed archive': Format7zHandler,
+    'microsoft cabinet archive': Format7zHandler,
+    'windows installer merge module (cab)': Format7zHandler,
+    'lhark compressed archive': Format7zHandler,
+    'lzma compressed archive': Format7zHandler,
+    'rpm package (v3.0 source)': Format7zHandler,
+    'rpm package (generic)': Format7zHandler,
+    'xar archive': Format7zHandler,
+
+    # Tendria que terminar de revisar estos nombres en el detector
+    # Unpacking only: APFS, AR, CPIO, CramFS, DMG, EXT, FAT, GPT, HFS, IHEX, MBR, NTFS, UDF, UEFI, and Z. TAR
+
+    # installer (DIE names)
+    'nsis - nullsoft scriptable install system': Format7zHandler,
+
+    # disk images (DIE names)
+    'macintosh disk image (bzlib compressed)': Format7zHandler,
+    'macintosh disk image (bz2 compressed)': Format7zHandler,
+    'squashsf image file (big endian)': Format7zHandler,
+    'squashsf image file (little endian)': Format7zHandler,
+    'qcow2 disk image': Format7zHandler,
+    'windows imaging format (generic)': Format7zHandler,
+    'virtual pc virtual hd image': Format7zHandler,
+    'virtual pc virtual hd image (dynamic)': Format7zHandler,
+    'virtual hd image extended': Format7zHandler,
+    'virtualbox disk image (generic)': Format7zHandler,
+    'virtualbox disk image (innotek)': Format7zHandler,
+    'virtualbox disk image (qemu)': Format7zHandler,
+    'vmware 4 virtual disk description (generic)': Format7zHandler,
+    'iso 9660 cd image': Format7zHandler,
+    'iso base media container': Format7zHandler,
 }
 
 def get_handler_from_mime(mime_type):
