@@ -72,7 +72,42 @@ class BaseExtractor:
         or to move files to a final destination. It could also handle error checking and compilation of extraction logs.
         This method is optional and may contain minimal or no implementation depending on specific subclass requirements.
         """
-        pass  # Optional implementation by subclasses
+        if getattr(self.cli_args, 'check_unicode', False):
+            self.warn_non_ascii_names()
+        if getattr(self.cli_args, 'create_log_files', False):
+            self.write_log_file()
+        if getattr(self.cli_args, 'open_output_folder', False):
+            self.open_output_folder()
+
+    def warn_non_ascii_names(self):
+        """Warn about extracted names that are not plain ASCII (portability hazard)."""
+        for root, dirs, files in os.walk(self.extract_directory):
+            for name in dirs + files:
+                try:
+                    name.encode('ascii')
+                except UnicodeEncodeError:
+                    logging.warning(f"Non-ASCII name in output: {os.path.join(root, name)}")
+
+    def write_log_file(self):
+        """Write a small per-run log of the extraction to the output directory."""
+        log_path = os.path.join(self.extract_directory, 'magic-extractor.log')
+        try:
+            with open(log_path, 'w', encoding='utf-8') as log_fh:
+                log_fh.write(f"Source : {self.target_file}\n")
+                log_fh.write(f"Handler: {type(self).__name__}\n")
+                log_fh.write(f"Output : {self.extract_directory}\n")
+        except OSError as exc:
+            logging.error(f"Failed to write log file {log_path}: {exc}")
+
+    def open_output_folder(self):
+        """Open the output directory in the system file manager."""
+        try:
+            if hasattr(os, 'startfile'):
+                os.startfile(self.extract_directory)  # Windows
+            else:
+                subprocess.run(['xdg-open', self.extract_directory], check=False)
+        except Exception as exc:
+            logging.error(f"Failed to open output folder {self.extract_directory}: {exc}")
 
     def validate_output_directory(self):
         """
