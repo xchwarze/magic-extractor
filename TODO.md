@@ -35,7 +35,9 @@ legacy archives (StuffIt/Zoo/LBR/LZX), exe packers (UPX/Enigma/MoleBox).
 - bitrock: `bitrock-unpacker.exe <installer> <out>` (from README).
 
 ## Remaining phases
-- [ ] Phase 8 — PyInstaller packaging; fix `config.ini` path to be base-path relative.
+- [ ] Phase 8 — build the exe on Windows: `pyinstaller magic-extractor.spec`,
+      then copy `src/bin`, `src/data`, `src/config.ini` into `dist/magic-extractor/`
+      (bin/data/config are external + updatable). Spec + config base-path already done.
 - [ ] Phase 4 deferred flags: `fix_file_extensions`, `warn_before_executing`
       (no execution point today), `extract_video_tracks` (niche, needs ffmpeg).
 
@@ -45,6 +47,7 @@ legacy archives (StuffIt/Zoo/LBR/LZX), exe packers (UPX/Enigma/MoleBox).
 - Phase 3 — `extract`/`identify`/`list` subcommands (bare path -> extract).
 - Phase 4 — `check_free_space` (+ Windows disk fix), `open_output_folder`,
   `create_log_files`, `check_unicode`.
+- Phase 8 groundwork — PyInstaller spec + `config.ini` resolved via base path.
 - Phase 5 — `carve` subcommand (binwalk offsets -> carve -> extract).
 - Phase 6 — bitrock/cicdec/dgca/wix handlers (dgca/cicdec CLIs verified).
 - Phase 7 — recursive extraction (`-r`/`--max-depth`).
