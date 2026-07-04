@@ -7,6 +7,7 @@ from logger import setup_logging
 from config import Config
 from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection
+from detection_filter import init_blacklist, filter_mimes, filter_detections
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
 # When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
@@ -76,59 +77,50 @@ def configure_settings(args, config):
         if getattr(args, key) is None:
             setattr(args, key, config.get('settings', key, type=bool))
 
+def _detector_outputs(file_path, fast_check):
+    """
+    Run the detectors in priority order and normalize each result to
+    (source_name, mime_list, detection_list). Magika (AI, high precision) runs
+    first; puremagic runs last as a pure-python fallback.
+    """
+    outputs = []
+
+    magika_result = determine_file_type_with_magika(file_path=file_path, bin_path=BIN_PATH)
+    outputs.append((
+        "Magika",
+        magika_result["mime_types"] if magika_result else [],
+        magika_result["labels"] if magika_result else [],
+    ))
+
+    for source, detector in (
+        ("DIE", determine_file_type_with_die),
+        ("TrID", determine_file_type_with_trid),
+        ("binwalk", determine_file_type_with_binwalk),
+    ):
+        detections = detector(file_path=file_path, bin_path=BIN_PATH)
+        outputs.append((source, [], detections or []))
+
+    # puremagic last: pure-python fallback; generic MIME is filtered downstream.
+    mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
+    outputs.append(("puremagic", list(mime_types) if mime_types else [], []))
+
+    return outputs
+
 def find_candidate_handlers(file_path, fast_check):
     """Return a list of candidate handler classes based on file type detection."""
     candidates = []
 
-    # Magika detection (AI-based, high precision) - runs first
-    magika_result = determine_file_type_with_magika(file_path=file_path, bin_path=BIN_PATH)
-    if magika_result:
-        for mime_type in magika_result["mime_types"]:
+    for source, mimes, detections in _detector_outputs(file_path, fast_check):
+        for mime_type in filter_mimes(mimes):
             handler_class = get_handler_from_mime(mime_type=mime_type)
             if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for Magika MIME type: {mime_type}")
+                logging.info(f"Candidate handler from {source} MIME: {mime_type}")
                 candidates.append(handler_class)
 
-        for label in magika_result["labels"]:
-            handler_class = get_handler_from_detection(detection=label)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for Magika label: {label}")
-                candidates.append(handler_class)
-
-    # MIME type detection
-    mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
-    if mime_types:
-        for mime_type in mime_types:
-            handler_class = get_handler_from_mime(mime_type=mime_type)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for MIME type: {mime_type}")
-                candidates.append(handler_class)
-
-    # Binwalk detection
-    detection_results = determine_file_type_with_binwalk(file_path=file_path, bin_path=BIN_PATH)
-    if detection_results:
-        for detection in detection_results:
+        for detection in filter_detections(detections):
             handler_class = get_handler_from_detection(detection=detection)
             if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for detection: {detection}")
-                candidates.append(handler_class)
-
-    # DIE detection
-    detection_results = determine_file_type_with_die(file_path=file_path, bin_path=BIN_PATH)
-    if detection_results:
-        for detection in detection_results:
-            handler_class = get_handler_from_detection(detection=detection)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for detection: {detection}")
-                candidates.append(handler_class)
-
-    # TRiD detection
-    detection_results = determine_file_type_with_trid(file_path=file_path, bin_path=BIN_PATH)
-    if detection_results:
-        for detection in detection_results:
-            handler_class = get_handler_from_detection(detection=detection)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"Candidate handler for detection: {detection}")
+                logging.info(f"Candidate handler from {source} detection: {detection}")
                 candidates.append(handler_class)
 
     return candidates
@@ -158,8 +150,9 @@ def main():
     args = parser.parse_args()
     setup_logging(args.debug)
 
-    # Load the detection -> handler routing maps from data/handlers.json
+    # Load the detection -> handler routing maps and the generic-token blacklist
     init_handlers(DATA_PATH)
+    init_blacklist(DATA_PATH)
 
     config = Config()
     configure_settings(args, config)
