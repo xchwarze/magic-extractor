@@ -1,0 +1,10 @@
+[Application]
+ModulePath=url.nya
+
+[Settings]
+Text=StockPrices(GoldenChart)
+Extension=spcsv
+EraseStart=(
+EraseEnd=)
+Refresh=60
+BaseURL=http://www.opticast.co.jp/cgi-bin/test/SendGif.exe?S=$W0$$W1$$W2$$W3$&T=1&H=1&DATE=00000000&B=0&G=2

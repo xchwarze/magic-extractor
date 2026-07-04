@@ -1,0 +1,21 @@
+Pour utiliser DGCA en français :
+1.  Lancez DGCA (dgca.exe) pour afficher sa fenêtre principale
+2.  Sélectionner le menu "language"
+3.  Sélectionner "Use Custom Language File..."
+4.  Parcourir le dossier "Language" où a été installé DGCA
+5.  Ouvrir le fichier *.csv correspondant :
+     (il doit comporter "FR", "fr", "Français"...)
+    soit: "FR(new).csv" [ma nouvelle version], 
+    soit: "fr.csv" [ancienne version, déconseillée].
+
+
+Veuillez noter que la version 1.07e de DGCArchiver 
+n'inclut officiellement, au 29 mars 2005 où j'écris ceci, 
+qu'une seule version française: le fichier "fr.csv".
+Cette ancienne version modifie les textes des étapes 2 et 3:
+"Langage" et "Autre".
+
+Pour charger MA VERSION française 
+et profiter de mes corrections/améliorations, 
+procédez de la même façon aux étapes 1 à 4, 
+puis ouvrez mon fichier de langue: "FR[new].csv".

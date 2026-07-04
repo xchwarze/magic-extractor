@@ -1,0 +1,9 @@
+[Application]
+ModulePath=url.nya
+
+[Settings]
+Text=ImageSearch
+Extension=google
+EraseStart=(
+EraseEnd=)
+BaseURL=http://images.google.co.jp/images?q=$%UTF8$&hl=ja

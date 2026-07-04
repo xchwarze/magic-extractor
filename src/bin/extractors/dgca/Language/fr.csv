@@ -1,0 +1,220 @@
+CHARACTER_SET,UTF-8
+LANGUAGE,French
+AUTHOR,Raph
+DATE,"04/05/03"
+MENU_FILE,Fichier
+MENU_TOOL,Outils
+MENU_OPTION,Options
+MENU_LANGUAGE,Langage
+MENU_HELP,Aide
+MENU_ARCHIVE,Archive
+MENU_EXTRACT,Extraire
+MENU_CLOSE,Quitter
+MENU_DIVIDE,Diviser
+MENU_COMBINE,Réunir
+MENU_COMPARE,Comparer
+MENU_CHECK,Vérifier
+MENU_PROTECT,Protéger
+MENU_RECOVER,Réparer
+MENU_SETUP,Configurer
+MENU_SETUP_ARC,"Configurer les options de compression par défaut"
+MENU_SETUP_EXT,"Configurer les options d'extraction par défaut"
+MENU_SETUP_DIV,"Configurer les options de division par défaut"
+MENU_SETUP_CBN,"Configurer les options de réunification par défaut"
+MENU_LANG_E,Anglais
+MENU_LANG_J,Japonais
+MENU_LANG_C,Autre
+MENU_LANG_OUTPUT,"Ecrire le fichier langage"
+MENU_INFO,"A propos de DGC..."
+MENU_WEB,"Site Web"
+MENU_UNINSTALL,Désinstaller
+TOOL_ARCHIVE,Compresser
+TOOL_EXTRACT,Extraire
+TOOL_DIVIDE,Diviser
+TOOL_COMBINE,Réunir
+TOOL_COMPARE,Comparer
+TOOL_CHECK,Vérifier
+TOOL_PROTECT,Protéger
+TOOL_RECOVER,Réparer
+DIALOG_SETUP_ARCHIVE,"Options de Compression"
+DIALOG_SETUP_EXTRACT,"Options d'Extraction"
+DIALOG_SETUP_DIVIDE,"Options de Division"
+DIALOG_SETUP_COMBINE,"Options de Réunification"
+DIALOG_SETUP_COMPARE,"Options de Comparaison"
+DIALOG_SETUP_CHECK,"Vérifier le fichier ?"
+DIALOG_SETUP_PROTECT,"Protéger le fichier ?"
+DIALOG_SETUP_RECOVER,"Réparer le fichier ?"
+DIALOG_SETUP_CRYPTO,"Options de Cryptage"
+LIST_NAME,Nom
+LIST_SIZE,Taille
+LIST_MODIFIED,"Modifié le"
+LIST_NAME_COLUMN_WIDTH,120
+LIST_EXT_COLUMN_WIDTH,50
+LIST_SIZE_COLUMN_WIDTH,100
+LIST_MODIFIED_COLUMN_WIDTH,120
+CONTEXTMENU_EXT,"Extraire (DGCA)"
+CONTEXTMENU_CBN,"Réunifier (DGCA)"
+DIALOG_FONT,"MS Sans Serif"
+DIALOG_FONTSIZE,8
+ITEM_OK,OK
+ITEM_CANCEL,Annuler
+ITEM_BROWSE,Parcourir
+ITEM_ASSOCIATION,"Associer les Extensions"
+ITEM_SENDTO,"Dans le menu 'Envoyer vers...'"
+ITEM_ARC_SETUP,"Fenêtre Ouvrir pendant une Compression"
+ITEM_EXT_SETUP,"Fenêtre Ouvrir durant une Extraction"
+ITEM_ARC_END_MB,"Afficher une Confirmation Après une Compression"
+ITEM_EXT_END_MB,"Afficher une Confirmation Après une Extraction"
+ITEM_AUTO_CLOSE,"Quitter Automatiquement Après un Lancement Automatique"
+ITEM_TASKTRAY,"Réduction en Icone dans la System Tray"
+ITEM_MINIMIZE,"Commencer en Mode Réduit"
+ITEM_TOPMOST,"Always on Top"
+ITEM_AUTO_COMMAND,"Choisir Automatiquement le processus lors de D&D ou 'Envoyer vers'."
+ITEM_EXTENSION_DGCR,"Attribuer les Extensions 'dgcr et 'dgdr' aux Archives Protegées."
+ITEM_ANIMATION,"Animations (Impossible en mode 8bit)"
+ITEM_HIDE_PASSWORD,"Cacher les Passwords"
+ITEM_SPECIAL_OPTION,"Activer les Options Spéciales"
+ITEM_DUAL_WINDOW,"Mode Deux Fenêtre"
+ITEM_HT,"Utiliser la Technologie 'Hyper-Threading' d'Intel"
+ITEM_PRIORITY,Priorité
+ITEM_NORMAL,Normal
+ITEM_LOW,Basse
+ITEM_SLIDER_CPU,00000000000000000000000000000000
+ITEM_COMPRESS_MODE,"Mode de Compression"
+ITEM_COMPRESS_OPTION,"Options de Compression"
+ITEM_OUT_ARC_FORMAT,"Format de l'Archive"
+ITEM_SFX_OPTION,"Options d'Auto-Extraction"
+ITEM_ENCRYPTION,Crypter
+ITEM_OUTPUT,Destination
+ITEM_COMPARIOSN,Comparaison
+ITEM_OUTPUT_FILENAME,"Nom du fichier"
+ITEM_COMPRESS_NONE,"Aucune (Storer)"
+ITEM_COMPRESS_EACH,Normal
+ITEM_COMPRESS_SOLID,Solide
+ITEM_PROTECT,Protéger
+ITEM_VERIFY,Vérifier
+ITEM_IDENTITY,Identity
+ITEM_UNLIMITED,Illimité
+ITEM_DGC_ARCHIVE,"Archive DGC"
+ITEM_SFX,"Auto-Extract EXE"
+ITEM_USE_SFX_OPTION,"Utiliser les Options Avancées"
+ITEM_SETUP_SFX_OPTION,"Options Avancées"
+ITEM_CRYPTO_NONE,Aucun
+ITEM_CRYPTO_PASSWORD,Password
+ITEM_CONFIRM_PASSWORD,"Confirmez le Password"
+ITEM_CRYPTO_KEYFILE,Keyfile
+ITEM_EDIT_PASSWORD,000000000000000000000000
+ITEM_SAME_AS_INPUT,"Même dossier que celui d'origine"
+ITEM_OTHER_WINDOW,"Autre fenêtre"
+ITEM_OUTPUT_FOLDER,"Dossier de destination"
+ITEM_COMPARIOSN_FOLDER,"Dossier â Comparer"
+ITEM_EDIT_OUTPUT,000000000000000000000000
+ITEM_EDIT_OUTPUT_FILENAME,0000000000000000
+ITEM_EDIT_OUTPUT_FILENAME_EX,0000000000000000
+ITEM_PRESERVE_EXTENSION,"Extension d'origine"
+ITEM_OUTPUT_EACH_ARCHIVE,"Une archive par fichier"
+ITEM_EXTRACT_OPTION,"Options d'Extraction"
+ITEM_DECRYPTION,Décrypter
+ITEM_EXTRACT_CREATE_FOLDER,"Créer un dossier selon le nom de l'archive et l'extraire dans celui-ci."
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FOLDER,"Ne pas créer le dossier quand le nom du dossier contenant l'archive est le même que celui de l'archive."
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FILE,"ne pas créer le dossier quand l'archive contient un dossier du même nom."
+ITEM_SFXOPT_HIDE,"Cacher la fenêtre"
+ITEM_SFXOPT_FILESET,"Spécifier le nom du fileset"
+ITEM_SFXOPT_INSTALL_PATH,"Spécifier le répertoire d'installation"
+ITEM_SFXOPT_COMMENT,"Spécifier un commentaire"
+ITEM_SFXOPT_OPEN,"Ouvrir un fichier"
+ITEM_SFXOPT_EXECUTE,"Executer un programme apres l'extraction"
+ITEM_SFXOPT_TMP_DEL,"Créer automatiquement un dossier temporaire pour executer un programme spécifique,après l'execution du programme le dossier temporaire ainsi que les fichiers seront supprimés.(Note: 'Dossier de destination' ne marchera pas !)"
+ITEM_SFXOPT_FONT_SIZE,"Spécifier la taille de l'écriture"
+ITEM_EDIT_SFX,000000000000000000000000
+ITEM_DIVIDE_SIZE,"Taille des divisions"
+ITEM_EDIT_DIVIDE_SIZE,00000000
+ITEM_DIVIDE_KB,Ko
+ITEM_DIVIDE_MB,Mo
+ITEM_DIVIDE_GB,Go
+ITEM_DIVIDE_TB,To
+ITEM_NUM_DIVIDE,"Nombre de divisions"
+ITEM_EDIT_NUM_DIVIDE,00000000
+ITEM_DIVIDE_OPTION,Protection
+ITEM_PROTECT_DIVIDE_SIZE,"Taille des divisions protegées"
+ITEM_EDIT_PROTECT_DIVIDE_SIZE," 00000000000000000000000000"
+ITEM_ADD_CHARACTER,"Ajouter des lettres au nom de fichier"
+ITEM_EDIT_ADD_CHARACTER,0000
+ITEM_CHECK_CONTENTS,"Vérification du contenu"
+ITEM_CRC_CHECK,"Vérification du CRC"
+ITEM_EXTRACTION_CHECK,"Extraction Check"
+MSG_ABOUT_DGCA,"A propos de DGCA..."
+MSG_TIME_LEFT,"Tps restant"
+MSG_MB_NOTICE,Information
+MSG_MB_TIME,"Temps ecoulé"
+MSG_MB_SECOND,seconde(s)
+MSG_MB_TERMINATE,"Voulez vous vraiment quitter ?"
+MSG_MB_UNINSTALL,"Voulez vous vraiment désinstaller DGCArchiver?"
+MSG_MB_COMPRESSION_SUCCESS,"Processus de compression terminé. "
+MSG_MB_COMPRESSION_FAILURE,"Le processus de compression a echoué. "
+MSG_MB_EXTRACTION_SUCCESS,"Extraction terminé. "
+MSG_MB_EXTRACTION_FAILURE,"L'extraction a echoué. "
+MSG_MB_DIVISION_SUCCESS,"La division est terminé. "
+MSG_MB_DIVISION_FAILURE,"La division a echoué. "
+MSG_MB_COMBINATION_SUCCESS,"La réunification est terminé. "
+MSG_MB_COMBINATION_FAILURE,"La réunification a echoué. "
+MSG_MB_COMPARISON_SUCCESS,"La comparaison est terminé. "
+MSG_MB_COMPARISON_FAILURE,"La comparaison a echoué. "
+MSG_MB_CHECK_SUCCESS,"La vérification est terminé. "
+MSG_MB_CHECK_FAILURE,"La vérification a echoue. "
+MSG_MB_PROTECTION_SUCCESS,"La protection est terminé. "
+MSG_MB_PROTECTION_FAILURE,"La protection a echoué. "
+MSG_MB_RECOVERY_SUCCESS,"La restauration est terminé. "
+MSG_MB_RECOVERY_FAILURE,"Le restauration a echoué. "
+MSG_MB_OUTPUT_FILE,Fichier
+MSG_MB_ALREADY_EXIST," déj  existant."
+MSG_MB_OVERWRITE_EXISTING_FILE,"Ecraser le fichier existant ?"
+MSG_MB_CREATE_FOLDER,"Voulez vous créer le dossier ?"
+MSG_MB_KEYFILE_NOT_EXIST,"Le Keyfile n'existe pas."
+MSG_MB_INVALID_KEYFILE,"Le Keyfile est invalide."
+MSG_MB_PASSWORD_DIFFER,"Les deux mots de passes diffèrent."
+MSG_MB_SPECIFIED_PATH_NOT_EXIST,"Le dossier specifié n'existe pas."
+MSG_MB_INVALID_PATH,"Chemin invalide."
+MSG_MB_DIVISION_SIZE_SMALL,"La taille de division est trop petite. (min : 64KB)"
+MSG_MB_NUM_DIVISION_MUCH,"Trop de divisions. (max suporte : 10000)"
+MSG_MB_ERROR,Erreur
+MSG_MB_CANNOT_OPEN_FILE,"Impossible d'ouvrir le fichier."
+MSG_MB_FILE_READ_ERROR,"Erreur de lecture."
+MSG_MB_FILE_WRITE_ERROR,"Erreur d'écriture."
+MSG_MB_FILE_NOTFOUND_ERROR,"Fichier non trouvé."
+MSG_MB_FILE_CRC_ERROR,"Erreur CRC"
+MSG_MB_FILE_COMPARE_ERROR,"Le fichier est différent."
+MSG_MB_FILE_DAMAGE_ERROR,"Le fichier est corrompu."
+MSG_MB_FILE_UNKNOWN_FORMAT_ERROR,"Format Inconnu"
+MSG_MB_CANNOT_CREATE_FOLDER,"Impossible de créer le dossier."
+MSG_MB_FILE_CRYPTO,"Fichier crypté."
+MSG_MB_ARCHIVE_CRYPTO,"Archive crypté."
+MSG_MB_CRYPTO_ERROR,"Mot de passe erroné ou Keyfile invalide."
+MSG_MB_ARCHIVE_VERSION_ERROR,"Version du codec inconnu"
+MSG_MB_ARCHIVE_UNKNOWN_FORMAT_ERROR,"Format d'archive inconnu"
+MSG_MB_ARCHIVE_WRONG_ERROR,"Archive corrompu"
+MSG_MB_ARCHIVE_UNFIXABLE_REPORT,"Un bloc infixable a été trouvé. Le fichier peut ne pas être correcte."
+SFX_BACK,"< &Précedent"
+SFX_NEXT,"&Suivant >"
+SFX_CANCEL,Annuler
+SFX_COMPLETE,Terminer
+SFX_INSTALLPATH,"Répertoire d'installation"
+SFX_OUTPUTPATH,Destination
+SFX_BROWSE,P&arcourir
+SFX_AGREE,Accepter
+SFX_DISAGREE,Refuser
+SFX_PHASE0,"Ce programme va extraire des fichiers sur votre ordinateur."
+SFX_PHASE0N,"Cliquez sur le bouton [Suivant] pour continuer."
+SFX_PHASE1,"Veuillez selectionner le dossier de destination."
+SFX_PHASE1N,"Cliquez sur le bouton [Suivant] pour continuer."
+SFX_PHASE2,"Le programme a fini de collecter les informations nécessaires a l'extraction des fichiers."
+SFX_PHASE2N,"Cliquez sur le bouton [Suivant] pour commencer l'extraction."
+SFX_PHASE3,"Extraction en cours..."
+SFX_PHASE4,"Extraction terminée."
+SFX_PHASEC,"Veuillez spécifier le type de décryption."
+SFX_PHASECN,"Cliquez sur le bouton [Suivant] pour continuer."
+SFX_PHASE0S,"Ce programme va installer %s sur votre ordinateur."
+SFX_PHASE1S,"Choisissez le dossier de destination."
+SFX_PHASE2S,"Commencer l'installation."
+SFX_PHASE3S,"Installation en cours..."
+SFX_PHASE4S,"Installation terminée."

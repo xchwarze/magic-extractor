@@ -1,0 +1,278 @@
+CHARACTER_SET, UTF-8
+LANGUAGE, English
+AUTHOR, "Jacob Poon"
+DATE, 2005/02/2
+COMMENT, "This language file is based on the English(built-in) language file by Raph. It fixes all grammatical errors and ambiguous descriptions from the original release. Visit homepage at: http://www.geocities.com/Tokyo/Dojo/1997/"
+MENU_FILE, &File
+MENU_COMMAND, &Command
+MENU_OPTION, &Option
+MENU_LANGUAGE, &Language
+MENU_HELP, &Help
+MENU_ARCHIVE_FOLDER, "Compress F&older..."
+MENU_ARCHIVE_FILE, "Compress F&ile..."
+MENU_EXTRACT_DGC, "Extract &DGC File..."
+MENU_EXTRACT_SFX, "Extract &SFX File..."
+MENU_CANCEL, &Cancel
+MENU_CLOSE, E&xit
+MENU_ARCHIVE, "&Add/Create archive..."
+MENU_EXTRACT, &Extract...
+MENU_DIVIDE, &Divide...
+MENU_COMBINE, &Combine...
+MENU_COMPARE, Co&mpare...
+MENU_CHECK, Chec&k
+MENU_PROTECT, &Protect...
+MENU_RECOVER, &Recover
+MENU_SETUP, "Environment &Settings..."
+MENU_SETUP_ARC, "Default &Archive Options..."
+MENU_SETUP_EXT, "Default &Extract Options..."
+MENU_SETUP_DIV, "Default &Divide Options..."
+MENU_SETUP_CBN, "Default &Combine Options..."
+MENU_LANG_E, &English
+MENU_LANG_J, &Japanese
+MENU_LANG_C, "&Use Custom Language File..."
+MENU_LANG_OUTPUT, "&Output Language File..."
+MENU_INFO, "&About DGCA..."
+MENU_WEB, "Author's &Web Page"
+MENU_UNINSTALL, &Uninstall...
+TOOL_ARCHIVE, Archive
+TOOL_EXTRACT, Extract
+TOOL_DIVIDE, Divide
+TOOL_COMBINE, Combine
+TOOL_COMPARE, Compare
+TOOL_CHECK, Check
+TOOL_PROTECT, Protect
+TOOL_RECOVER, Recover
+DIALOG_SETUP_ENVIRONMENT, "Environment Settings"
+DIALOG_SETUP_DEFAULT_ARCHIVE, "Default Archive Options"
+DIALOG_SETUP_DEFAULT_EXTRACT, "Default Extract Options"
+DIALOG_SETUP_DEFAULT_DIVIDE, "Default Divide Options"
+DIALOG_SETUP_DEFAULT_COMBINE, "Default Combine Options"
+DIALOG_SETUP_ARCHIVE, "Archive Options"
+DIALOG_SETUP_EXTRACT, "Extract Options"
+DIALOG_SETUP_DIVIDE, "Divide Options"
+DIALOG_SETUP_COMBINE, "Combine Options"
+DIALOG_SETUP_COMPARE, "Compare Options"
+DIALOG_SETUP_CHECK, "Check Options"
+DIALOG_SETUP_PROTECT, "Protect Options"
+DIALOG_SETUP_RECOVER, "Recover Options"
+DIALOG_SETUP_CRYPTO, "Encryption Options"
+DIALOG_EDIT_FILE_INFO, "Edit File Information"
+LIST_NAME, Name
+LIST_SIZE, Size
+LIST_MODIFIED, Modified
+LIST_NAME_COLUMN_WIDTH, 120
+LIST_EXT_COLUMN_WIDTH, 50
+LIST_SIZE_COLUMN_WIDTH, 100
+LIST_MODIFIED_COLUMN_WIDTH, 120
+CONTEXTMENU_EXT, Extract(DGCA)
+CONTEXTMENU_CBN, Combine(DGCA)
+DIALOG_FONT, "Microsoft Sans Serif"
+DIALOG_FONTSIZE, 9
+ITEM_OK, OK
+ITEM_CANCEL, Cancel
+ITEM_BROWSE, Browse
+ITEM_ASSOCIATION, "Associate DGC archives with DGCA"
+ITEM_SENDTO, "Add DGCA to 'Send To' Menu"
+ITEM_INI_FILE, "Save configurations to .ini file instead of registry"
+ITEM_ARC_SETUP, "Open Dialogue During Compression"
+ITEM_EXT_SETUP, "Open Dialog During Extraction"
+ITEM_ARC_END_MB, "Display Confirmation After Compress"
+ITEM_EXT_END_MB, "Display Confirmation After Extract"
+ITEM_DIV_END_MB, "Display Confirmation After Divide"
+ITEM_CBN_END_MB, "Display Confirmation After Combine"
+ITEM_AUTO_CLOSE, "If DGCA is started automatically, exit after completing the process"
+ITEM_TASKTRAY, "Minimize to Icon in System Tray"
+ITEM_MINIMIZE, "Start in Minimize Mode"
+ITEM_MULTI_INSTANCE, "Allow Multiple Instances of Application"
+ITEM_TOPMOST, "Always on Top"
+ITEM_CENTER_DIALOG, "Centre Dialogue to Application Window"
+ITEM_AUTO_COMMAND, "Process objects selected via Drag and Drop or 'Send To' automatically"
+ITEM_EXTENSION_DGCR, "Set extension of the protected archive to 'dgcr' or 'dgdr'"
+ITEM_USE_UPX, "Using UPX, Reduce SFX etc.(Not recommend)"
+ITEM_ANIMATION, "Animation (needs 16-bit colour depth or higher)"
+ITEM_HIDE_PASSWORD, "Hide Password"
+ITEM_SHOW_PASSWORD2, "Confirm password when using encryption"
+ITEM_SPECIAL_OPTION, "Enable Special Option"
+ITEM_DUAL_WINDOW, "Dual Window Mode"
+ITEM_GRIDLINE, "Show grid lines"
+ITEM_CUSTOM_MENU, "Enable Custom Menu"
+ITEM_MULTISENSOR, "Enable Multi Sensor"
+ITEM_PRIORITY, Priority
+ITEM_NORMAL, Normal
+ITEM_LOW, Low
+ITEM_SLIDER_CPU, 00000000000000000000000000000000
+ITEM_COMPRESS_MODE, "Compress Mode"
+ITEM_COMPRESS_OPTION, "Compress Options"
+ITEM_OUT_ARC_FORMAT, "Output Archive Format"
+ITEM_SFX_OPTION, "Self-Extract Options"
+ITEM_ENCRYPTION, Encryption
+ITEM_OUTPUT, Output
+ITEM_COMPARIOSN, Comparison
+ITEM_OUTPUT_FILENAME, "Output Filename"
+ITEM_COMPRESS_NONE, None/Store
+ITEM_COMPRESS_EACH, Normal
+ITEM_COMPRESS_SOLID, Solid
+ITEM_PROTECT, Protect
+ITEM_VERIFY, Verify
+ITEM_IDENTITY, Identity
+ITEM_NON_COMPRESS_EXTENSION, "Do not compress files with following extension(s):"
+ITEM_EDIT_NON_COMPRESS_EXTENSION, 000000000000000000000000
+ITEM_PROTECTION_LEVEL, "Protection level (1-9)"
+ITEM_EDIT_PROTECTION_LEVEL, 0
+ITEM_EDIT_PROTECTION_PERCENT, 000000
+ITEM_DGC_ARCHIVE, "DGC Archive"
+ITEM_SFX, "Self-Extracting EXE"
+ITEM_USE_SFX_OPTION, "Use Advanced Options"
+ITEM_SETUP_SFX_OPTION, "Advanced Options"
+ITEM_CRYPTO_NONE, None
+ITEM_CRYPTO_PASSWORD, Password
+ITEM_CONFIRM_PASSWORD, "Confirm Password"
+ITEM_CRYPTO_KEYFILE, "Key file"
+ITEM_EDIT_PASSWORD, 000000000000000000000000
+ITEM_SAME_AS_INPUT, "Same As Input Folder"
+ITEM_OTHER_WINDOW, "Other Window"
+ITEM_OUTPUT_FOLDER, "Output Folder"
+ITEM_COMPARIOSN_FOLDER, "Comparison Folder"
+ITEM_EDIT_OUTPUT, 000000000000000000000000
+ITEM_EDIT_OUTPUT_FILENAME, 0000000000000000
+ITEM_EDIT_OUTPUT_FILENAME_EX, 0000000000000000
+ITEM_PRESERVE_EXTENSION, "Preserve original extension"
+ITEM_OUTPUT_EACH_ARCHIVE, "Make an archive for each selected object"
+ITEM_EXTRACT_OPTION, "Extract Options"
+ITEM_DECRYPTION, Decryption
+ITEM_EXTRACT_CREATE_FOLDER, "Create folder from archive name and extract into the folder"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FOLDER, "Do not create folder when there is only one folder in archive"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FILE, "Do not create folder when there is only one file in archive"
+ITEM_SFXOPT_HIDE, "Hide window"
+ITEM_SFXOPT_FILESET, "Specify file list name"
+ITEM_SFXOPT_INSTALL_PATH, "Specify installation path"
+ITEM_SFXOPT_COMMENT, "Specify Comment"
+ITEM_SFXOPT_OPEN, "Open File"
+ITEM_SFXOPT_EXECUTE, "Execute a program after extraction"
+ITEM_SFXOPT_TMP_DEL, "Automatically create a temporary area for processing, and execute specified program. After running the program, files in temporary area will be deleted. (Warning: 'Output To Folder' does not work here!)"
+ITEM_SFXOPT_FONT_SIZE, "Specify font size"
+ITEM_EDIT_SFX, 000000000000000000000000
+ITEM_DIVIDE_SIZE, "Size of divided output"
+ITEM_EDIT_DIVIDE_SIZE, 00000000
+ITEM_DIVIDE_KB, KByte
+ITEM_DIVIDE_MB, MByte
+ITEM_DIVIDE_GB, GByte
+ITEM_DIVIDE_TB, TByte
+ITEM_NUM_DIVIDE, "Number of output files"
+ITEM_EDIT_NUM_DIVIDE, 00000
+ITEM_DIVIDE_OPTION, "Divide Options"
+ITEM_ADD_SFC, "Add Self-Combiner EXE"
+ITEM_ADD_CHARACTER, "Add characters to file name"
+ITEM_EDIT_ADD_CHARACTER, 0000
+ITEM_CHECK_CONTENTS, "Check Contents"
+ITEM_CRC_CHECK, "CRC Check"
+ITEM_EXTRACTION_CHECK, "Extraction Check"
+ITEM_FILE_NAME, Filename
+ITEM_EDIT_FILE_NAME, 0000000000000000
+ITEM_FILE_ATTRIBUTES, Attributes
+ITEM_FILE_READONLY, "Read Only"
+ITEM_FILE_HIDDEN, Hidden
+ITEM_FILE_SYSTEM, System
+ITEM_FILE_ARCHIVE, Archive
+ITEM_FILE_TIME, Time
+ITEM_EDIT_FILE_TIME_DATE, 0000/00/00
+ITEM_EDIT_FILE_TIME_TIME, 00:00:00
+ITEM_EDIT_FILE_TIME_4, 0000
+ITEM_EDIT_FILE_TIME_2, 00
+MSG_ABOUT_DGCA, "About DGCA"
+MSG_TIME_LEFT, "Time left"
+MSG_MB_NOTICE, Notice
+MSG_MB_TIME, "Elapsed time"
+MSG_MB_SECOND, seconds
+MSG_MB_CANCEL, "Proceed to cancel current process?"
+MSG_MB_TERMINATE, "Proceed to terminate?"
+MSG_MB_UNINSTALL, "Proceed to uninstall DGCArchiver?"
+MSG_MB_COMPRESSION_SUCCESS, "Finished compression process."
+MSG_MB_COMPRESSION_FAILURE, "Compression process failed."
+MSG_MB_EXTRACTION_SUCCESS, "Finished extraction process."
+MSG_MB_EXTRACTION_FAILURE, "Extraction process failed."
+MSG_MB_DIVISION_SUCCESS, "Finished division process."
+MSG_MB_DIVISION_FAILURE, "Division process failed."
+MSG_MB_COMBINATION_SUCCESS, "Finished combination process."
+MSG_MB_COMBINATION_FAILURE, "Combination process failed."
+MSG_MB_COMPARISON_SUCCESS, "Finished comparison process."
+MSG_MB_COMPARISON_FAILURE, "Comparison process failed."
+MSG_MB_CHECK_SUCCESS, "Finished check process."
+MSG_MB_CHECK_FAILURE, "Check process failed."
+MSG_MB_PROTECTION_SUCCESS, "Finished protection process."
+MSG_MB_PROTECTION_FAILURE, "Protection process failed."
+MSG_MB_RECOVERY_SUCCESS, "Finished recovery process."
+MSG_MB_RECOVERY_FAILURE, "Recovery process failed."
+MSG_MB_OUTPUT_FILE, File
+MSG_MB_ALREADY_EXIST, "already exists."
+MSG_MB_OVERWRITE_EXISTING_FILE, "Overwrite existing file?"
+MSG_MB_CREATE_FOLDER, "Create folder?"
+MSG_MB_KEYFILE_NOT_EXIST, "Key file does not exist."
+MSG_MB_INVALID_KEYFILE, "Invalid key file."
+MSG_MB_PASSWORD_DIFFER, "Different passwords."
+MSG_MB_SPECIFIED_PATH_NOT_EXIST, "Specified path does not exist."
+MSG_MB_INVALID_PATH, "Invalid path."
+MSG_MB_DIVISION_SIZE_SMALL, "Division size is too small. It must be at least 64KB."
+MSG_MB_NUM_DIVISION_MUCH, "Too many division output files. It must be 10000 or lower."
+MSG_MB_ERROR, Error
+MSG_MB_CANNOT_OPEN_FILE, "Cannot open file."
+MSG_MB_FILE_READ_ERROR, "File Read Error."
+MSG_MB_FILE_WRITE_ERROR, "File Write Error."
+MSG_MB_FILE_NOTFOUND_ERROR, "File Not found."
+MSG_MB_FILE_CRC_ERROR, "File CRC Error."
+MSG_MB_FILE_COMPARE_ERROR, "File is different."
+MSG_MB_FILE_DAMAGE_ERROR, "File is damaged."
+MSG_MB_FILE_UNKNOWN_FORMAT_ERROR, "Unknown format."
+MSG_MB_CANNOT_OPEN_ARCHIVE, "Cannot open archive."
+MSG_MB_ARCHIVE_READ_ERROR, "Archive Read Error."
+MSG_MB_CANNOT_CREATE_FOLDER, "Cannot create folder."
+MSG_MB_FILE_CRYPTO, "File encrypted."
+MSG_MB_ARCHIVE_CRYPTO, "Archive encrypted."
+MSG_MB_CRYPTO_ERROR, "Wrong password or invalid key file."
+MSG_MB_ARCHIVE_VERSION_ERROR, "Unknown compression version."
+MSG_MB_ARCHIVE_UNKNOWN_FORMAT_ERROR, "Unknown archive format."
+MSG_MB_ARCHIVE_WRONG_ERROR, "Error occurs when archiving."
+MSG_MB_ARCHIVE_NON_PROTECT_REPORT, "Protection information is not found. It is not protected or protection information is lost."
+MSG_MB_ARCHIVE_UNFIXABLE_REPORT, "An irreparable block is found. Processing may not proceed properly."
+SFX_BACK, "< &Back"
+SFX_NEXT, "&Next >"
+SFX_OK, OK
+SFX_CANCEL, Cancel
+SFX_COMPLETE, Complete
+SFX_INSTALLPATH, "Installation Path"
+SFX_OUTPUTPATH, Output
+SFX_BROWSE, B&rowse
+SFX_AGREE, Agree
+SFX_DISAGREE, Disagree
+SFX_PHASE0, "This program will extract files on your computer."
+SFX_PHASE0N, "Press [Next] button to continue."
+SFX_PHASE1, "Select target extraction folder."
+SFX_PHASE1N, "Press [Next] button to continue."
+SFX_PHASE2, "Extraction is about to begin."
+SFX_PHASE2N, "Press [Next] button to begin."
+SFX_PHASE3, Extracting...
+SFX_PHASE4, "Extraction complete."
+SFX_PHASEC, "Please enter password."
+SFX_PHASECN, "Press [Next] button to continue."
+SFX_PHASE0S, "This program will install %s on your computer."
+SFX_PHASE1S, "Select target installation folder."
+SFX_PHASE2S, "Installation is about to begin."
+SFX_PHASE3S, Installing...
+SFX_PHASE4S, "Installation complete."
+SFC_BACK, "< &Back"
+SFC_NEXT, "&Next >"
+SFC_OK, OK
+SFC_CANCEL, Cancel
+SFC_COMPLETE, Complete
+SFC_OUTPUTPATH, Output
+SFC_BROWSE, B&rowse
+SFC_PHASE0, "This program will combine the divided files."
+SFC_PHASE0N, "Press [Next] button to continue."
+SFC_PHASE1, "Please select output folder."
+SFC_PHASE1N, "Press [Next] button to continue."
+SFC_PHASE2, "Combining is about to begin."
+SFC_PHASE2N, "Press [Next] button to begin."
+SFC_PHASE3, Combining...
+SFC_PHASE4, "Combining complete."
+SFC_PHASEC, "Please enter password."
+SFC_PHASECN, "Press [Next] button to continue."

@@ -1,0 +1,118 @@
+﻿//////////////////////////////////////////////////////////////////////////////
+//  ぱにょX Version 1.07r                                                   //
+//                                                                          //
+//    2003-5 819(panyoX)                                                    //
+//////////////////////////////////////////////////////////////////////////////
+
+●はじめに
+
+  ｢panyoX Version 1.07r｣をダウンロードしていただき、ありがとうございます。
+  DGCA α3版に含まれていた｢ぱにょ(ぱにょぱにょしよう)｣を更新&改造し、
+  DGCA Version 1.07rに対応させました。
+
+
+●注意
+  ｢言語ファイルの改造、頒布は自由です。｣とのこと。
+
+
+●ファイル構成
+
+  展開すると、次のファイルが得られます。構成を確認してください。
+
+        panyoX.csv  (ぱにょX(ぱにょぱにょしようX))
+        panyoX.txt  (現在、お読みになっているテキストファイル)
+
+
+●使用方法
+
+  上記の2ファイルをDGCAをインストールしたフォルダ内のLanguageフォルダに
+  上書きしてください。
+  dgca.exeを実行し、LanguageメニューのCustomを選択し、
+  panyoX.csvファイルを開いて下さい。
+
+
+●更新情報
+
+■Version1.07r 修正・変更箇所
+・DGCA Version 1.07rに準拠
+・11行追加
+　ITEM_EXCLUSIVE_SENSOR
+　ITEM_OUTPUT_FILE_PERIOD
+　ITEM_EDIT_OUTPUT_FILE_EXTENSION
+　ITEM_SFXOPT_CLOSE
+　ITEM_SFXOPT_TITLE
+　ITEM_SFXOPT_SHORTCUT
+　ITEM_SFXOPT_SHORTCUT_NAME
+　ITEM_SFXOPT_SHORTCUT_FILE
+　ITEM_DIVIDE_START_NUM
+　ITEM_EDIT_DIVIDE_START_NUM
+　SFX_SHORTCUT
+■Version1.07 修正・変更箇所
+・DGCA Version 1.07に準拠
+・5行追加
+　ITEM_SFXOPT_ICON
+　ITEM_DIVIDE_GUIDE
+　MSG_MB_ICON_FILE_NOT_EXIST
+　MSG_MB_INVALID_ICON_FILE
+　MSG_MB_CANNOT_CHANGE_ICON
+・一部の文末に...を追加
+■Version1.06a 修正・変更箇所
+・DGCA Version 1.06aに準拠
+・1行追加:DRAG_DROP_PROCESSING
+■Version1.06 修正・変更箇所
+・DGCA Version 1.06に準拠
+・1行追加:ITEM_SHOW_PASSWORD2
+■Version1.04 修正・変更箇所
+・dgca_v104.exeに準拠
+・1行追加:MSG_MB_CANNOT_OPEN_ARCHIVE
+・1行追加:MSG_MB_ARCHIVE_READ_ERROR
+■Version1.03a 修正・変更箇所
+・dgca_v103a.exeに準拠
+・1行削除:ITEM_HT
+・1行追加:ITEM_USE_UPX
+■Version1.01 修正・変更箇所
+・dgca_v101.exeに準拠
+・3行追加
+■Version1.0b 修正・変更箇所
+・全項目(272行)見直し、修正。
+・(&X)を付けた。
+・dgca_v100b.exeに準拠。
+■Version1.0a 修正・変更箇所
+・31行MENU_SETUP_CBNを修正。
+■Version1.0 修正・変更箇所
+・Version1.0に対応。
+■12a版 修正・変更箇所
+・自己展開方式(EXE)作成すると解凍ダイアログが英語で表示されるのを修正。
+■12版 修正・変更箇所
+・｢00000～｣がすべて｢0｣になってしまっていたため、
+　設定ダイアログの配置(テキストボックスとスライダーコントロール)が崩れる問題を修正。
+・不正な改行が入っていたのを修正。
+・訳を修正。
+
+
+●免責
+
+・作者はこの言語ファイルの動作保証を致しません。
+・作者はこの言語ファイルを使用に関して直接、または間接に生じた障害、損害につい
+  て一切の責任を負いません。
+・作者はこの言語ファイルの修正、及びバージョンアップの義務を負いません。
+
+
+●SpecialThanks
+
+・DGCAの開発者のSYN様
+・TeraPadの開発者の寺尾 進様
+・NoEditorの開発者のYokka様
+・2ちゃんねるDGCAスレッドの皆様
+・ぱにょX使用者の皆様
+・DGCA使用者の皆様
+
+
+●連絡先
+
+        E-mail : panyox＠hotmail.com
+        URL : http://panyox.hp.infoseek.co.jp/ (新)
+            : http://www.geocities.jp/panyox/ (旧)
+
+
+//////////////////////////////////////////////////////////////////////////////

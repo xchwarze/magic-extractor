@@ -1,0 +1,9 @@
+[Application]
+ModulePath=..\URL\url.nya
+
+[Settings]
+Text=Search
+Extension=google
+EraseStart=(
+EraseEnd=)
+BaseURL=http://www.google.co.jp/search?hl=ja&q=$%UTF8$&lr=

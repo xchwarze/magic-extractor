@@ -1,0 +1,357 @@
+﻿ _____
+|  __ \
+| |  | |
+| |  | |
+| |__| |
+|_____/  (D) I G I T A L
+	  _____
+	 / ____|
+	| |  __
+	| | |_ |
+	| |__| |
+	 \_____| (G)
+		  _____
+		 / ____|
+		| |
+		| |
+		| |____
+		 \_____| (C) O D E C
+			  ____
+			 / __ \
+			| |__| |
+			|  __  |
+			| |  | |
+			|_|  |_| (A) R C H I V E R
+
+
+`-----—> Hi, SYN!  {^.-}
+ `----—> Here are a few notes about my humble translations...
+CHARACTER_SET, UTF-8
+LANGUAGE, "French (FRANC€)"
+AUTHOR, "a supporter of $¥₦   m(_  _)m"
+`-----—> Please call me: anon (i.e. 'anonymous' in English, 'anonyme' in French)...
+DATE, 2005/03/29
+`-----—> Used ???
+COMMENT, "Traduction pour la version 1.07e entièrement reprise de l'anglais.  [2005/03/29]"
+`-----—> DGCA est au début de son développement; les aides détaillées sont à ce jour inexistantes en anglais. J'espère ne pas avoir trop commis d'erreurs de traduction, en me basant principalement sur les étiquettes anglaises... En tout cas c'est bien plus soigné qu'avec la version de Raph: cette dernière est assez valable (j'en ai repris les meilleurs éléments), mais franglaise et incomplète voire boguée.
+ `----—> SYN, I think it's THE good, full and checked French version you need! It can be used trustfully for your updates, with the help of Raph (or mine just in case).
+MENU_FILE, &Fichier
+MENU_TOOL, Outils
+`-----—> Used ???
+MENU_COMMAND, &Commandes
+MENU_OPTION, &Options
+MENU_LANGUAGE, &Langue
+MENU_HELP, &Aide
+MENU_ARCHIVE_FOLDER, "Compresser un &Dossier..."
+MENU_ARCHIVE_FILE, "Compresser un &Fichier..."
+MENU_EXTRACT_DGC, "Extraire un fichier DG&C..."
+MENU_EXTRACT_SFX, "Extraire un fichier SF&X..."
+MENU_CANCEL, &Annuler
+MENU_CLOSE, &Quitter
+MENU_ARCHIVE, "&Ajouter/Créer une Archive..."
+MENU_EXTRACT, &Extraire...
+MENU_DIVIDE, &Diviser...
+MENU_COMBINE, &Réunir...
+MENU_COMPARE, &Comparer...
+MENU_CHECK, &Vérifier...
+MENU_PROTECT, &Protéger...
+MENU_RECOVER, Réc&upérer...
+MENU_SETUP, "&Configuration  de l'Environnement..."
+MENU_SETUP_ARC, "&Archivage - Options par défaut..."
+MENU_SETUP_EXT, "&Extraction - Options par défaut..."
+MENU_SETUP_DIV, "&Division - Options par défaut..."
+MENU_SETUP_CBN, "&Réunion - Options par défaut..."
+MENU_LANG_E, &Anglais
+MENU_LANG_J, &Japonais
+MENU_LANG_C, "&Utiliser un fichier de langue personnalisé..."
+MENU_LANG_OUTPUT, "&Exporter le fichier de langue actuel..."
+MENU_INFO, "&Au sujet de DGCA..."
+MENU_WEB, "&Page Web de l'auteur..."
+MENU_UNINSTALL, &Désinstaller...
+TOOL_ARCHIVE, Archiver
+TOOL_EXTRACT, Extraire
+TOOL_DIVIDE, Diviser
+TOOL_COMBINE, Réunir
+TOOL_COMPARE, Comparer
+TOOL_CHECK, Vérifier
+TOOL_PROTECT, Protéger
+TOOL_RECOVER, Récupérer
+DRAG_DROP_PROCESSING, Traitement...
+DIALOG_SETUP_ENVIRONMENT, "DGCA — Configuration de l'Environnement"
+DIALOG_SETUP_DEFAULT_ARCHIVE, "DGCA — Options d'Archivage par Défaut"
+DIALOG_SETUP_DEFAULT_EXTRACT, "DGCA — Options d'Extraction par Défaut"
+DIALOG_SETUP_DEFAULT_DIVIDE, "DGCA — Options de Division par Défaut"
+DIALOG_SETUP_DEFAULT_COMBINE, "DGCA — Options de Réunion par Défaut"
+DIALOG_SETUP_ARCHIVE, "DGCA — Options d'Archivage"
+DIALOG_SETUP_EXTRACT, "DGCA — Options d'Extraction"
+DIALOG_SETUP_DIVIDE, "DGCA — Options de Division"
+DIALOG_SETUP_COMBINE, "DGCA — Options de Réunion"
+DIALOG_SETUP_COMPARE, "DGCA — Options de Comparaison"
+DIALOG_SETUP_CHECK, "DGCA — Vérification"
+DIALOG_SETUP_PROTECT, "DGCA — Option de Protection"
+DIALOG_SETUP_RECOVER, "DGCA — Options de Récupération"
+DIALOG_SETUP_CRYPTO, "DGCA — Options de Cryptage"
+DIALOG_EDIT_FILE_INFO, "Informations Fichier Édition"
+LIST_NAME, Nom
+LIST_SIZE, Taille
+LIST_MODIFIED, "Modifié le"
+LIST_NAME_COLUMN_WIDTH, 120
+LIST_EXT_COLUMN_WIDTH, 50
+LIST_SIZE_COLUMN_WIDTH, 100
+LIST_MODIFIED_COLUMN_WIDTH, 120
+CONTEXTMENU_EXT, "Extraire avec DGCA"
+CONTEXTMENU_CBN, "Réunir avec DGCA"
+DIALOG_FONT, "Microsoft Sans Serif"
+DIALOG_FONTSIZE, 9
+`-----—> 8 is too small !
+ITEM_OK, Valider
+ITEM_CANCEL, Annuler
+ITEM_BROWSE, Parcourir
+ITEM_ASSOCIATION, "Associer les Extensions d'archives DGC avec le programme DGCA"
+ITEM_SENDTO, "Ajouter DGCA au menu ″Envoyer vers...″"
+ITEM_INI_FILE, "Enregistrer la Configuration dans le fichier ″dgca.ini″  au lieu du Registre"
+ITEM_ARC_SETUP, "Ouvrir la Fenêtre d'Options au cours de l'Archivage"
+ITEM_EXT_SETUP, "Ouvrir la Fenêtre d'Options au cours de l'Extraction"
+ITEM_ARC_END_MB, "Afficher une Confirmation Après une Compression"
+ITEM_EXT_END_MB,"Afficher une Confirmation Après une Extraction"
+ITEM_DIV_END_MB, "Afficher une Confirmation Après une Division"
+ITEM_CBN_END_MB, "Afficher une Confirmation Après une Réunion"
+ITEM_AUTO_CLOSE, "Quitter Après avoir terminé le processus, si DGCA a été ouvert par un traitement automatique"
+ITEM_TASKTRAY, "Réduire en Icône dans la Zone de Notification"
+ITEM_MINIMIZE, "Démarrer en Mode Réduit"
+ITEM_MULTI_INSTANCE, "Permettre de Multiples Exemplaires de l'Application"
+ITEM_TOPMOST, "Fenêtre Toujours Visible"
+ITEM_CENTER_DIALOG, "Centrer la boîte de dialogue sur la Fenêtre principale"
+ITEM_AUTO_COMMAND, "Traiter automatiquement les objets sélectionnés lors d'un Glisser-Déposer ou ″Envoyer vers...″"
+ITEM_EXTENSION_DGCR, "Attribuer les extensions ″dgcr″ et ″dgdr″ aux archives Protégées"
+ITEM_USE_UPX, "Réduire le SFX etc. avec UPX (Déconseillé)"
+`-----—> Description not very clear...
+ITEM_ANIMATION, "Animer (Nécessite un affichage en qualité de couleur 16 bits ou plus)"
+`-----—> Used ???
+ITEM_HIDE_PASSWORD, "Cacher les Mots de Passe"
+ITEM_SHOW_PASSWORD2, "Confirmer le mot de passe  au cryptage"
+ITEM_SPECIAL_OPTION, "Activer les Options Spéciales"
+`-----—> Used ???
+ITEM_DUAL_WINDOW, "Diviser la Fenêtre principale"
+ITEM_GRIDLINE, "Afficher les Lignes de la Grille"
+ITEM_CUSTOM_MENU, "Utiliser le Menu Personnalisé"
+`-----—> Used ???
+ITEM_MULTISENSOR, "Utiliser le ″Multi Sensor″"
+`-----—> What is it ???
+ITEM_HT, "Utiliser la Technologie ″Hyper-Threading″ d'Intel®"
+`-----—> Used (and only for packing, not fot unpacking)? (I'm on AMD...)
+ITEM_PRIORITY, Priorité:
+ITEM_NORMAL, Normale
+ITEM_LOW, Basse
+ITEM_SLIDER_CPU, 00000000000000000000000000000000
+ITEM_COMPRESS_MODE, "Mode de Compression"
+ITEM_COMPRESS_OPTION, "Options de Compression"
+ITEM_OUT_ARC_FORMAT, "Format de l'Archive"
+ITEM_SFX_OPTION, "Options d'Auto-Extraction"
+ITEM_ENCRYPTION, Cryptage
+ITEM_OUTPUT, Destination
+ITEM_COMPARIOSN, Comparaison
+`-----—> 'compariSON' please...
+ITEM_OUTPUT_FILENAME, "Nom du fichier de destination"
+ITEM_COMPRESS_NONE, Aucune/Stocker
+ITEM_COMPRESS_EACH, Normale
+ITEM_COMPRESS_SOLID, Solide
+ITEM_PROTECT, Protéger
+ITEM_VERIFY, Vérifier
+ITEM_IDENTITY, Identité
+ITEM_UNLIMITED, Illimité
+`-----—> Used ???
+ITEM_NON_COMPRESS_EXTENSION, "Ne Pas Compresser  les fichiers portant ces Extensions:"
+ITEM_EDIT_NON_COMPRESS_EXTENSION, 000000000000000000000000
+ITEM_PROTECTION_LEVEL, "Niveau de protection (1-9)"
+ITEM_EDIT_PROTECTION_LEVEL, 0
+`-----—> Why is it "0000" in the English and Japanese built-ins (but same as here in the custom English one) ??
+ITEM_EDIT_PROTECTION_PERCENT, 000000
+ITEM_DGC_ARCHIVE, "Archive DGC"
+ITEM_SFX, "Auto-Extractible EXE"
+ITEM_USE_SFX_OPTION, "Utiliser les Options Avancées"
+ITEM_SETUP_SFX_OPTION, "Options Avancées"
+ITEM_CRYPTO_NONE, Aucun
+ITEM_CRYPTO_PASSWORD, "Mot de Passe"
+ITEM_CONFIRM_PASSWORD, "Confirmez le Mot de Passe"
+ITEM_CRYPTO_KEYFILE, "Fichier de Passe"
+ITEM_EDIT_PASSWORD, 000000000000000000000000
+`-----—> Why is it '00000000000000000000000000000000' in the Japanese built-in (but same as here in the English one) ??
+ITEM_SAME_AS_INPUT, "Même dossier que celui d'Origine"
+ITEM_OTHER_WINDOW, "Autre Fenêtre"
+ITEM_OUTPUT_FOLDER, "Dossier de Destination"
+ITEM_COMPARIOSN_FOLDER, "Dossier à Comparer"
+`-----—> 'compariSON' please...
+ITEM_EDIT_OUTPUT, 000000000000000000000000
+`-----—> Why is it '00000000000000000000000000000000' in the Japanese built-in (but same as here in the English one) ??
+ITEM_EDIT_OUTPUT_FILENAME, 0000000000000000
+`-----—> Why is it '000000000000000000000000' in the Japanese built-in (but same as here in the English one) ??
+ITEM_EDIT_OUTPUT_FILENAME_EX, 0000000000000000
+`-----—> Why is it '000000000000000000000000' in the Japanese built-in (but same as here in the English one) ??
+ITEM_PRESERVE_EXTENSION, "Garder l'Extension d'Origine"
+ITEM_OUTPUT_EACH_ARCHIVE, "Créer une archive Pour Chaque objet sélectionné"
+ITEM_EXTRACT_OPTION, "Options d'Extraction"
+ITEM_DECRYPTION, Décryptage
+ITEM_EXTRACT_CREATE_FOLDER, "Créer un dossier à partir du nom de l'archive et extraire dans le dossier"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FOLDER, "Ne pas créer de dossier quand il n'y a qu'un dossier dans l'archive"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FILE, "Ne pas créer de dossier quand il n'y a qu'un fichier dans l'archive"
+ITEM_SFXOPT_HIDE, "Cacher la fenêtre"
+ITEM_SFXOPT_FILESET, "Spécifier un Titre pour présenter l'archive"
+ITEM_SFXOPT_INSTALL_PATH, "Pré-remplir avec un Autre Chemin d'installation"
+ITEM_SFXOPT_COMMENT, "Spécifier un Commentaire"
+`-----—> Used ???
+ITEM_SFXOPT_OPEN, "Ouvrir un Fichier après l'extraction"
+`-----—> Help needed
+ITEM_SFXOPT_EXECUTE, "Exécuter un Programme après l'extraction"
+`-----—> Help needed
+ITEM_SFXOPT_TMP_DEL, "Créer automatiquement un dossier temporaire pour le traitement, et exécuter un programme spécifique. Après l'exécution du programme, le dossier temporaire ainsi que ses fichiers seront supprimés. (Attention: ″Destination Vers Dossier″ ne fonctionne pas ici!)"
+`-----—> Used ???  Warning not very clear...
+ITEM_SFXOPT_FONT_SIZE, "Modifier la taille de la Fonte  ( 9 = ″minimum″ et taille actuelle )"
+ITEM_SFXOPT_ICON, "Changer l'Icône"
+ITEM_EDIT_SFX, 000000000000000000000000
+`-----—> Why is it '00000000000000000000000000000000' in the Japanese built-in (but same as here in the English built-in) ??
+ITEM_DIVIDE_SIZE, "Taille des divisions"
+ITEM_EDIT_DIVIDE_SIZE, 00000000
+ITEM_DIVIDE_KB, Ko
+ITEM_DIVIDE_MB, Mo
+ITEM_DIVIDE_GB, Go
+ITEM_DIVIDE_TB, To
+ITEM_NUM_DIVIDE, "Nombre de divisions"
+ITEM_EDIT_NUM_DIVIDE, 00000
+`-----—> Why is it '00000000' in the English and Japanese built-ins ??
+ITEM_DIVIDE_GUIDE, "( 000000000000 x 000000 + 000000000000 )"
+`-----—> Useful translation ???
+ITEM_DIVIDE_OPTION, "Options de Division"
+ITEM_PROTECT_DIVIDE_SIZE, "Taille des divisions protégées"
+`-----—> Used ?
+ITEM_EDIT_PROTECT_DIVIDE_SIZE, 00000000000000000000000000
+`-----—> Used ?
+ITEM_ADD_SFC, "Ajouter une Auto-Réunion EXE"
+ITEM_ADD_CHARACTER, "Ajouter des caractères au nom de fichier"
+ITEM_EDIT_ADD_CHARACTER, 0000
+ITEM_CHECK_CONTENTS, "Vérification du Contenu"
+ITEM_CRC_CHECK, "Vérification du CRC"
+ITEM_EXTRACTION_CHECK, "Vérification de l'Extraction"
+ITEM_FILE_NAME, "Nom de fichier"
+ITEM_EDIT_FILE_NAME, 0000000000000000
+`-----—> Why is it '000000000000000000000000' in the Japanese built-in (but same as here in the English one) ??
+ITEM_FILE_ATTRIBUTES, Attributs
+`-----—> Used ??
+ITEM_FILE_READONLY, "Lecture Seule"
+`-----—> Used ??
+ITEM_FILE_HIDDEN, Caché
+`-----—> Used ??
+ITEM_FILE_SYSTEM, Système
+`-----—> Used ??
+ITEM_FILE_ARCHIVE, Archive
+`-----—> Used ??
+ITEM_FILE_TIME, Temps
+`-----—> Used ??
+ITEM_EDIT_FILE_TIME_DATE, 0000/00/00
+`-----—> Used ??
+ITEM_EDIT_FILE_TIME_TIME, 00:00:00
+`-----—> Used ??
+ITEM_EDIT_FILE_TIME_4, 0000
+`-----—> Used ??
+ITEM_EDIT_FILE_TIME_2, 00
+`-----—> Used ??
+MSG_ABOUT_DGCA, "À propos de DGCArchiver"
+MSG_TIME_LEFT, "Temps restant"
+MSG_MB_NOTICE, "DGCA — Information"
+MSG_MB_TIME, "Temps écoulé: "
+MSG_MB_SECOND, s
+MSG_MB_CANCEL, "Voulez-vous vraiment annuler le processus actuel ?"
+MSG_MB_TERMINATE, "Voulez-vous vraiment quitter ?"
+MSG_MB_UNINSTALL, "Vous demandez à DÉSINSTALLER DGCArchiver ?!"
+MSG_MB_COMPRESSION_SUCCESS, "Processus de compression terminé.  "
+MSG_MB_COMPRESSION_FAILURE, "Le processus de compression a échoué.  "
+MSG_MB_EXTRACTION_SUCCESS, "Processus d'extraction terminé.  "
+MSG_MB_EXTRACTION_FAILURE, "Le processus d'extraction a échoué.  "
+MSG_MB_DIVISION_SUCCESS, "Processus de division terminé.  "
+MSG_MB_DIVISION_FAILURE, "Le processus de division a échoué.  "
+MSG_MB_COMBINATION_SUCCESS, "Processus de réunion terminé.  "
+MSG_MB_COMBINATION_FAILURE, "Le processus de réunion a échoué.  "
+MSG_MB_COMPARISON_SUCCESS, "Processus de comparaison terminé.  "
+MSG_MB_COMPARISON_FAILURE, "Le processus de comparaison a échoué.  "
+MSG_MB_CHECK_SUCCESS, "Processus de vérification terminé.  "
+MSG_MB_CHECK_FAILURE, "Le processus de vérification a échoué.  "
+MSG_MB_PROTECTION_SUCCESS, "Processus de protection terminé.  "
+MSG_MB_PROTECTION_FAILURE, "Le processus de protection a échoué.  "
+MSG_MB_RECOVERY_SUCCESS, "Processus de récupération terminé.  "
+MSG_MB_RECOVERY_FAILURE, "Le processus de récupération a échoué.  "
+MSG_MB_OUTPUT_FILE, "Attention‼   Un fichier "
+MSG_MB_ALREADY_EXIST, " porte déjà ce nom."
+MSG_MB_OVERWRITE_EXISTING_FILE, "Voulez-vous vraiment l' ÉCRASER ?"
+MSG_MB_CREATE_FOLDER, "Créer le dossier ?"
+MSG_MB_KEYFILE_NOT_EXIST, "Le fichier de passe n'existe pas."
+MSG_MB_INVALID_KEYFILE, "Le fichier de passe est invalide."
+MSG_MB_PASSWORD_DIFFER, "Mots de passe différents."
+MSG_MB_ICON_FILE_NOT_EXIST, "Le fichier d'Icône n'existe pas."
+MSG_MB_INVALID_ICON_FILE, "Le fichier d'Icône est invalide."
+MSG_MB_CANNOT_CHANGE_ICON, "Impossible de changer l'Icône."
+MSG_MB_SPECIFIED_PATH_NOT_EXIST, "Le chemin spécifié n'existe pas."
+MSG_MB_INVALID_PATH, "Chemin invalide."
+MSG_MB_DIVISION_SIZE_SMALL, "La taille de division est trop petite. Elle doit être d'au moins 64 Ko."
+MSG_MB_NUM_DIVISION_MUCH, "Trop de divisions. Le maximum supporté est de 10000."
+MSG_MB_ERROR, "DGCA — Erreur"
+MSG_MB_CANNOT_OPEN_FILE, "Impossible d'ouvrir le fichier."
+MSG_MB_FILE_READ_ERROR, "Erreur de fichier à la lecture."
+MSG_MB_FILE_WRITE_ERROR, "Erreur de fichier à l'écriture."
+MSG_MB_FILE_NOTFOUND_ERROR, "Fichier non trouvé."
+MSG_MB_FILE_CRC_ERROR, "Erreur de fichier au CRC."
+MSG_MB_FILE_COMPARE_ERROR, "Le fichier est différent."
+MSG_MB_FILE_DAMAGE_ERROR, "Le fichier est corrompu."
+MSG_MB_FILE_UNKNOWN_FORMAT_ERROR, "Format inconnu."
+MSG_MB_CANNOT_OPEN_ARCHIVE, "Impossible d'ouvrir l'archive."
+MSG_MB_ARCHIVE_READ_ERROR, "Erreur de lecture de l'archive."
+MSG_MB_CANNOT_CREATE_FOLDER, "Impossible de créer le dossier."
+MSG_MB_FILE_CRYPTO, "Fichier crypté."
+MSG_MB_ARCHIVE_CRYPTO, "Archive cryptée."
+MSG_MB_CRYPTO_ERROR, "Mot de passe erroné OU fichier de passe invalide."
+MSG_MB_ARCHIVE_VERSION_ERROR, "Version de la compression inconnue."
+MSG_MB_ARCHIVE_UNKNOWN_FORMAT_ERROR, "Format d'archive inconnu."
+MSG_MB_ARCHIVE_WRONG_ERROR, "Une erreur s'est produite à l'archivage."
+MSG_MB_ARCHIVE_NON_PROTECT_REPORT, "L'information de protection n'a pas été trouvée. Ce n'est pas protégé ou l'information de protection est perdue."
+MSG_MB_ARCHIVE_UNFIXABLE_REPORT, "Un bloc irréparable a été trouvé. Le fichier créé peut ne pas être correct."
+SFX_BACK, "<<<  &Précédent"
+SFX_NEXT, "&Suivant  >>>"
+SFX_OK, Valider
+SFX_CANCEL, Annuler
+SFX_COMPLETE, Terminer
+SFX_INSTALLPATH, "Chemin d'installation"
+SFX_OUTPUTPATH, Destination
+SFX_BROWSE, P&arcourir
+SFX_AGREE, Accepter
+SFX_DISAGREE, Refuser
+SFX_PHASE0, "Ce programme va extraire des fichiers sur votre ordinateur."
+SFX_PHASE0N, "Bouton [Suivant] pour continuer."
+SFX_PHASE1, "Veuillez sélectionner le dossier de destination."
+SFX_PHASE1N, "Bouton [Suivant] pour continuer."
+SFX_PHASE2, "L'extraction peut commencer."
+SFX_PHASE2N, "Bouton [Suivant] pour commencer."
+SFX_PHASE3, "Extraction en cours..."
+SFX_PHASE4, "Extraction terminée."
+SFX_PHASEC, "Veuillez entrer le mot de passe."
+SFX_PHASECN, "Bouton [Suivant] pour continuer."
+SFX_PHASE0S, "Ce programme va installer %s sur votre ordinateur."
+SFX_PHASE1S, "Choisissez le dossier de destination."
+SFX_PHASE2S, "L'installation va commencer."
+SFX_PHASE3S, "Installation en cours..."
+SFX_PHASE4S, "Installation terminée."
+SFC_BACK, "<<<  &Précédent"
+SFC_NEXT, "&Suivant  >>>"
+SFC_OK, Valider
+SFC_CANCEL, Annuler
+SFC_COMPLETE, Terminer
+SFC_OUTPUTPATH, Destination
+SFC_BROWSE, P&arcourir
+SFC_PHASE0, "Ce programme va réunir des fichiers divisés."
+SFC_PHASE0N, "Bouton [Suivant] pour continuer."
+SFC_PHASE1, "Veuillez sélectionner le dossier de destination."
+SFC_PHASE1N, "Bouton [Suivant] pour continuer."
+SFC_PHASE2, "La réunion peut commencer."
+SFC_PHASE2N, "Bouton [Suivant] pour commencer."
+SFC_PHASE3, "Réunion en cours..."
+SFC_PHASE4, "Réunion terminée."
+SFC_PHASEC, "Veuillez entrer le mot de passe."
+SFC_PHASECN, "Bouton [Suivant] pour continuer."

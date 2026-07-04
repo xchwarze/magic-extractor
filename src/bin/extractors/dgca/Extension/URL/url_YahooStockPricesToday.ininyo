@@ -1,0 +1,11 @@
+[Application]
+ModulePath=url.nya
+
+[Settings]
+Text=StockPrices(Today)
+Extension=spcsv
+EraseStart=(
+EraseEnd=)
+Refresh=60
+BaseURL=http://ichart.yahoo.co.jp/c/1d/$W0$/$WA$.gif
+_BaseURL=http://ichart.yahoo.co.jp/chart/1b/$W0$/$WA$.gif

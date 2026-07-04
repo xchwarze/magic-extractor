@@ -1,0 +1,10 @@
+[Application]
+ModulePath=..\URL\url.nya
+
+[Settings]
+Text=StockPrices(3Month)
+Extension=spcsv
+EraseStart=(
+EraseEnd=)
+Refresh=60
+BaseURL=http://tchart.yahoo.co.jp/c/3m/$W0$/$WA$.gif

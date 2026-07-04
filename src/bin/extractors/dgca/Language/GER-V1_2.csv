@@ -1,0 +1,278 @@
+CHARACTER_SET, UTF-8
+LANGUAGE, "German (v1.2)"
+AUTHOR, "H. Allenstein (Germany)"
+DATE, 2006/05/30
+COMMENT, "Uebersetzt von H. Allenstein (Germany) 30.05.2006 (Rechtschreibfehler nicht beachten!!!)"
+MENU_FILE, &Datei
+MENU_COMMAND, &Befehle
+MENU_OPTION, &Einstellungen
+MENU_LANGUAGE, &Sprache
+MENU_HELP, &Hilfe
+MENU_ARCHIVE_FOLDER, "Komprimiere &Ordner..."
+MENU_ARCHIVE_FILE, "Komprimiere &Datei..."
+MENU_EXTRACT_DGC, "Entpacke &DGC Datei..."
+MENU_EXTRACT_SFX, "Entpacke &SFX Datei..."
+MENU_CANCEL, &Abbrechen
+MENU_CLOSE, &Beenden
+MENU_ARCHIVE, "&Archiv erzeugen (hinzufuegen)..."
+MENU_EXTRACT, &Entpacke...
+MENU_DIVIDE, "&Splitten (aufteilen)..."
+MENU_COMBINE, "&Join (zusammenfuegen)..."
+MENU_COMPARE, &Vergleichen...
+MENU_CHECK, &Pruefen
+MENU_PROTECT, &Schuetzen...
+MENU_RECOVER, &Wiederherstellen
+MENU_SETUP, "Programm&einstellungen..."
+MENU_SETUP_ARC, "Standard &Archiv-Einstellungen..."
+MENU_SETUP_EXT, "Standard &Entpack-Einstellungen..."
+MENU_SETUP_DIV, "Standard &Split-Einstellungen... (Teilen)"
+MENU_SETUP_CBN, "Standard &Join-Einstellungen... (Verbinden)"
+MENU_LANG_E, &Englisch
+MENU_LANG_J, &Japanisch
+MENU_LANG_C, "&Benutze eigene Sprachdatei..."
+MENU_LANG_OUTPUT, "&Sprachdatei exportieren..."
+MENU_INFO, "&Ueber DGCA..."
+MENU_WEB, "Autoren &Webseite"
+MENU_UNINSTALL, "&DGCArchiver Deinstallieren..."
+TOOL_ARCHIVE, "Neues Archiv"
+TOOL_EXTRACT, Entpacken
+TOOL_DIVIDE, "Teilen (Split)"
+TOOL_COMBINE, "Verbinden (Join)"
+TOOL_COMPARE, Vergleichen
+TOOL_CHECK, Pruefen
+TOOL_PROTECT, Schuetzen
+TOOL_RECOVER, Wiederherstellen
+DIALOG_SETUP_ENVIRONMENT, "Programmeinstellungen"
+DIALOG_SETUP_DEFAULT_ARCHIVE, "Standard Archiv-Einstellungen"
+DIALOG_SETUP_DEFAULT_EXTRACT, "Standard Entpack-Einstellungen"
+DIALOG_SETUP_DEFAULT_DIVIDE, "Standard Split-Einstellungen (Teilen)"
+DIALOG_SETUP_DEFAULT_COMBINE, "Standard Join-Einstellungen (Verbinden)"
+DIALOG_SETUP_ARCHIVE, "Komprimierungs-Einstellungen"
+DIALOG_SETUP_EXTRACT, "Entpack-Einstellungen"
+DIALOG_SETUP_DIVIDE, "Split-Einstellungen"
+DIALOG_SETUP_COMBINE, "Join-Einstellungen"
+DIALOG_SETUP_COMPARE, "Vergleichs-Einstellungen"
+DIALOG_SETUP_CHECK, "Pruefen"
+DIALOG_SETUP_PROTECT, "Schutz-Einstellungen"
+DIALOG_SETUP_RECOVER, "Wiederherstellungs-Einstellungen"
+DIALOG_SETUP_CRYPTO, "Verschluesselungs-Einstellungen"
+DIALOG_EDIT_FILE_INFO, "Bearbeite Datei-Informationen"
+LIST_NAME, Name
+LIST_SIZE, Groesse
+LIST_MODIFIED, Verändert
+LIST_NAME_COLUMN_WIDTH, 120
+LIST_EXT_COLUMN_WIDTH, 50
+LIST_SIZE_COLUMN_WIDTH, 100
+LIST_MODIFIED_COLUMN_WIDTH, 120
+CONTEXTMENU_EXT, Entpacke(DGCA)
+CONTEXTMENU_CBN, Verbinde(DGCA)
+DIALOG_FONT, "Microsoft Sans Serif"
+DIALOG_FONTSIZE, 9
+ITEM_OK, OK
+ITEM_CANCEL, Abbruch
+ITEM_BROWSE, Durchsuchen...
+ITEM_ASSOCIATION, "Verknuepfe DGC-Dateien mit DGCA"
+ITEM_SENDTO, "Fuege DGCA   zum 'Senden an' Menu hinzu"
+ITEM_INI_FILE, "Speichere Einstellungen der .ini-Datei in der Registry"
+ITEM_ARC_SETUP, "Zeige Dialog waehrend der Kompression"
+ITEM_EXT_SETUP, "Zeige Dialog waehrend des Entpackens"
+ITEM_ARC_END_MB, "Zeige Bestaetigungsdialog nach der Kompression"
+ITEM_EXT_END_MB, "Zeige Bestaetigungsdialog nach dem Entpacken"
+ITEM_DIV_END_MB, "Zeige Bestaetigungsdialog nach dem Splitten (Teilen)"
+ITEM_CBN_END_MB, "Zeige Bestaetigungsdialog nach dem Joinen (Zusammenfuegen)"
+ITEM_AUTO_CLOSE, "DGCA wird nach der Benutzung automatisch geschlossen (nur bei Autostart)"
+ITEM_TASKTRAY, "Minimieren in den SytemTray"
+ITEM_MINIMIZE, "Minimiert starten"
+ITEM_MULTI_INSTANCE, "Mehrfaches paralleles Ausfuehren von DGCA erlauben"
+ITEM_TOPMOST, "Immer im Vordergrund"
+ITEM_CENTER_DIALOG, "Zentriere Dialog zum Anwendungsfenster"
+ITEM_AUTO_COMMAND, "Automatische Prozesswahl bei 'Drag and Drop' bzw. 'Senden an'"
+ITEM_EXTENSION_DGCR, "Setzt Dateierweiterung des geschuetzten Archivs auf 'dgcr' der 'dgdr'"
+ITEM_USE_UPX, "Mit Hilfe von UPX SFX reduzieren (Nicht empfohlen)"
+ITEM_ANIMATION, "Animieren (benoetigt min. 16bit Farbtiefe)"
+ITEM_HIDE_PASSWORD, "Passwort nicht anzeigen/verstecken"
+ITEM_SHOW_PASSWORD2, "Bei Verschluesselung Passwortbestaetigung"
+ITEM_SPECIAL_OPTION, "Spezialeinstellungen einschalten"
+ITEM_DUAL_WINDOW, "Zeige zwei Spalten im DGCA Fenster"
+ITEM_GRIDLINE, "Zeige Gitterlinien"
+ITEM_CUSTOM_MENU, "Benutzereinstellungs-Menu einschalten"
+ITEM_MULTISENSOR, "Multi Sensor einschalten"
+ITEM_PRIORITY, Prioritaet
+ITEM_NORMAL, Normal
+ITEM_LOW, Gering
+ITEM_SLIDER_CPU, 00000000000000000000000000000000
+ITEM_COMPRESS_MODE, "Kompressions-Modus"
+ITEM_COMPRESS_OPTION, "Kompressions-Einstellungen"
+ITEM_OUT_ARC_FORMAT, "Archiv-Format (Ausgabe)"
+ITEM_SFX_OPTION, "Selbst-Entpack-Einstellungen"
+ITEM_ENCRYPTION, Verschluesselung
+ITEM_OUTPUT, Ausgabe
+ITEM_COMPARIOSN, Vergleichen
+ITEM_OUTPUT_FILENAME, "Ausgabe Dateiname"
+ITEM_COMPRESS_NONE, Keine
+ITEM_COMPRESS_EACH, Normal
+ITEM_COMPRESS_SOLID, Solide
+ITEM_PROTECT, Schuetzen
+ITEM_VERIFY, Vergleichen
+ITEM_IDENTITY, Identifizieren
+ITEM_NON_COMPRESS_EXTENSION, "Kein komprimieren von Dateien mit den Endungen:"
+ITEM_EDIT_NON_COMPRESS_EXTENSION, 000000000000000000000000
+ITEM_PROTECTION_LEVEL, "Sicherheits-Level (1-9)"
+ITEM_EDIT_PROTECTION_LEVEL, 0
+ITEM_EDIT_PROTECTION_PERCENT, 000000
+ITEM_DGC_ARCHIVE, "DGC Archiv"
+ITEM_SFX, "Selbst-Entpackende EXE"
+ITEM_USE_SFX_OPTION, "Benutze erweiterte Einstellungen"
+ITEM_SETUP_SFX_OPTION, "Erweiterte Einstellungen"
+ITEM_CRYPTO_NONE, "Keine Verschluesselung"
+ITEM_CRYPTO_PASSWORD, Passwort
+ITEM_CONFIRM_PASSWORD, "Passwort Wiederholung"
+ITEM_CRYPTO_KEYFILE, "Schluessel-Datei (Key-File)"
+ITEM_EDIT_PASSWORD, 000000000000000000000000
+ITEM_SAME_AS_INPUT, "Uebernehme Archivname als Ordndernamen"
+ITEM_OTHER_WINDOW, "Anderes Fenster"
+ITEM_OUTPUT_FOLDER, "Ausgabe-Ordner"
+ITEM_COMPARIOSN_FOLDER, "Vergleichs-Ordner"
+ITEM_EDIT_OUTPUT, 000000000000000000000000
+ITEM_EDIT_OUTPUT_FILENAME, 0000000000000000
+ITEM_EDIT_OUTPUT_FILENAME_EX, 0000000000000000
+ITEM_PRESERVE_EXTENSION, "Originalerweiterung erhalten"
+ITEM_OUTPUT_EACH_ARCHIVE, "Fuer jedes gewaehlte Objekt ein Archiv erstellen"
+ITEM_EXTRACT_OPTION, "Entpack-Einstellungen"
+ITEM_DECRYPTION, Dekodierung
+ITEM_EXTRACT_CREATE_FOLDER, "Erzeuge Ordner wie Archivname und entpacke darin"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FOLDER, "Keinen Ordner erzeugen, wenn Archiv nur einen Ordner enthaelt"
+ITEM_EXTRACT_PREVENT_DOUBLE_FOLDER_ONE_FILE, "Keinen Ordner erzeugen, wenn Archiv nur eine Datei enthaelt"
+ITEM_SFXOPT_HIDE, "Fenster verbergen"
+ITEM_SFXOPT_FILESET, "Dateinamen angeben"
+ITEM_SFXOPT_INSTALL_PATH, "Installaionspfad angeben"
+ITEM_SFXOPT_COMMENT, "Bemerkung/Erlaeuterung angeben"
+ITEM_SFXOPT_OPEN, "Datei oeffnen"
+ITEM_SFXOPT_EXECUTE, "Programm nach dem entpacken ausfuehren"
+ITEM_SFXOPT_TMP_DEL, "Lege automatisch einen temporaeren Bereich fuer das auszufuehrende Programm an. Nach dem ausfuehren des Programmswerden diese Dateien wieder geloescht. (ACHTUNG: 'Ausgabe-Ordner' funktioniert hier nicht!)"
+ITEM_SFXOPT_FONT_SIZE, "Font-Groesse   angeben"
+ITEM_EDIT_SFX, 000000000000000000000000
+ITEM_DIVIDE_SIZE, "Groesse der Archiv-Teile"
+ITEM_EDIT_DIVIDE_SIZE, 00000000
+ITEM_DIVIDE_KB, KByte
+ITEM_DIVIDE_MB, MByte
+ITEM_DIVIDE_GB, GByte
+ITEM_DIVIDE_TB, TByte
+ITEM_NUM_DIVIDE, "Anzahl Archiv-Teile"
+ITEM_EDIT_NUM_DIVIDE, 00000
+ITEM_DIVIDE_OPTION, "Split-Einstellungen"
+ITEM_ADD_SFC, "Erstelle Join-Datei (EXE)"
+ITEM_ADD_CHARACTER, "Fuege Zeichen dem Datei-Namen hinzu"
+ITEM_EDIT_ADD_CHARACTER, 0000
+ITEM_CHECK_CONTENTS, "Ueberpruefe Inhalt"
+ITEM_CRC_CHECK, "CRC Check"
+ITEM_EXTRACTION_CHECK, "Entpack Check"
+ITEM_FILE_NAME, Dateiname
+ITEM_EDIT_FILE_NAME, 0000000000000000
+ITEM_FILE_ATTRIBUTES, Attribute
+ITEM_FILE_READONLY, "Nur lesen"
+ITEM_FILE_HIDDEN, versteckt
+ITEM_FILE_SYSTEM, System
+ITEM_FILE_ARCHIVE, Archiv
+ITEM_FILE_TIME, Zeit
+ITEM_EDIT_FILE_TIME_DATE, 0000/00/00
+ITEM_EDIT_FILE_TIME_TIME, 00:00:00
+ITEM_EDIT_FILE_TIME_4, 0000
+ITEM_EDIT_FILE_TIME_2, 00
+MSG_ABOUT_DGCA, "Ueber DGCA"
+MSG_TIME_LEFT, "Dauer"
+MSG_MB_NOTICE, Notiz
+MSG_MB_TIME, "vergangene Zeit"
+MSG_MB_SECOND, Sekunden
+MSG_MB_CANCEL, "Laufenden Prozess wirklich beenden?"
+MSG_MB_TERMINATE, "Wirklich abbrechen?"
+MSG_MB_UNINSTALL, "DGCArchiver wirklich deinstallieren?"
+MSG_MB_COMPRESSION_SUCCESS, "Kompressionsvorgang beendet."
+MSG_MB_COMPRESSION_FAILURE, "Kompressionsvorgang fehlgeschlagen."
+MSG_MB_EXTRACTION_SUCCESS, "Entpackvorgang beendet."
+MSG_MB_EXTRACTION_FAILURE, "Entpackvorgang fehlgeschlagen."
+MSG_MB_DIVISION_SUCCESS, "Splitting beendet."
+MSG_MB_DIVISION_FAILURE, "Splitting fehlgeschlagen."
+MSG_MB_COMBINATION_SUCCESS, "Join-Vorgang beendet."
+MSG_MB_COMBINATION_FAILURE, "Join-Vorgang fehlgeschlagen."
+MSG_MB_COMPARISON_SUCCESS, "Vergleichsvorgang beendet."
+MSG_MB_COMPARISON_FAILURE, "Vergleichsvorgang fehlgeschlagen."
+MSG_MB_CHECK_SUCCESS, "Ueberpruefung beendet."
+MSG_MB_CHECK_FAILURE, "Ueberpruefung fehlgeschlagen."
+MSG_MB_PROTECTION_SUCCESS, "Schuetzen beendet."
+MSG_MB_PROTECTION_FAILURE, "Schuetzen fehlgeschlagen."
+MSG_MB_RECOVERY_SUCCESS, "Wiederherstellung beendet."
+MSG_MB_RECOVERY_FAILURE, "Wiederherstellung fehlgeschlagen."
+MSG_MB_OUTPUT_FILE, Datei
+MSG_MB_ALREADY_EXIST, "existiert bereits."
+MSG_MB_OVERWRITE_EXISTING_FILE, "Ueberschreibe vorhandene Datei?"
+MSG_MB_CREATE_FOLDER, "Ordner erstellen?"
+MSG_MB_KEYFILE_NOT_EXIST, "Key-file (Schluesseldatei) exisitert nicht."
+MSG_MB_INVALID_KEYFILE, "Falscher/Fehlerhafter Key-file."
+MSG_MB_PASSWORD_DIFFER, "Unterschiedliche Passwoerter."
+MSG_MB_SPECIFIED_PATH_NOT_EXIST, "Angegebener Pfad existiert nicht."
+MSG_MB_INVALID_PATH, "Falscher Pfad."
+MSG_MB_DIVISION_SIZE_SMALL, "Aufteilung zu klein. Es muessen min. 64KB sein."
+MSG_MB_NUM_DIVISION_MUCH, "Zu hohe Aufteilung (max. 10000 Teile)."
+MSG_MB_ERROR, Fehler
+MSG_MB_CANNOT_OPEN_FILE, "Datei kann nicht geöffnet werden."
+MSG_MB_FILE_READ_ERROR, "Lesefehler."
+MSG_MB_FILE_WRITE_ERROR, "Schreibfehler."
+MSG_MB_FILE_NOTFOUND_ERROR, "Datei nicht gefunden."
+MSG_MB_FILE_CRC_ERROR, "Datei CRC-Fehler."
+MSG_MB_FILE_COMPARE_ERROR, "Datei ist unterschiedlich."
+MSG_MB_FILE_DAMAGE_ERROR, "Datei ist beschaedigt."
+MSG_MB_FILE_UNKNOWN_FORMAT_ERROR, "Unbekanntes Format."
+MSG_MB_CANNOT_OPEN_ARCHIVE, "Kan Archiv nicht oeffnen."
+MSG_MB_ARCHIVE_READ_ERROR, "Archiv Lesefehler."
+MSG_MB_CANNOT_CREATE_FOLDER, "Kann Ordner nicht erstellen."
+MSG_MB_FILE_CRYPTO, "Datei verschluesselt."
+MSG_MB_ARCHIVE_CRYPTO, "Archiv verschluesselt."
+MSG_MB_CRYPTO_ERROR, "Falsches Passwort, oder falscher/defekter Key-File (Schluesseldatei)."
+MSG_MB_ARCHIVE_VERSION_ERROR, "Unbekannte Kompressions-Version."
+MSG_MB_ARCHIVE_UNKNOWN_FORMAT_ERROR, "Unbekanntes Archiv-Format."
+MSG_MB_ARCHIVE_WRONG_ERROR, "Fehler bei der Archivierung."
+MSG_MB_ARCHIVE_NON_PROTECT_REPORT, "Schutzinformationen nicht gefunden. Es liegt keine verschluesselung vor, oder verschluesselungsinformationen sind verloren gegangen."
+MSG_MB_ARCHIVE_UNFIXABLE_REPORT, "Ein defekter Block wurde gefunden. Es kann nicht fortgefahren werden."
+SFX_BACK, "< &Zurueck"
+SFX_NEXT, "&Weiter >"
+SFX_OK, OK
+SFX_CANCEL, Abbruch
+SFX_COMPLETE, Fertig
+SFX_INSTALLPATH, "Installationspfad"
+SFX_OUTPUTPATH, Ausgabe
+SFX_BROWSE, &Durchsuchen...
+SFX_AGREE, Zustimmen
+SFX_DISAGREE, Ablehnen
+SFX_PHASE0, "Dieses Programm wird Dateien auf Ihre Festplatte entpacken."
+SFX_PHASE0N, "Druecke [Weiter] Schaltflaeche um fortzufahren."
+SFX_PHASE1, "Waehle Zielordner."
+SFX_PHASE1N, "Druecke [Weiter] Schaltflaeche um fortzufahren."
+SFX_PHASE2, "Es wird nun entpackt."
+SFX_PHASE2N, "Druecke [Weiter] Schaltflaeche um zu beginnen."
+SFX_PHASE3, Entpacke...
+SFX_PHASE4, "Entpacken beendet."
+SFX_PHASEC, "Bitte Passwort eingeben."
+SFX_PHASECN, "Druecke [Weiter] Schaltflaeche um fortzufahren.."
+SFX_PHASE0S, "Es wird nun %s auf Ihrem Computer installiert."
+SFX_PHASE1S, "Waehle Zielordner (Installationsordner)."
+SFX_PHASE2S, "Die Installation wird gleich beginnen."
+SFX_PHASE3S, Installiere...
+SFX_PHASE4S, "Installation beendet."
+SFC_BACK, "< &Zurueck"
+SFC_NEXT, "&Weiter >"
+SFC_OK, OK
+SFC_CANCEL, Abbruch
+SFC_COMPLETE, Fertig
+SFC_OUTPUTPATH, Ausgabe
+SFC_BROWSE, &Durchsuchen...
+SFC_PHASE0, "Dieses Program verbindet (Join) die gewaehlten Dateien."
+SFC_PHASE0N, "Druecke [Weiter] Schaltflaeche um fortzufahren."
+SFC_PHASE1, "Zielordner waehlen."
+SFC_PHASE1N, "Druecke [Weiter] Schaltflaeche um fortzufahren."
+SFC_PHASE2, "Joinen wird begonnen."
+SFC_PHASE2N, "Druecke [Weiter] Schaltflaeche um zu beginnen."
+SFC_PHASE3, Joine...
+SFC_PHASE4, "Verbinden (joinen) beendet."
+SFC_PHASEC, "Bitte Passwort eingeben."
+SFC_PHASECN, "Druecke [Weiter] Schaltflaeche um fortzufahren."
