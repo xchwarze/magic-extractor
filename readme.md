@@ -1,30 +1,53 @@
 # Magic Extractor
 
-
 ## Description
-Magic Extractor is a universal extraction tool designed to handle multiple compressed file formats. It utilizes a combination of detection techniques to accurately identify and extract contents from compressed files, supporting a wide range of formats.
+Magic Extractor is a universal extraction tool for Windows that identifies a file
+with several detectors and routes it to the right bundled extractor. It aims to
+cover mainstream compression formats, the installers you actually see today, and a
+range of less common archivers.
 
 ## Development Status
-Although the Magic Extractor is fully functional, it is still under active development and not yet finalized for a release version. Consequently, the repository does not have any release tags yet, and features or functionality may change as the project evolves.
+Functional but still under active development; no release tags yet. Features and
+the on-disk layout may still change.
 
 ## Project Structure
-The project is organized into several main folders:
-- `src`: Contains the source code of the project.
-  - `bin`: Includes binary files and detectors for various file types.
-  - `data`: Runtime configuration. Holds `handlers.json`, the detection/MIME → handler routing map, loaded dynamically so it can be updated without rebuilding.
-  - `formats`: Contains Python modules for handling specific file formats.
-- `test`: Houses test files and scripts for various compression formats.
+- `src`: source code.
+  - `bin`: bundled detector and extractor binaries.
+    - `detectors`: DIE, Magika, TrID, binwalk.
+    - `extractors`: 7z, unrar, unace, unshield, lessmsi, dark (WiX), and more.
+  - `data`: runtime configuration, loaded dynamically (see below).
+  - `formats`: one handler module per format family.
+- `test`: sample files per format (fixtures for the extraction/detection tests).
+- `tools`: developer tooling (`build_handlers.py`).
 
-## Features
-- Supports multiple compression formats including 7z, RAR, ALZip, and more.
-- Combines several detection engines (puremagic MIME, Magika, binwalk, DIE, TrID) to identify files.
-- Routes detections to extractors through an external, data-driven map (`data/handlers.json`).
-- Offers a configurable setup through command-line arguments for tailored usage.
+The compiled build keeps `bin/`, `data/` and `config.ini` external to the exe so
+they can be updated with a file swap; the path resolver in `main.py` finds them
+beside the executable (frozen) or under `src/` (dev).
+
+## How detection works
+For normal extraction, detectors run in this order with **early-exit** — the first
+one that yields a known handler wins:
+
+1. **puremagic** — pure-python, no subprocess; a cheap MIME check for well-formed archives.
+2. **DIE** (Detect It Easy) — signature engine; the specialist for archives, installers and PE.
+3. **Magika** — Google's AI content-type detector, as a catch-all.
+
+- `--bruteforce` disables early-exit: every detector runs and each detected handler
+  is tried in turn (useful when the first guess is wrong).
+- Executables that no detector identifies fall back to the wrapped-exe installer
+  handlers (BitRock, Clickteam, PyInstaller, Inno, ...), which self-validate.
+- **binwalk** is used by the `carve` subcommand (embedded/offset scanning), not by
+  the whole-file detection path.
+
+The detection → handler routing map lives in `data/handlers.json` (hand-curated,
+loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist.json`.
+
+## Supported Formats
+See `formats.md` for the full list of formats and their handlers.
 
 ## Installation
-To set up the Magic Extractor, clone the repository and install the required Python packages:
 ```bash
-git clone https://github.com/yourusername/magic-extractor.git
+git clone <repo-url>
 cd magic-extractor
 pip install -r src/requirements.txt
 ```
@@ -32,43 +55,40 @@ pip install -r src/requirements.txt
 ## Usage
 Magic Extractor uses subcommands:
 ```bash
-python src/main.py extract  <path_to_file> [output_directory] [options]
-python src/main.py identify <path_to_file>   # detect type + candidate handlers, no extraction
-python src/main.py list     <path_to_file>   # list archive contents without extracting
-python src/main.py carve    <path_to_file> [output_directory]  # carve embedded archives at binwalk offsets and extract them
-python src/main.py carve    <path_to_file> --list              # list binwalk fragments (index/offset/size/name)
-python src/main.py carve    <path_to_file> --fragment N         # carve a single fragment by index
-python src/main.py carve    <path_to_file> --raw                # carve every fragment (binwalk extract-all)
+python src/main.py extract  <path> [output_dir] [options]   # detect and extract
+python src/main.py identify <path>                          # report type + candidate handlers
+python src/main.py list     <path>                          # list archive contents
+python src/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
 ```
-`extract` also supports `-r`/`--recursive` (with `--max-depth N`) to extract archives found inside the output.
-A bare path with no subcommand defaults to `extract` for backward compatibility:
+A bare path with no subcommand defaults to `extract` (backward compatible):
 ```bash
-python src/main.py <path_to_file> <output_directory> [options]
+python src/main.py <path> <output_dir> [options]
 ```
-`extract` options include:
-- `--password <password>`: Specify a password for encrypted files.
-- `--debug`: Enable detailed log output for debugging.
-- Additional flags for customization:
-  - `--open-output-folder <bool>`: Open output folder after extraction.
-  - `--check-free-space <bool>`: Check disk space before extraction.
-  - `--check-unicode <bool>`: Check for unicode characters in file names.
-  - `--fix-file-extensions <bool>`: Automatically fix file extensions.
-  - `--create-log-files <bool>`: Create log files of the operations.
-  - `--fast-check`: Perform a fast type check by reading only the first 2048 bytes.
-  - `--no-fast-check`: Disable fast type check.
 
-## Supported Formats
-A complete list of all supported file formats can be found in the `formats.md` file included in the project repository.
+`extract` options:
+- `--password <password>`: password for encrypted archives.
+- `-r`, `--recursive`: extract archives found inside the output (bounded by `--max-depth`, default 5).
+- `-b`, `--bruteforce`: try every handler detected instead of stopping at the first.
+- `--open-output-folder <bool>`: open the output folder when done.
+- `--check-free-space <bool>`: warn if the output volume may lack room.
+- `--check-unicode <bool>`: warn about non-ASCII extracted names.
+- `--fix-file-extensions <bool>`: rename extracted files whose content type disagrees with their extension.
+- `--create-log-files <bool>`: write a per-run log to the output dir.
+- `--no-fast-check`: read the whole file for detection instead of the first 2048 bytes.
+- `--update-defaults`: persist the given settings as defaults in `config.ini`.
 
-## Contributing
-Contributions to Magic Extractor are welcome! Please read the contributing guidelines in `CONTRIBUTING.md` (to be created) before submitting pull requests.
+`carve` options: `--list` (print the binwalk fragment table), `--fragment N` (carve one
+fragment by index), `--raw` (carve every fragment, not only handler-known ones).
+
+## Building (Windows)
+```
+pyinstaller magic-extractor.spec
+```
+Then copy `src/bin`, `src/data` and `src/config.ini` into `dist/magic-extractor/`.
 
 ## License
-This project is licensed under the LGPL-3.0-only - see the `LICENSE.txt` file for details.
+LGPL-3.0-only — see `LICENSE.txt`.
 
-## Authors and Acknowledgment
-- Lead Developer: DSR! - xchwarze@gmail.com
-- Thanks to all contributors who have helped to enhance this project.
-
-## Support
-If you find this project useful, consider supporting it by providing feedback, contributing code, or donations.
+## Authors
+- Lead Developer: DSR! — xchwarze@gmail.com
+- Thanks to all contributors.
