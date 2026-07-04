@@ -42,7 +42,7 @@ class Format7zHandler(BaseExtractor):
                 return False
         except subprocess.CalledProcessError as exc:
             logging.error(f"Failed to extract 7z file with error code {exc.returncode}")
-            if e.returncode == 3:
+            if exc.returncode == 3:
                 logging.error("Missing parts of the 7z file.")
 
             return False
