@@ -31,6 +31,14 @@ class BaseExtractor:
         """
         raise NotImplementedError("Each subclass must implement the 'extract' method.")
 
+    def list_contents(self):
+        """
+        List the archive contents without extracting. Returns a listing string,
+        or None if this handler does not support listing.
+        """
+        logging.info(f"Listing is not supported by {type(self).__name__}.")
+        return None
+
     def pre_extract_actions(self):
         """
         Perform any necessary actions before starting the extraction process.

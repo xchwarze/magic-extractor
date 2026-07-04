@@ -8,6 +8,27 @@ class Format7zHandler(BaseExtractor):
     Handler class for .7z files that utilizes 7z for extraction.
     """
 
+    def list_contents(self):
+        """List archive contents using '7z l'. Returns the listing text, or None on error."""
+        command_list = [
+            os.path.join(self.extractors_path, '7z', '7z.exe'),
+            'l',   # list contents
+            '-y',  # assume Yes on all queries
+        ]
+        if self.cli_args.password:
+            command_list += [f'-p{self.cli_args.password}']
+
+        command_list.append(self.target_file)
+
+        try:
+            return self.run_command(command_list)
+        except subprocess.CalledProcessError as exc:
+            logging.error(f"Failed to list 7z file with error code {exc.returncode}")
+            return None
+        except Exception as exc:
+            logging.error(f"An error occurred during listing: {exc}")
+            return None
+
     def extract(self):
         """
         Extracts .7z files to a specified output directory using the 7z executable.

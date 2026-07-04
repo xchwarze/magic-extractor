@@ -38,7 +38,7 @@ def dir_path_type_check(path):
 
     return dir_path
 
-SUBCOMMANDS = ("extract", "identify")
+SUBCOMMANDS = ("extract", "identify", "list")
 
 def configure_parser():
     """Configure and return the subcommand argument parser."""
@@ -69,6 +69,11 @@ def configure_parser():
     # identify: run the detectors and report, without extracting.
     identify_parser = subparsers.add_parser("identify", parents=[common], help="Detect file type and candidate handlers without extracting")
     identify_parser.add_argument("file_path", help="Path to the file to identify", type=file_path_type_check)
+
+    # list: list archive contents without extracting.
+    list_parser = subparsers.add_parser("list", parents=[common], help="List archive contents without extracting")
+    list_parser.add_argument("file_path", help="Path to the archive to list", type=file_path_type_check)
+    list_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
 
     return parser
 
@@ -180,6 +185,20 @@ def process_identify(args):
     print("No candidate handler found.")
     return False
 
+def process_list(args):
+    """List archive contents using the first candidate handler that supports it."""
+    candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
+    for candidate in candidates:
+        handler = candidate(cli_args=args, bin_path=BIN_PATH)
+        listing = handler.list_contents()
+        if listing is not None:
+            print(listing)
+            return True
+        logging.info(f"{candidate.__name__} does not support listing; trying next candidate.")
+
+    logging.error(f"No candidate handler could list: {args.file_path}")
+    return False
+
 def run_extract(args):
     """Extract a single file, or every file in a directory (non-recursive)."""
     if args.file_path.is_dir():
@@ -214,6 +233,9 @@ def main():
 
     if args.command == "identify":
         sys.exit(0 if process_identify(args) else 1)
+
+    if args.command == "list":
+        sys.exit(0 if process_list(args) else 1)
 
     # extract
     config = Config()
