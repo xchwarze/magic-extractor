@@ -75,6 +75,7 @@ DIR_HANDLERS = {
     'zip':   ('Format7zHandler', ['zip']),
     'cpio':  ('Format7zHandler', ['cpio']),
     'bz2':   ('Format7zHandler', ['bzip', 'bz2']),
+    'lzip':  ('FormatLzipHandler', ['lzip']),
 }
 
 
