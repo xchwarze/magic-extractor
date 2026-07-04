@@ -61,8 +61,7 @@ def configure_parser():
     # Configurable settings as command-line options
     extract_parser.add_argument("--open-output-folder", help="Open output folder after extraction", type=bool, default=None)
     extract_parser.add_argument("--check-free-space", help="Check disk space before extraction", type=bool, default=None)
-    extract_parser.add_argument("--extract-video-tracks", help="Extract video tracks if available", type=bool, default=None)
-    extract_parser.add_argument("--warn-before-executing", help="Warn before executing any executable file", type=bool, default=None)
+    extract_parser.add_argument("--warn-before-executing", help="Warn before processing an executable file", type=bool, default=None)
     extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
     extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
     extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
@@ -91,7 +90,7 @@ def configure_parser():
 
 def configure_settings(args, config):
     """Update settings from command line arguments if necessary, and apply them."""
-    keys = ["open_output_folder", "check_free_space", "extract_video_tracks", "warn_before_executing",
+    keys = ["open_output_folder", "check_free_space", "warn_before_executing",
             "check_unicode", "fix_file_extensions", "create_log_files", "fast_check"]
     
     # Update configuration defaults if requested
@@ -174,6 +173,14 @@ def _is_pe(file_path):
     except OSError:
         return False
 
+def _confirm_executable(file_path):
+    """Prompt before processing an executable. Denies on non-interactive input."""
+    try:
+        answer = input(f"'{file_path}' is an executable. Process it anyway? [y/N] ")
+    except EOFError:
+        return False
+    return answer.strip().lower() in ('y', 'yes')
+
 def find_candidate_handlers(file_path, fast_check):
     """Return candidate handler classes from detection, plus PE-installer fallbacks."""
     candidates = _candidates_from_outputs(_detector_outputs(file_path, fast_check))
@@ -194,6 +201,12 @@ def process_extraction(args, depth=0):
     Waits for a handler to return True from extract(). When --recursive is set,
     archives found inside the output are extracted too, up to --max-depth.
     """
+    # Safety gate: confirm before processing an untrusted executable (top level only).
+    if depth == 0 and getattr(args, 'warn_before_executing', False) and _is_pe(args.file_path):
+        if not _confirm_executable(args.file_path):
+            logging.warning(f"Skipped executable (not confirmed): {args.file_path}")
+            return False
+
     candidates = find_candidate_handlers(file_path=args.file_path, fast_check=args.fast_check)
     for candidate in candidates:
         handler = candidate(cli_args=args, bin_path=BIN_PATH)

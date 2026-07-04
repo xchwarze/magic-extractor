@@ -72,12 +72,45 @@ class BaseExtractor:
         or to move files to a final destination. It could also handle error checking and compilation of extraction logs.
         This method is optional and may contain minimal or no implementation depending on specific subclass requirements.
         """
+        if getattr(self.cli_args, 'fix_file_extensions', False):
+            self.fix_extensions()
         if getattr(self.cli_args, 'check_unicode', False):
             self.warn_non_ascii_names()
         if getattr(self.cli_args, 'create_log_files', False):
             self.write_log_file()
         if getattr(self.cli_args, 'open_output_folder', False):
             self.open_output_folder()
+
+    def fix_extensions(self):
+        """Rename extracted files whose detected content type disagrees with their extension."""
+        try:
+            import puremagic
+        except ImportError:
+            logging.error("puremagic not available; cannot fix file extensions")
+            return
+
+        for root, _dirs, files in os.walk(self.extract_directory):
+            for name in files:
+                path = os.path.join(root, name)
+                try:
+                    guessed_ext = puremagic.from_file(path)
+                except Exception:
+                    continue  # unknown / unreadable content, leave as is
+
+                if not guessed_ext:
+                    continue
+                current_ext = os.path.splitext(name)[1].lower()
+                if guessed_ext.lower() == current_ext:
+                    continue
+
+                new_path = os.path.splitext(path)[0] + guessed_ext
+                if os.path.exists(new_path):
+                    continue  # don't clobber an existing file
+                try:
+                    os.rename(path, new_path)
+                    logging.info(f"Fixed extension: {name} -> {os.path.basename(new_path)}")
+                except OSError as exc:
+                    logging.error(f"Failed to rename {path}: {exc}")
 
     def warn_non_ascii_names(self):
         """Warn about extracted names that are not plain ASCII (portability hazard)."""
