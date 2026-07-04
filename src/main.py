@@ -82,6 +82,9 @@ def configure_parser():
     carve_parser.add_argument("file_path", help="Path to the file to carve", type=file_path_type_check)
     carve_parser.add_argument("output_dir", help="Directory to write carved segments to", type=dir_path_type_check, nargs='?', default=None)
     carve_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
+    carve_parser.add_argument("--list", help="List binwalk fragments (index, offset, size, name) and exit", action="store_true", dest="list_fragments")
+    carve_parser.add_argument("--fragment", help="Carve only the fragment at this index (see --list)", type=int, default=None)
+    carve_parser.add_argument("--raw", help="Carve every fragment raw (binwalk extract-all), not only handler-known ones", action="store_true")
 
     return parser
 
@@ -237,44 +240,70 @@ def process_list(args):
     return False
 
 def process_carve(args):
-    """Carve embedded, extractable blobs at binwalk offsets and extract each."""
+    """
+    Carve embedded blobs at binwalk offsets and extract them.
+
+    Default: carve+extract every handler-known, non-generic blob.
+    --raw: carve every fragment raw (binwalk extract-all), extracting where possible.
+    --fragment N: carve only the fragment at index N (from --list).
+    --list: just print the fragment table and exit.
+    """
     entries = binwalk_file_map(args.file_path, BIN_PATH)
     if not entries:
         logging.error(f"Binwalk found nothing to carve in {args.file_path}")
         return False
 
+    if getattr(args, 'list_fragments', False):
+        for index, entry in enumerate(entries):
+            print(f"[{index}] offset={entry.get('offset')} size={entry.get('size')} "
+                  f"name={entry.get('name')}  {entry.get('description', '')}")
+        return True
+
+    if args.fragment is not None:
+        if not 0 <= args.fragment < len(entries):
+            logging.error(f"Fragment index {args.fragment} out of range (0..{len(entries) - 1})")
+            return False
+        selected = [(args.fragment, entries[args.fragment])]
+    else:
+        selected = list(enumerate(entries))
+
+    # A specific fragment or --raw carves regardless of handler coverage.
+    carve_all = args.raw or args.fragment is not None
+
     output_dir = str(args.output_dir) if args.output_dir else f"{args.file_path}_carved"
     os.makedirs(output_dir, exist_ok=True)
-
     with open(args.file_path, 'rb') as source_fh:
         data = source_fh.read()
 
     carved_any = False
-    for entry in entries:
+    for index, entry in selected:
         name = (entry.get('name') or '').lower()
         offset = entry.get('offset', 0)
         size = entry.get('size') or 0
-        if size <= 0 or is_generic_detection(name):
-            continue
-        # only carve embedded blobs we have a handler for
-        if not get_handler_from_detection(name):
+        if size <= 0:
             continue
 
-        carved_path = os.path.join(output_dir, f"carved_{offset}_{name}.bin")
+        has_handler = bool(get_handler_from_detection(name)) and not is_generic_detection(name)
+        if not carve_all and not has_handler:
+            continue
+
+        carved_path = os.path.join(output_dir, f"carved_{index}_{offset}_{name}.bin")
         with open(carved_path, 'wb') as carved_fh:
             carved_fh.write(data[offset:offset + size])
-        logging.info(f"Carved {name} at offset {offset} ({size} bytes) -> {carved_path}")
+        logging.info(f"Carved [{index}] {name} at offset {offset} ({size} bytes) -> {carved_path}")
         carved_any = True
 
-        nested_args = argparse.Namespace(
-            file_path=pathlib.Path(carved_path), output_dir=None,
-            fast_check=args.fast_check, password=getattr(args, 'password', None),
-            recursive=False, open_output_folder=False,
-        )
-        process_extraction(nested_args)
+        # Attempt extraction only when a handler covers this blob type.
+        if has_handler:
+            nested_args = argparse.Namespace(
+                file_path=pathlib.Path(carved_path), output_dir=None,
+                fast_check=args.fast_check, password=getattr(args, 'password', None),
+                recursive=False, open_output_folder=False,
+            )
+            process_extraction(nested_args)
 
     if not carved_any:
-        logging.error(f"No extractable embedded data found to carve in {args.file_path}")
+        logging.error(f"No matching data to carve in {args.file_path}")
     return carved_any
 
 def run_extract(args):
