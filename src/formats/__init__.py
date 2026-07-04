@@ -14,6 +14,10 @@ from .format_arc import FormatArcHandler
 from .format_pea import FormatPeaHandler
 from .format_exe_innosetup import FormatInnoSetupHandler
 from .format_exe_msi import FormatMsiHandler
+from .format_bitrock import FormatBitrockHandler
+from .format_cicdec import FormatCicdecHandler
+from .format_dgca import FormatDgcaHandler
+from .format_wix import FormatWixHandler
 
 # Registry mapping the handler class names used in data/handlers.json to the classes.
 # The extraction logic lives in code (format_*.py); only the routing map is data.
@@ -21,7 +25,8 @@ _HANDLER_CLASSES = (
     Format7zHandler, FormatRarHandler, FormatAceHandler, FormatKgbHandler,
     FormatUharcHandler, FormatZpaqHandler, FormatAlzipHandler, FormatEggHandler,
     FormatBcmHandler, FormatArcHandler, FormatPeaHandler, FormatInnoSetupHandler,
-    FormatMsiHandler,
+    FormatMsiHandler, FormatBitrockHandler, FormatCicdecHandler, FormatDgcaHandler,
+    FormatWixHandler,
 )
 HANDLER_REGISTRY = {cls.__name__: cls for cls in _HANDLER_CLASSES}
 

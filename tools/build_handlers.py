@@ -55,6 +55,10 @@ DIR_HANDLERS = {
     'squashfs': ('Format7zHandler',       ['squash', 'sqsh']),
     'uharc':    ('FormatUharcHandler',    ['uharc', 'uha']),
     'zpaq':     ('FormatZpaqHandler',     ['zpaq']),
+    'bitrock':  ('FormatBitrockHandler',  ['bitrock', 'installbuilder']),
+    'cicdec':   ('FormatCicdecHandler',   ['clickteam', 'install creator', 'cicdec']),
+    'dgca':     ('FormatDgcaHandler',     ['dgca', 'gca']),
+    'wix':      ('FormatWixHandler',      ['wix', 'msi', 'dark']),
 }
 
 
