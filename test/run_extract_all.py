@@ -48,11 +48,16 @@ def main():
     results = []
     for fmt, sample in iter_samples():
         output_dir = tempfile.mkdtemp(prefix='mx_')
-        proc = subprocess.run(
-            [sys.executable, MAIN_PY, 'extract', sample, output_dir],
-            capture_output=True, text=True,
-        )
-        ok = proc.returncode == 0 and extracted_something(output_dir)
+        try:
+            proc = subprocess.run(
+                [sys.executable, MAIN_PY, 'extract', sample, output_dir],
+                capture_output=True, text=True,
+                stdin=subprocess.DEVNULL,  # never block on a prompt
+                timeout=180,
+            )
+            ok = proc.returncode == 0 and extracted_something(output_dir)
+        except subprocess.TimeoutExpired:
+            ok = False
         results.append((fmt, os.path.relpath(sample, TEST_DIR), ok))
         status = 'OK  ' if ok else 'FAIL'
         print(f"[{status}] {fmt:14} {os.path.relpath(sample, TEST_DIR)}")

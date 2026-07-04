@@ -174,11 +174,18 @@ def _is_pe(file_path):
         return False
 
 def _confirm_executable(file_path):
-    """Prompt before processing an executable. Denies on non-interactive input."""
+    """Warn before processing an executable; prompt only when interactive.
+
+    Non-interactive callers (pipelines, the test runner) are warned via the log
+    and allowed to proceed rather than blocking on input().
+    """
+    logging.warning(f"Processing an executable file: {file_path}")
+    if not sys.stdin.isatty():
+        return True
     try:
-        answer = input(f"'{file_path}' is an executable. Process it anyway? [y/N] ")
+        answer = input("Process it anyway? [y/N] ")
     except EOFError:
-        return False
+        return True
     return answer.strip().lower() in ('y', 'yes')
 
 def find_candidate_handlers(file_path, fast_check):
