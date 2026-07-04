@@ -8,8 +8,14 @@ from config import Config
 from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid
 from formats import get_handler_from_mime, get_handler_from_detection
 
-# Define the path to the 'bin' directory
-BIN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bin')
+# Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
+# When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
+if getattr(sys, "frozen", False):
+    BASE_PATH = os.path.dirname(sys.executable)
+else:
+    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+
+BIN_PATH = os.path.join(BASE_PATH, 'bin')
 
 def file_path_type_check(path):
     """Custom argparse type to check if a file or directory exists."""
