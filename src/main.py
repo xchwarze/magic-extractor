@@ -8,6 +8,7 @@ from config import Config
 from file_type import determine_file_type_with_magic, determine_file_type_with_signatures, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_magika, binwalk_file_map
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection, HANDLER_REGISTRY
 from detection_filter import init_blacklist, filter_mimes, filter_detections, is_generic_detection
+from helpers import delete_source
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
 # When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
@@ -67,6 +68,7 @@ def configure_parser():
     extract_parser.add_argument("-r", "--recursive", help="Recursively extract archives found inside the output", action="store_true")
     extract_parser.add_argument("--max-depth", help="Maximum recursion depth for --recursive", type=int, default=5)
     extract_parser.add_argument("-b", "--bruteforce", help="Try every handler DIE and Magika detect (no early-exit)", action="store_true")
+    extract_parser.add_argument("--delete-source", help="Delete the source file after a successful extraction (Recycle Bin unless delete_to_recycle_bin is off)", action="store_true")
 
     # identify: run the detectors and report, without extracting.
     identify_parser = subparsers.add_parser("identify", parents=[common], help="Detect file type and candidate handlers without extracting")
@@ -377,6 +379,9 @@ def process_carve(args):
 
 def run_extract(args):
     """Extract a single file, or every file in a directory (non-recursive)."""
+    delete_after = getattr(args, 'delete_source', False)
+    use_recycle_bin = getattr(args, 'delete_to_recycle_bin', True)
+
     if args.file_path.is_dir():
         for item in args.file_path.iterdir():
             if item.is_file():
@@ -385,12 +390,18 @@ def run_extract(args):
                 # Create a temporary args instance for the current file
                 temp_args = argparse.Namespace(**vars(args))
                 temp_args.file_path = item
-                if not process_extraction(temp_args):
+                if process_extraction(temp_args):
+                    if delete_after:
+                        delete_source(item, use_recycle_bin)
+                else:
                     logging.error(f"Extraction failed for file: {item}")
 
         return True
 
-    return process_extraction(args)
+    result = process_extraction(args)
+    if result and delete_after:
+        delete_source(args.file_path, use_recycle_bin)
+    return result
 
 def main():
     """Entry point: dispatch subcommands (extract, identify, ...)."""
@@ -419,6 +430,7 @@ def main():
     # extract
     config = Config(CONFIG_PATH)
     configure_settings(args, config)
+    args.delete_to_recycle_bin = config.get('settings', 'delete_to_recycle_bin', fallback=True, type=bool)
     sys.exit(0 if run_extract(args) else 1)
 
 if __name__ == "__main__":

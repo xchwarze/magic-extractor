@@ -51,7 +51,7 @@ jobs:
 
       - name: Build the .exe application
         working-directory: ./src
-        run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic
+        run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic --hidden-import send2trash
 
       - name: Build the GUI .exe application
         working-directory: ./src
