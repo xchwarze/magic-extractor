@@ -11,20 +11,11 @@ cover mainstream compression formats, the installers you actually see today, and
 range of less common archivers.
 
 ## Quick Start
-1. **Download** the latest release `.zip` and **unzip** it. Keep the folder intact —
-   `magic-extractor.exe` must stay next to the `bin/` and `data/` folders.
-2. Open a terminal in that folder and extract anything (the type is auto-detected):
-   ```text
-   magic-extractor.exe extract mystery.bin
-   ```
-   Output lands in `mystery_extracted/`.
-3. Not sure what a file is? Ask, without extracting:
-   ```text
-   magic-extractor.exe identify mystery.bin
-   ```
-
-That's it. See [Examples](#examples) for `list`, `carve`, `--recursive` and `--bruteforce`.
-(Running from source instead? Use `python src/main.py …` — same arguments.)
+Download the [latest release](../../releases/latest), unzip it, and run:
+```text
+magic-extractor.exe extract mystery.bin
+```
+See [Examples](#examples) for `identify`, `list`, `carve`, `--recursive` and `--bruteforce`.
 
 ## Project Structure
 - `src`: source code.

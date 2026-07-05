@@ -20,7 +20,7 @@ jobs:
 
       - name: Install PyInstaller and pyinstaller-versionfile
         run: |
-          pip install pyinstaller
+          pip install pyinstaller pillow
           pip install pyinstaller-versionfile
 
       - name: Determine version from release tag (fallback 0.0.0)
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build the .exe application
         working-directory: ./src
-        run: pyinstaller --onefile main.py --name magic-extractor --version-file=version_info.txt --collect-data puremagic
+        run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/icon.png --version-file=version_info.txt --collect-data puremagic
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash
