@@ -40,6 +40,7 @@ class ExtractorApp:
         theme.apply(self.root, self.theme_mode)
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
+        self._enable_dnd()
         self.root.after(100, self._drain_log)
 
     # ---- UI construction -------------------------------------------------
@@ -78,7 +79,8 @@ class ExtractorApp:
                         command=self._sync_mode).pack(side="left")
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
-        ttk.Entry(row, textvariable=self.source).pack(side="left", fill="x", expand=True)
+        self.source_entry = ttk.Entry(row, textvariable=self.source)
+        self.source_entry.pack(side="left", fill="x", expand=True)
         ttk.Button(row, text="...", width=3, command=self._browse_source).pack(side="left", padx=4)
 
         # Destination row
@@ -125,6 +127,28 @@ class ExtractorApp:
         path = filedialog.askdirectory(title="Select destination directory")
         if path:
             self.dest.set(path)
+
+    def _enable_dnd(self):
+        """Register file drag-and-drop on the source entry + log (no-op without tkinterdnd2)."""
+        try:
+            from tkinterdnd2 import DND_FILES
+        except Exception:
+            return
+        for target in (self.source_entry, self.log):
+            try:
+                target.drop_target_register(DND_FILES)
+                target.dnd_bind("<<Drop>>", self._on_drop)
+            except Exception:
+                pass  # root is not a TkinterDnD.Tk() — DnD unavailable
+
+    def _on_drop(self, event):
+        # tk.splitlist handles brace-wrapped, space-containing, multi-file payloads.
+        paths = self.root.tk.splitlist(event.data)
+        if not paths:
+            return
+        self.source.set(paths[0])
+        if not self.lock_dest.get():
+            self.dest.set("")  # let the CLI derive <name>_extracted
 
     def _current_opts(self):
         return {

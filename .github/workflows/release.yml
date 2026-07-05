@@ -55,7 +55,7 @@ jobs:
 
       - name: Build the GUI .exe application
         working-directory: ./src
-        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles
+        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash

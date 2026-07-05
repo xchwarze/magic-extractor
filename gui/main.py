@@ -9,8 +9,17 @@ import tkinter as tk
 from gui.app import ExtractorApp
 
 
+def _make_root():
+    """A DnD-capable root when tkinterdnd2 is installed; a plain Tk otherwise."""
+    try:
+        from tkinterdnd2 import TkinterDnD
+        return TkinterDnD.Tk()
+    except Exception:
+        return tk.Tk()
+
+
 def main():
-    root = tk.Tk()
+    root = _make_root()
     ExtractorApp(root)
     root.minsize(460, 360)
     root.mainloop()

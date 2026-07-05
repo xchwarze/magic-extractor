@@ -3,3 +3,4 @@
 sv-ttk>=2.6.1        # Sun Valley light/dark ttk theme
 darkdetect>=0.8.0    # detect OS light/dark preference
 pywinstyles>=1.8     # dark Windows title bar (Windows only)
+tkinterdnd2>=0.4.2   # file drag-and-drop onto the window
