@@ -198,6 +198,16 @@ def confirm_run_installer(file_path):
         return True
     return answer.strip().lower() in ('y', 'yes')
 
+def _append_pe_installer_fallbacks(file_path, candidates):
+    """Wrapped-exe installers can't be identified by content; try them on any PE."""
+    if not _is_pe(file_path):
+        return
+    for name in PE_INSTALLER_FALLBACK:
+        handler_class = HANDLER_REGISTRY.get(name)
+        if handler_class and handler_class not in candidates:
+            logging.info(f"PE installer fallback candidate: {name}")
+            candidates.append(handler_class)
+
 def find_candidate_handlers(file_path, fast_check, bruteforce=False):
     """
     Return candidate handler classes. By default stops at the first detector that
@@ -211,14 +221,7 @@ def find_candidate_handlers(file_path, fast_check, bruteforce=False):
         if added and not bruteforce:
             break  # early-exit: first detector with a mapped handler wins
 
-    # Wrapped-exe installers can't be identified by content; try them on any PE.
-    if _is_pe(file_path):
-        for name in PE_INSTALLER_FALLBACK:
-            handler_class = HANDLER_REGISTRY.get(name)
-            if handler_class and handler_class not in candidates:
-                logging.info(f"PE installer fallback candidate: {name}")
-                candidates.append(handler_class)
-
+    _append_pe_installer_fallbacks(file_path, candidates)
     return candidates
 
 def process_extraction(args, depth=0):
@@ -281,6 +284,7 @@ def process_identify(args):
             print(f"  [{source}] detect   {detection}")
 
     candidates = _candidates_from_outputs(outputs)
+    _append_pe_installer_fallbacks(args.file_path, candidates)  # match extract's behavior
     if candidates:
         print("Candidate handlers (in order):")
         for candidate in candidates:
