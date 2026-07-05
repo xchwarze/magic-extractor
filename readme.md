@@ -96,10 +96,12 @@ python src/main.py <path> <output_dir> [options]
 fragment by index), `--raw` (carve every fragment, not only handler-known ones).
 
 ## Building (Windows)
+```bash
+cd src
+pyinstaller --onefile main.py --name magic-extractor --collect-data puremagic
 ```
-pyinstaller magic-extractor.spec
-```
-Then copy `src/bin`, `src/data` and `src/config.ini` into `dist/magic-extractor/`.
+Then copy `bin/`, `data/` and `config.ini` next to `dist/magic-extractor.exe`.
+CI does this automatically — see `.github/workflows/release.yml`.
 
 ## License
 LGPL-3.0-only — see `LICENSE.txt`.

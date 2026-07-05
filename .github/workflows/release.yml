@@ -16,28 +16,47 @@ jobs:
           python-version: '3.13'
 
       - name: Install dependencies
-        run: |
-          pip install -r src/requirements.txt
-          pip install pyinstaller
+        run: pip install -r src/requirements.txt
 
-      - name: Build the exe with PyInstaller
-        run: pyinstaller magic-extractor.spec
+      - name: Install PyInstaller and pyinstaller-versionfile
+        run: |
+          pip install pyinstaller
+          pip install pyinstaller-versionfile
+
+      - name: Generate version file
+        shell: bash
+        run: |
+          pyivf-make_version \
+            --outfile src/version_info.txt \
+            --version 1.0.0.0 \
+            --company-name "DSR!" \
+            --file-description "Magic Extractor - universal extraction tool" \
+            --internal-name "magic-extractor" \
+            --legal-copyright "© 2026 github.com/xchwarze. All rights reserved." \
+            --original-filename "magic-extractor.exe" \
+            --product-name "Magic Extractor"
+          echo "Generated version file content:"
+          cat src/version_info.txt
+
+      - name: Build the .exe application
+        working-directory: ./src
+        run: pyinstaller --onefile main.py --name magic-extractor --version-file=version_info.txt --collect-data puremagic
 
       - name: Bundle external bin/, data/ and config.ini beside the exe
         shell: bash
         run: |
-          cp -r src/bin  dist/magic-extractor/bin
-          cp -r src/data dist/magic-extractor/data
-          cp src/config.ini dist/magic-extractor/config.ini
+          cp -r src/bin  src/dist/bin
+          cp -r src/data src/dist/data
+          cp src/config.ini src/dist/config.ini
 
       - name: Smoke test (extract a bundled sample)
-        run: ./dist/magic-extractor/magic-extractor.exe extract test/7z/test-file.7z
+        run: ./src/dist/magic-extractor.exe extract test/7z/test-file.7z
 
-      - name: Upload the build as an artifact
+      - name: Upload the built application as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: magic-extractor
-          path: ./dist/magic-extractor
+          path: ./src/dist
 
   create-release:
     needs: generate-build
@@ -48,10 +67,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: magic-extractor
-          path: ./dist/magic-extractor
+          path: ./magic-extractor
 
       - name: Compress the build
-        run: cd dist && zip -r ../magic-extractor.zip magic-extractor/
+        run: zip -r magic-extractor.zip magic-extractor/
 
       - name: Upload as release download
         uses: softprops/action-gh-release@v2
