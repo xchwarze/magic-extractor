@@ -77,3 +77,36 @@ dedicated handlers cover the rest.
 - The detection → handler routing is data-driven (`data/handlers.json`).
 - `carve` mode uses binwalk to extract archives embedded at arbitrary offsets
   (e.g. inside firmware images).
+
+## Tools
+
+Each handler shells out to a bundled helper binary under `src/bin/extractors/`;
+the four content detectors live under `src/bin/detectors/` (except `puremagic`,
+which is a pip dependency). Tool paths are relative to those directories.
+
+| Handler | Tool | URL |
+|---------|------|-----|
+| Format7zHandler | `7z/7z.exe` | http://www.7-zip.org/ |
+| FormatRarHandler | `rar/unrar.exe` | http://www.rarlab.com/rar_add.htm |
+| FormatAceHandler | `unace/unace.exe` | https://sourceforge.net/projects/peazip/files/Resources/PeaZip%20UNACE%20Plugin/ |
+| FormatAlzipHandler | `alzip/ALZipCon.exe` | https://www.altools.com/ |
+| FormatEggHandler | `alzip/ALZipCon.exe` | https://www.altools.com/ |
+| FormatKgbHandler | `kgb/kgb2_console.exe` | http://kgbarchiver.sourceforge.net/ |
+| FormatUharcHandler | `uharc/uharc-v0.6b.exe` | http://en.wikipedia.org/wiki/UHarc |
+| FormatZpaqHandler | `zpaq/zpaq.exe` | http://mattmahoney.net/dc/zpaq.html |
+| FormatArcHandler | `unarc/unarc.exe` | http://freearc.org/ |
+| FormatBcmHandler | `bcm/bcm-v203x64.exe` | https://github.com/encode84/bcm |
+| FormatPeaHandler | `peazip/pea.exe` | https://www.peazip.org/ |
+| FormatDgcaHandler | `dgca/dgcac.exe` | http://www.emit.jp/dgca/ |
+| FormatLzipHandler | `plzip/plzip.exe` | https://encode.su/threads/570-plzip-a-massively-parallel-compressor-based-on-LZMA |
+| FormatMsiHandler | `lessmsi/lessmsi.exe` (+ `7z/7z.exe` fallback) | https://github.com/activescott/lessmsi |
+| FormatWixHandler | `wix/dark.exe` | http://wixtoolset.org/ |
+| FormatInnoSetupHandler | `innounp/innounp.exe` | http://innounp.sourceforge.net/ |
+| FormatInstallShieldHandler | `unshield/unshield.exe` | https://github.com/ScoopInstaller/Main/blob/master/bucket/unshield.json |
+| FormatBitrockHandler | `bitrock-unpacker/bitrock-unpacker.exe` | https://gist.github.com/mickael9/0b902da7c13207d1b86e |
+| FormatCicdecHandler | `cicdec/cicdec.exe` | https://github.com/Bioruebe/cicdec |
+| FormatPyInstallerHandler | `pyinstxtractor-ng/pyinstxtractor-ng.exe` | https://github.com/pyinstxtractor/pyinstxtractor-ng |
+| DIE (detector) | `detectors/die/diec.exe` | https://github.com/horsicq/Detect-It-Easy |
+| Magika (detector) | `detectors/magika/magika.exe` | https://github.com/google/magika |
+| binwalk (detector) | `detectors/binwalk/binwalk.exe` | https://github.com/ReFirmLabs/binwalk |
+| puremagic (detector) | `puremagic` (pip package) | https://github.com/cdgriffith/puremagic |
