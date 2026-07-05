@@ -54,6 +54,96 @@
     ]
   },
   {
+    "name": "arj",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "60ea"
+      }
+    ]
+  },
+  {
+    "name": "lzh",
+    "patterns": [
+      {
+        "pos": 2,
+        "hex": "2d6c68"
+      }
+    ]
+  },
+  {
+    "name": "chm",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "49545346"
+      }
+    ]
+  },
+  {
+    "name": "qcow2",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "514649fb"
+      }
+    ]
+  },
+  {
+    "name": "vhdx",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "7668647866696c65"
+      }
+    ]
+  },
+  {
+    "name": "vmdk",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4b444d56"
+      }
+    ]
+  },
+  {
+    "name": "vdi",
+    "patterns": [
+      {
+        "pos": 64,
+        "hex": "7f10dabe"
+      }
+    ]
+  },
+  {
+    "name": "wim",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4d5357494d000000"
+      }
+    ]
+  },
+  {
+    "name": "apfs",
+    "patterns": [
+      {
+        "pos": 32,
+        "hex": "4e585342"
+      }
+    ]
+  },
+  {
+    "name": "xar",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "78617221"
+      }
+    ]
+  },
+  {
     "name": "ace compressed archive",
     "patterns": [
       {

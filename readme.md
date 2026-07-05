@@ -45,6 +45,12 @@ Each handler declares its own indicators via `detection_mimes()` /
 these into `data/handlers.json` and `data/signatures.json` (with an optional
 `data/extra_detections.json` merged on top). TrID is not used.
 
+> Note: any format whose signature is missing from puremagic's
+> [`magic_data.json`](https://github.com/cdgriffith/puremagic/blob/master/puremagic/magic_data.json)
+> (or that puremagic reports only as a generic `application/octet-stream`) must
+> declare a custom `detection_signatures()` entry in its handler — otherwise it
+> will not be detected by content.
+
 - `--bruteforce` disables early-exit: every detector runs and each detected handler
   is tried in turn (useful when the first guess is wrong).
 - Executables that no detector identifies fall back to the wrapped-exe installer

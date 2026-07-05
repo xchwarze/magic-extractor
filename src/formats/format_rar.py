@@ -10,7 +10,7 @@ class FormatRarHandler(BaseExtractor):
 
     @classmethod
     def detection_mimes(cls):
-        return ['application/vnd.rar', 'application/x-rar']  # puremagic / Magika
+        return ['application/vnd.rar', 'application/x-rar', 'application/x-rar-compressed']  # puremagic / Magika
 
     @classmethod
     def detection_names(cls):

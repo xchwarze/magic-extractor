@@ -24,6 +24,7 @@ class Format7zHandler(BaseExtractor):
             'application/x-vhd', 'application/x-vhdx', 'application/x-vmdk', 'application/x-xar',
             'application/x-compress', 'application/zstd', 'application/vnd.squashfs',
             'application/vnd.debian.binary-package', 'application/x-zstd-compressed-tar',
+            'application/arj', 'application/x-lha',  # exact MIMEs puremagic emits
         ]
 
     @classmethod
@@ -53,6 +54,17 @@ class Format7zHandler(BaseExtractor):
             {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373037'}]},
             {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373031'}]},
             {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373032'}]},
+            # formats puremagic misses or reports as generic (octet-stream) / unrouted MIME
+            {'name': 'arj', 'patterns': [{'pos': 0, 'hex': '60ea'}]},
+            {'name': 'lzh', 'patterns': [{'pos': 2, 'hex': '2d6c68'}]},           # '-lh'
+            {'name': 'chm', 'patterns': [{'pos': 0, 'hex': '49545346'}]},          # 'ITSF'
+            {'name': 'qcow2', 'patterns': [{'pos': 0, 'hex': '514649fb'}]},        # 'QFI\xfb'
+            {'name': 'vhdx', 'patterns': [{'pos': 0, 'hex': '7668647866696c65'}]}, # 'vhdxfile'
+            {'name': 'vmdk', 'patterns': [{'pos': 0, 'hex': '4b444d56'}]},         # 'KDMV'
+            {'name': 'vdi', 'patterns': [{'pos': 64, 'hex': '7f10dabe'}]},         # VDI image signature
+            {'name': 'wim', 'patterns': [{'pos': 0, 'hex': '4d5357494d000000'}]},  # 'MSWIM\0\0\0'
+            {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
+            {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
         ]
 
     def list_contents(self):
