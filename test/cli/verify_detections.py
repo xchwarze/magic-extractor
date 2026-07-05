@@ -21,7 +21,7 @@ import sys
 import logging
 
 # Make the application source importable and resolve bin/ and data/ under it.
-SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'cli'))
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'cli'))
 sys.path.insert(0, SRC_PATH)
 
 import formats
@@ -35,7 +35,8 @@ from file_type import (
 
 BIN_PATH = os.path.join(SRC_PATH, 'bin')
 DATA_PATH = os.path.join(SRC_PATH, 'data')
-TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+# Sample corpus lives under test/samples/ (this script sits in test/cli/).
+TEST_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'samples'))
 
 # Directories that hold tool data rather than sample files.
 SKIP_DIRS = {'defs'}

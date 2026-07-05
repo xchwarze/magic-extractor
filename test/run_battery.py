@@ -4,13 +4,13 @@ Full test battery for magic-extractor.
 Two independent stages, run back-to-back:
 
   1. Pure-python unit tests  (runs ANYWHERE, incl. WSL/Linux/macOS)
-     Discovers and runs test/gui/test_*.py and test/test_delete_source.py
-     in-process with the stdlib `unittest` runner. These exercise pure logic
-     (GUI command building, config/history/paths, delete_source) and never
-     touch the bundled binaries.
+     Discovers and runs test/gui/test_*.py and test/cli/test_*.py in-process
+     with the stdlib `unittest` runner. These exercise pure logic (GUI command
+     building, config/history/paths, delete_source) and never touch the
+     bundled binaries.
 
   2. Extraction battery      (WINDOWS ONLY)
-     Walks every sample file under test/<format>/ and runs both
+     Walks every sample file under test/samples/<format>/ and runs both
      `python cli/main.py identify <file>` and
      `python cli/main.py extract  <file> <tmp_out>` on each, recording the
      exit code and whether a handler actually produced output.
@@ -24,9 +24,9 @@ Two independent stages, run back-to-back:
      expected; run it from a Windows `python` (cmd/PowerShell), not from WSL.
      Stage 1 has no such restriction and passes everywhere.
 
-This script builds ON the existing helpers rather than duplicating them:
-it reuses the sample-walking + "did it extract" logic pioneered in
-run_extract_all.py, and the stdlib-unittest layout of the test_*.py suites.
+This is the single test runner (the old run_extract_all.py was folded in here):
+stage 2 does the sample-walking + "did it extract" check, stage 1 the
+stdlib-unittest suites.
 
 Usage:
     python test/run_battery.py                 # both stages
@@ -52,6 +52,8 @@ TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(TEST_DIR)
 MAIN_PY = os.path.join(REPO_ROOT, 'cli', 'main.py')
 GUI_TEST_DIR = os.path.join(TEST_DIR, 'gui')
+CLI_TEST_DIR = os.path.join(TEST_DIR, 'cli')
+SAMPLES_DIR = os.path.join(TEST_DIR, 'samples')
 
 # Non-sample files living under test/: this runner's own helper scripts, docs,
 # and installer *source* scripts (.nsi/.iss) that are inputs to a build, not
@@ -72,16 +74,14 @@ def build_unit_suite():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    # test/gui/test_*.py -- top_level_dir is the gui dir so the modules load as
-    # bare `test_*` names (each file injects the repo root itself to import the
-    # real `gui` package); using test/ as top level would shadow that package.
-    if os.path.isdir(GUI_TEST_DIR):
-        suite.addTests(loader.discover(
-            start_dir=GUI_TEST_DIR, pattern='test_*.py', top_level_dir=GUI_TEST_DIR))
-
-    # test/test_delete_source.py (imports cli/helpers.py, which it puts on path).
-    suite.addTests(loader.discover(
-        start_dir=TEST_DIR, pattern='test_delete_source.py', top_level_dir=TEST_DIR))
+    # test/gui/test_*.py and test/cli/test_*.py -- top_level_dir is each dir so
+    # the modules load as bare `test_*` names (each file injects the repo root /
+    # cli path itself for its imports); using test/ as top level would shadow the
+    # real `gui` package.
+    for unit_dir in (GUI_TEST_DIR, CLI_TEST_DIR):
+        if os.path.isdir(unit_dir):
+            suite.addTests(loader.discover(
+                start_dir=unit_dir, pattern='test_*.py', top_level_dir=unit_dir))
 
     return suite
 
@@ -124,9 +124,11 @@ def run_unit_tests():
 # Stage 2: extraction battery (Windows only)
 # --------------------------------------------------------------------------- #
 def iter_samples():
-    """Yield (format_dir_name, sample_path) for every sample under test/<fmt>/."""
-    for name in sorted(os.listdir(TEST_DIR)):
-        format_dir = os.path.join(TEST_DIR, name)
+    """Yield (format_dir_name, sample_path) for every sample under test/samples/<fmt>/."""
+    if not os.path.isdir(SAMPLES_DIR):
+        return
+    for name in sorted(os.listdir(SAMPLES_DIR)):
+        format_dir = os.path.join(SAMPLES_DIR, name)
         if not os.path.isdir(format_dir) or name in SKIP_DIRS:
             continue
         for root, dirs, files in os.walk(format_dir):

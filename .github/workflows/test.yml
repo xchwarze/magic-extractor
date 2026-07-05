@@ -1,0 +1,35 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Pure-python unit tests: GUI command-building, config/history/paths,
+  # delete_source. No bundled .exe needed, so this runs on Linux.
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Run unit tests
+        run: python test/run_battery.py --unit-only
+
+  # Extraction battery: identify + extract every sample under test/samples/.
+  # Needs the bundled Windows .exe detectors/extractors, so it runs on Windows.
+  battery:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install CLI dependencies
+        run: pip install -r cli/requirements.txt
+      - name: Run extraction battery
+        run: python test/run_battery.py --battery-only

@@ -68,7 +68,7 @@ jobs:
           test -f cli/dist/magic-extractor-gui.exe
 
       - name: Smoke test (extract a bundled sample)
-        run: ./cli/dist/magic-extractor.exe extract test/7z/test-file.7z
+        run: ./cli/dist/magic-extractor.exe extract test/samples/7z/test-file.7z
 
       - name: Upload the built application as an artifact
         uses: actions/upload-artifact@v4
