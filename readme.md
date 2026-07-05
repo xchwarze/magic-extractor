@@ -6,10 +6,6 @@ with several detectors and routes it to the right bundled extractor. It aims to
 cover mainstream compression formats, the installers you actually see today, and a
 range of less common archivers.
 
-## Development Status
-Functional but still under active development; no release tags yet. Features and
-the on-disk layout may still change.
-
 ## Project Structure
 - `src`: source code.
   - `bin`: bundled detector and extractor binaries.

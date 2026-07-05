@@ -1,0 +1,61 @@
+name: Create Release
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  generate-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install -r src/requirements.txt
+          pip install pyinstaller
+
+      - name: Build the exe with PyInstaller
+        run: pyinstaller magic-extractor.spec
+
+      - name: Bundle external bin/, data/ and config.ini beside the exe
+        shell: bash
+        run: |
+          cp -r src/bin  dist/magic-extractor/bin
+          cp -r src/data dist/magic-extractor/data
+          cp src/config.ini dist/magic-extractor/config.ini
+
+      - name: Smoke test (extract a bundled sample)
+        run: ./dist/magic-extractor/magic-extractor.exe extract test/7z/test-file.7z
+
+      - name: Upload the build as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: magic-extractor
+          path: ./dist/magic-extractor
+
+  create-release:
+    needs: generate-build
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: magic-extractor
+          path: ./dist/magic-extractor
+
+      - name: Compress the build
+        run: cd dist && zip -r ../magic-extractor.zip magic-extractor/
+
+      - name: Upload as release download
+        uses: softprops/action-gh-release@v2
+        with:
+          files: magic-extractor.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
