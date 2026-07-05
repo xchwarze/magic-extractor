@@ -13,7 +13,7 @@ the on-disk layout may still change.
 ## Project Structure
 - `src`: source code.
   - `bin`: bundled detector and extractor binaries.
-    - `detectors`: DIE, Magika, TrID, binwalk.
+    - `detectors`: DIE, Magika, binwalk (TrID's defs are converted to `data/signatures.json`).
     - `extractors`: 7z, unrar, unace, unshield, lessmsi, dark (WiX), and more.
   - `data`: runtime configuration, loaded dynamically (see below).
   - `formats`: one handler module per format family.
@@ -26,18 +26,27 @@ beside the executable (frozen) or under `src/` (dev).
 
 ## How detection works
 For normal extraction, detectors run in this order with **early-exit** — the first
-one that yields a known handler wins:
+one that yields a known handler wins (cheapest first, so the ML model is usually skipped):
 
 1. **puremagic** — pure-python, no subprocess; a cheap MIME check for well-formed archives.
-2. **DIE** (Detect It Easy) — signature engine; the specialist for archives, installers and PE.
-3. **Magika** — Google's AI content-type detector, as a catch-all.
+2. **built-in signatures** — magic-byte patterns in `data/signatures.json`, harvested
+   from the public TrID defs by `tools/convert_trid_defs.py`; names most archivers
+   (alzip, freearc, dgca, kgb, uharc, ...) with no external process.
+3. **DIE** (Detect It Easy) — signature engine; the specialist for installers, PE and SFX.
+4. **binwalk** — short type keys (cpio, lzma, ...) and embedded content.
+5. **Magika** — Google's AI content-type detector, as a catch-all.
+
+Each detector contributes uniquely (they are complementary, not redundant): the
+signature DB names most archivers, DIE handles installers/PE, binwalk catches a
+few types the others miss, puremagic/Magika cover MIME. (TrID itself is no longer
+run — its signatures live in `data/signatures.json`.)
 
 - `--bruteforce` disables early-exit: every detector runs and each detected handler
   is tried in turn (useful when the first guess is wrong).
 - Executables that no detector identifies fall back to the wrapped-exe installer
   handlers (BitRock, Clickteam, PyInstaller, Inno, ...), which self-validate.
-- **binwalk** is used by the `carve` subcommand (embedded/offset scanning), not by
-  the whole-file detection path.
+- The `carve` subcommand additionally uses binwalk's offset map to extract archives
+  embedded at arbitrary offsets (e.g. inside firmware images).
 
 The detection → handler routing map lives in `data/handlers.json` (hand-curated,
 loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist.json`.
