@@ -13,6 +13,10 @@ class FormatZpaqHandler(BaseExtractor):
         # '7kSt' at 0.
         return [{'name': 'zpaq compressed archive', 'patterns': [{'pos': 0, 'hex': '376b5374'}]}]
 
+    @classmethod
+    def detection_names(cls):
+        return ['zpaq compressed archive (.zpaq)']  # DIE
+
     def extract(self):
         """
         Extracts ZPAQ files using the zpaq command-line tool.

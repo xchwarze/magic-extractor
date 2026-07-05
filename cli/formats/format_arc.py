@@ -13,6 +13,10 @@ class FormatArcHandler(BaseExtractor):
         # 'ArC\x01' at 0 (FreeArc).
         return [{'name': 'freearc compressed archive', 'patterns': [{'pos': 0, 'hex': '41724301'}]}]
 
+    @classmethod
+    def detection_names(cls):
+        return ['freearc archive (.arc)']  # DIE
+
     def extract(self):
         """
         Extracts ARC files using the unarc.exe command-line tool.

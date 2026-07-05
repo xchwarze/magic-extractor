@@ -11,6 +11,10 @@ class FormatPyInstallerHandler(BaseExtractor):
     Usage: pyinstxtractor-ng.exe <filename>
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['PyInstaller']  # DIE tags it type "packer", name "PyInstaller"
+
     def extract(self):
         """
         Extracts a PyInstaller executable into the output directory.

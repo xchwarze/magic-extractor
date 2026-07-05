@@ -12,8 +12,8 @@ from .format_egg import FormatEggHandler
 from .format_bcm import FormatBcmHandler
 from .format_arc import FormatArcHandler
 from .format_pea import FormatPeaHandler
-from .format_exe_innosetup import FormatInnoSetupHandler
-from .format_exe_msi import FormatMsiHandler
+from .format_innosetup import FormatInnoSetupHandler
+from .format_msi import FormatMsiHandler
 from .format_bitrock import FormatBitrockHandler
 from .format_cicdec import FormatCicdecHandler
 from .format_dgca import FormatDgcaHandler

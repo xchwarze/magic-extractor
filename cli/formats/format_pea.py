@@ -13,6 +13,10 @@ class FormatPeaHandler(BaseExtractor):
         # PEA magic 0xEA 0x01 at 0.
         return [{'name': 'pea compressed archive (v1.x)', 'patterns': [{'pos': 0, 'hex': 'ea01'}]}]
 
+    @classmethod
+    def detection_names(cls):
+        return ['peazip (.pea)']  # DIE
+
     def extract(self):
         """
         Extracts PEA files using the PeaZip command-line tool.

@@ -10,7 +10,7 @@ class FormatInnoSetupHandler(BaseExtractor):
 
     @classmethod
     def detection_names(cls):
-        return ['inno setup installer', 'inno setup module']  # DIE
+        return ['inno setup installer', 'inno setup module', 'inno setup']  # DIE
 
     def extract(self):
         """

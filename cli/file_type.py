@@ -141,12 +141,14 @@ def determine_file_type_with_die(file_path, bin_path):
         # Parse the JSON output
         die_output = json.loads(result.stdout)
         
-        # Extract names for specific types
-        relevant_types = {'Sfx', 'Archive', 'Installer'}
+        # Extract names for extraction-relevant categories. 'Packer' is included so
+        # wrapped-exe formats DIE tags as packers (e.g. PyInstaller) are surfaced,
+        # not dropped. Compared case-insensitively (DIE capitalizes the JSON type).
+        relevant_types = {'sfx', 'archive', 'installer', 'packer'}
         names = []
         for detect in die_output.get('detects', []):
             for value in detect.get('values', []):
-                if value.get('type') in relevant_types:
+                if (value.get('type') or '').lower() in relevant_types:
                     names.append(value.get('name'))
 
         #logging.error(f"DIE complete analysis: {die_output}")
