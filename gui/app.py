@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from gui import runner, config_io, theme
+from gui.menubar import MenuBar
 
 CONFIG_KEYS = [
     "open_output_folder", "check_free_space", "check_unicode",
@@ -38,29 +39,30 @@ class ExtractorApp:
         self._build_body()
         theme.apply(self.root, self.theme_mode)
         theme.restyle_text(self.log, self.theme_mode)
+        self.menubar.recolor(self.theme_mode)
         self.root.after(100, self._drain_log)
 
     # ---- UI construction -------------------------------------------------
     def _build_menu(self):
-        menubar = tk.Menu(self.root)
-        file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Open source...", command=self._browse_source)
-        file_menu.add_command(label="Open destination...", command=self._browse_dest)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.quit)
-        menubar.add_cascade(label="File", menu=file_menu)
-
-        edit_menu = tk.Menu(menubar, tearoff=0)
-        edit_menu.add_command(label="Run options...", command=self._open_run_options)
-        edit_menu.add_command(label="Preferences...", command=self._open_preferences)
-        edit_menu.add_separator()
-        edit_menu.add_command(label="Toggle dark mode", command=self._toggle_theme)
-        menubar.add_cascade(label="Edit", menu=edit_menu)
-
-        help_menu = tk.Menu(menubar, tearoff=0)
-        help_menu.add_command(label="About", command=self._about)
-        menubar.add_cascade(label="Help", menu=help_menu)
-        self.root.config(menu=menubar)
+        # Self-drawn menu bar: native tk.Menu bars/dropdowns are OS-rendered on
+        # Windows and ignore colors, so they never go dark. MenuBar draws its own.
+        self.menubar = MenuBar(self.root, self.theme_mode)
+        self.menubar.pack(fill="x", side="top")
+        self.menubar.add_menu("File", [
+            ("Open source...", self._browse_source),
+            ("Open destination...", self._browse_dest),
+            None,
+            ("Exit", self.root.quit),
+        ])
+        self.menubar.add_menu("Edit", [
+            ("Run options...", self._open_run_options),
+            ("Preferences...", self._open_preferences),
+            None,
+            ("Toggle dark mode", self._toggle_theme),
+        ])
+        self.menubar.add_menu("Help", [
+            ("About", self._about),
+        ])
 
     def _build_body(self):
         pad = {"padx": 6, "pady": 3}
@@ -203,6 +205,7 @@ class ExtractorApp:
     def _toggle_theme(self):
         self.theme_mode = theme.toggle(self.root)
         theme.restyle_text(self.log, self.theme_mode)
+        self.menubar.recolor(self.theme_mode)
 
     # ---- dialogs ---------------------------------------------------------
     def _open_run_options(self):

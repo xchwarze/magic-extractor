@@ -44,10 +44,11 @@ def current(root):
 
 
 def apply(root, mode):
-    """Apply mode ('dark'/'light') to ttk widgets + the Windows title bar."""
+    """Apply mode ('dark'/'light') to ttk widgets + the Windows title bar + native menus."""
     if sv_ttk is not None:
         sv_ttk.set_theme(mode)
     _title_bar(root, mode)
+    _dark_menu_popups(mode)
 
 
 def toggle(root):
@@ -71,6 +72,38 @@ def restyle_text(widget, mode):
 def restyle_toplevel(win, mode):
     """Recolor a Toplevel background to match the theme."""
     win.config(bg=palette(mode)["bg"])
+
+
+def restyle_menu(menu, mode):
+    """Recolor a tk.Menu dropdown (sv-ttk does not skin menus)."""
+    colors = palette(mode)
+    active_bg = "#2d2d2d" if mode == "dark" else "#e5e5e5"
+    menu.config(
+        bg=colors["bg"], fg=colors["fg"],
+        activebackground=active_bg, activeforeground=colors["fg"],
+        borderwidth=0,
+    )
+
+
+def _dark_menu_popups(mode):
+    """
+    Make native Win32 menus (the OS-rendered tk.Menu dropdowns, which ignore
+    bg/fg) render dark, via the undocumented uxtheme app-mode API. Best-effort:
+    the ordinals exist on Win10 1809+; any failure is silently ignored.
+    """
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        uxtheme = ctypes.windll.uxtheme
+        set_preferred_app_mode = uxtheme[135]  # SetPreferredAppMode
+        set_preferred_app_mode.argtypes = [ctypes.c_int]
+        set_preferred_app_mode.restype = ctypes.c_int
+        # 2 = ForceDark, 1 = AllowDark, 0 = Default
+        set_preferred_app_mode(2 if mode == "dark" else 0)
+        uxtheme[136]()  # FlushMenuThemes
+    except Exception:
+        pass
 
 
 def _title_bar(root, mode):
