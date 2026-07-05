@@ -27,6 +27,7 @@ GUI_LABELS = {
     "auto_fill_destination": "Auto-fill the destination from the source file",
     "keep_open": "Keep the window open after a run finishes",
     "always_on_top": "Keep the window always on top",
+    "debug": "Verbose debug logging (adds --debug to every command)",
 }
 
 LOG_FILENAME = "magic-extractor.log"
@@ -95,6 +96,7 @@ class ExtractorApp:
         self.opt_bruteforce = tk.BooleanVar(value=s.get_bool("defaults", "bruteforce", False))
         self.opt_password = tk.StringVar()
         self.opt_fast_check = tk.BooleanVar(value=s.get_bool("defaults", "fast_check", True))
+        self.opt_debug = tk.BooleanVar(value=s.get_bool("defaults", "debug", False))
 
         # History (recent sources/dests).
         self.history_enabled = s.get_bool("history", "enabled", False)
@@ -137,6 +139,7 @@ class ExtractorApp:
         s.set("defaults", "max_depth", self.opt_max_depth.get())
         s.set("defaults", "bruteforce", self.opt_bruteforce.get())
         s.set("defaults", "fast_check", self.opt_fast_check.get())
+        s.set("defaults", "debug", self.opt_debug.get())
         if self.settings.get_bool("window", "remember_geometry", True):
             s.set("window", "geometry", self.root.geometry())
         try:
@@ -287,6 +290,7 @@ class ExtractorApp:
             "bruteforce": self.opt_bruteforce.get(),
             "password": self.opt_password.get(),
             "fast_check": self.opt_fast_check.get(),
+            "debug": self.opt_debug.get(),
         }
 
     def _resolve_delete(self):
@@ -568,6 +572,7 @@ class ExtractorApp:
         ttk.Checkbutton(interface, text=GUI_LABELS["auto_fill_destination"], variable=self.auto_fill).pack(anchor="w", pady=1)
         ttk.Checkbutton(interface, text=GUI_LABELS["keep_open"], variable=self.keep_open).pack(anchor="w", pady=1)
         ttk.Checkbutton(interface, text=GUI_LABELS["always_on_top"], variable=self.always_on_top).pack(anchor="w", pady=1)
+        ttk.Checkbutton(interface, text=GUI_LABELS["debug"], variable=self.opt_debug).pack(anchor="w", pady=1)
 
         def save():
             config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})

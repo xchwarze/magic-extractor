@@ -64,6 +64,18 @@ class BuildCommandTest(unittest.TestCase):
         cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"delete_source": True})
         self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z"])
 
+    def test_debug_flag_extract(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"debug": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--debug"])
+
+    def test_debug_flag_scan(self):
+        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"debug": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z", "--debug"])
+
+    def test_debug_omitted_when_false(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"debug": False})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
+
 
 if __name__ == "__main__":
     unittest.main()

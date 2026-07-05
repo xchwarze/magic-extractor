@@ -17,7 +17,10 @@ def build_command(prefix, mode, source, dest, opts):
     opts   : recursive/max_depth/bruteforce/password/fast_check.
     """
     if mode == "scan":
-        return prefix + ["identify", source]
+        cmd = prefix + ["identify", source]
+        if opts.get("debug"):
+            cmd.append("--debug")  # --debug is a common arg on every subcommand
+        return cmd
 
     cmd = prefix + ["extract", source]
     if dest:
@@ -34,6 +37,8 @@ def build_command(prefix, mode, source, dest, opts):
         cmd.append("--delete-source")
     if not opts.get("fast_check", True):
         cmd.append("--no-fast-check")
+    if opts.get("debug"):
+        cmd.append("--debug")
 
     return cmd
 
