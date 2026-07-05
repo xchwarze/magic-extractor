@@ -14,7 +14,7 @@ import subprocess
 import tempfile
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-MAIN_PY = os.path.join(TEST_DIR, '..', 'src', 'main.py')
+MAIN_PY = os.path.join(TEST_DIR, '..', 'cli', 'main.py')
 
 # Non-sample files living under test/ (docs, and installer source scripts that
 # are not extraction targets, e.g. .nsi / .iss).

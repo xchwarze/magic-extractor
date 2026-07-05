@@ -29,7 +29,7 @@ See [Examples](#examples) for `identify`, `list`, `carve`, `--recursive` and `--
 
 The compiled build keeps `bin/`, `data/` and `config.ini` external to the exe so
 they can be updated with a file swap; the path resolver in `main.py` finds them
-beside the executable (frozen) or under `src/` (dev).
+beside the executable (frozen) or under `cli/` (dev).
 
 ## How detection works
 For normal extraction, detectors run in this order with **early-exit** — the first
@@ -76,20 +76,20 @@ Most users just download the release (see [Quick Start](#quick-start)). To run f
 ```bash
 git clone <repo-url>
 cd magic-extractor
-pip install -r src/requirements.txt
+pip install -r cli/requirements.txt
 ```
 
 ## Usage
 Magic Extractor uses subcommands:
 ```bash
-python src/main.py extract  <path> [output_dir] [options]   # detect and extract
-python src/main.py identify <path>                          # report type + candidate handlers
-python src/main.py list     <path>                          # list archive contents
-python src/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
+python cli/main.py extract  <path> [output_dir] [options]   # detect and extract
+python cli/main.py identify <path>                          # report type + candidate handlers
+python cli/main.py list     <path>                          # list archive contents
+python cli/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
 ```
 A bare path with no subcommand defaults to `extract` (backward compatible):
 ```bash
-python src/main.py <path> <output_dir> [options]
+python cli/main.py <path> <output_dir> [options]
 ```
 
 `extract` options:
@@ -108,7 +108,7 @@ python src/main.py <path> <output_dir> [options]
 fragment by index), `--raw` (carve every fragment, not only handler-known ones).
 
 > In the examples below, `magic-extractor` is the built `.exe`. From source, replace
-> it with `python src/main.py` — the arguments are identical.
+> it with `python cli/main.py` — the arguments are identical.
 
 ## Examples
 

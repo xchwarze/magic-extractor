@@ -49,24 +49,24 @@ def _repo_root():
 
 
 def resolve_backend():
-    """Locate the CLI backend. Frozen: sibling exe. Dev: python + src/main.py."""
+    """Locate the CLI backend. Frozen: sibling exe. Dev: python + cli/main.py."""
     if getattr(sys, "frozen", False):
         exe = os.path.join(os.path.dirname(sys.executable), EXE_NAME)
         if os.path.isfile(exe):
             return [exe]
         raise FileNotFoundError(f"Backend not found beside GUI: {exe}")
 
-    main_py = os.path.join(_repo_root(), "src", "main.py")
+    main_py = os.path.join(_repo_root(), "cli", "main.py")
     if os.path.isfile(main_py):
         return [sys.executable, main_py]
     raise FileNotFoundError(f"Backend not found: {main_py}")
 
 
 def resolve_config_path():
-    """config.ini (CLI extraction settings) beside the backend exe (frozen) or under src/ (dev)."""
+    """config.ini (CLI extraction settings) beside the backend exe (frozen) or under cli/ (dev)."""
     if getattr(sys, "frozen", False):
         return os.path.join(os.path.dirname(sys.executable), "config.ini")
-    return os.path.join(_repo_root(), "src", "config.ini")
+    return os.path.join(_repo_root(), "cli", "config.ini")
 
 
 def resolve_gui_config_path():

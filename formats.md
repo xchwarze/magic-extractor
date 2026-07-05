@@ -80,8 +80,8 @@ dedicated handlers cover the rest.
 
 ## Tools
 
-Each handler shells out to a bundled helper binary under `src/bin/extractors/`;
-the four content detectors live under `src/bin/detectors/` (except `puremagic`,
+Each handler shells out to a bundled helper binary under `cli/bin/extractors/`;
+the four content detectors live under `cli/bin/detectors/` (except `puremagic`,
 which is a pip dependency). Tool paths are relative to those directories.
 
 | Handler | Tool | URL |

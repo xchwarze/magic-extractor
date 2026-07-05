@@ -21,7 +21,7 @@ import sys
 import logging
 
 # Make the application source importable and resolve bin/ and data/ under it.
-SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'cli'))
 sys.path.insert(0, SRC_PATH)
 
 import formats

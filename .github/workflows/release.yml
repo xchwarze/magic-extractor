@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r src/requirements.txt
+          pip install -r cli/requirements.txt
           pip install -r gui/requirements.txt
 
       - name: Install PyInstaller and pyinstaller-versionfile
@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           pyivf-make_version \
-            --outfile src/version_info.txt \
+            --outfile cli/version_info.txt \
             --version ${{ env.PROJECT_VERSION }} \
             --company-name "DSR!" \
             --file-description "Magic Extractor - universal extraction tool" \
@@ -47,34 +47,34 @@ jobs:
             --original-filename "magic-extractor.exe" \
             --product-name "Magic Extractor"
           echo "Generated version file content:"
-          cat src/version_info.txt
+          cat cli/version_info.txt
 
       - name: Build the .exe application
-        working-directory: ./src
+        working-directory: ./cli
         run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic --hidden-import send2trash
 
       - name: Build the GUI .exe application
-        working-directory: ./src
+        working-directory: ./cli
         run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --hidden-import gui.paths --hidden-import gui.settings --hidden-import gui.history --hidden-import gui.context_menu --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash
         run: |
-          cp -r src/bin  src/dist/bin
-          cp -r src/data src/dist/data
-          cp src/config.ini src/dist/config.ini
-          cp gui/gui.ini src/dist/gui.ini
-          cp LICENSE.txt readme.md formats.md src/dist/
-          test -f src/dist/magic-extractor-gui.exe
+          cp -r cli/bin  cli/dist/bin
+          cp -r cli/data cli/dist/data
+          cp cli/config.ini cli/dist/config.ini
+          cp gui/gui.ini cli/dist/gui.ini
+          cp LICENSE.txt readme.md formats.md cli/dist/
+          test -f cli/dist/magic-extractor-gui.exe
 
       - name: Smoke test (extract a bundled sample)
-        run: ./src/dist/magic-extractor.exe extract test/7z/test-file.7z
+        run: ./cli/dist/magic-extractor.exe extract test/7z/test-file.7z
 
       - name: Upload the built application as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: magic-extractor
-          path: ./src/dist
+          path: ./cli/dist
 
   create-release:
     needs: generate-build

@@ -139,6 +139,6 @@ dmypy.json
 # reference UniExtract2 install (inspection only)
 UniExtract/
 # dgcac first-run generated config
-src/bin/extractors/dgca/dgca.ini
+cli/bin/extractors/dgca/dgca.ini
 # TrID XML defs (reference source for tools/convert_trid_defs.py)
 triddefs_xml/

@@ -11,7 +11,7 @@ from detection_filter import init_blacklist, filter_mimes, filter_detections, is
 from helpers import delete_source
 
 # Resolve the base path (frozen-exe aware) so 'bin' and 'data' stay external and updatable.
-# When frozen by PyInstaller they live beside the executable; in dev they live under 'src'.
+# When frozen by PyInstaller they live beside the executable; in dev they live under 'cli'.
 if getattr(sys, "frozen", False):
     BASE_PATH = os.path.dirname(sys.executable)
 else:
