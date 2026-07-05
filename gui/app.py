@@ -1,10 +1,13 @@
 """Universal-Extractor-style Tk window that drives the magic-extractor CLI."""
+import os
 import queue
+import subprocess
+import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io, theme, paths
+from gui import runner, config_io, theme, paths, history, context_menu
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
@@ -14,6 +17,8 @@ CONFIG_KEYS = [
     "fix_file_extensions", "create_log_files", "delete_to_recycle_bin",
 ]
 
+LOG_FILENAME = "magic-extractor.log"
+
 
 class ExtractorApp:
     def __init__(self, root, initial_source=None, initial_dest=None, initial_mode=None):
@@ -22,6 +27,7 @@ class ExtractorApp:
         self.log_queue = queue.Queue()
         self.worker = None
         self.cancel_flag = threading.Event()
+        self.batch_queue = []  # list of (mode, source, dest)
 
         # Persisted GUI settings (gui.ini).
         self.settings = GuiSettings(runner.resolve_gui_config_path())
@@ -73,6 +79,12 @@ class ExtractorApp:
         self.opt_password = tk.StringVar()
         self.opt_fast_check = tk.BooleanVar(value=s.get_bool("defaults", "fast_check", True))
 
+        # History (recent sources/dests).
+        self.history_enabled = s.get_bool("history", "enabled", False)
+        self.history_max = s.get_int("history", "max_entries", 10)
+        self._src_hist = history.parse(s.get("history", "sources", "")) if self.history_enabled else []
+        self._dst_hist = history.parse(s.get("history", "dests", "")) if self.history_enabled else []
+
     def _apply_window_prefs(self):
         self.root.attributes("-topmost", self.always_on_top.get())
         if self.settings.get_bool("window", "remember_geometry", True):
@@ -114,6 +126,13 @@ class ExtractorApp:
             ("Open source...", self._browse_source),
             ("Open destination...", self._browse_dest),
             None,
+            ("Clear log", self._clear_log),
+            ("Open log file", self._open_log_file),
+            ("Open log folder", self._open_log_folder),
+            None,
+            ("Show batch queue", self._show_batch),
+            ("Clear batch queue", self._clear_batch),
+            None,
             ("Exit", self._on_close),
         ])
         self.menubar.add_menu("Edit", [
@@ -121,6 +140,9 @@ class ExtractorApp:
             ("Preferences...", self._open_preferences),
             None,
             ("Toggle dark mode", self._toggle_theme),
+            None,
+            ("Add to Explorer menu", self._install_context_menu),
+            ("Remove from Explorer menu", self._uninstall_context_menu),
         ])
         self.menubar.add_menu("Help", [
             ("About", self._about),
@@ -140,7 +162,7 @@ class ExtractorApp:
                         command=self._sync_mode).pack(side="left")
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
-        self.source_entry = ttk.Entry(row, textvariable=self.source)
+        self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
         self.source_entry.pack(side="left", fill="x", expand=True)
         ttk.Button(row, text="...", width=3, command=self._browse_source).pack(side="left", padx=4)
 
@@ -151,7 +173,7 @@ class ExtractorApp:
         self.lock_chk.pack(side="left", padx=4)
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
-        self.dest_entry = ttk.Entry(row, textvariable=self.dest)
+        self.dest_entry = ttk.Combobox(row, textvariable=self.dest, values=self._dst_hist)
         self.dest_entry.pack(side="left", fill="x", expand=True)
         self.dest_btn = ttk.Button(row, text="...", width=3, command=self._browse_dest)
         self.dest_btn.pack(side="left", padx=4)
@@ -218,10 +240,10 @@ class ExtractorApp:
 
     def _on_drop(self, event):
         # tk.splitlist handles brace-wrapped, space-containing, multi-file payloads.
-        paths_ = self.root.tk.splitlist(event.data)
-        if not paths_:
+        dropped = self.root.tk.splitlist(event.data)
+        if not dropped:
             return
-        self.source.set(paths_[0])
+        self.source.set(dropped[0])
         self._autofill(force=True)
 
     def _current_opts(self):
@@ -244,11 +266,60 @@ class ExtractorApp:
                 "Delete each source file after a successful extraction?")
         return False
 
+    def _current_output_dir(self):
+        dest = self.dest.get().strip()
+        if dest:
+            return dest
+        src = self.source.get().strip()
+        return paths.default_output_dir(src) if src else ""
+
+    def _open_path(self, path):
+        if not path or not os.path.exists(path):
+            messagebox.showinfo("Not found", f"Not found:\n{path}")
+            return
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)  # noqa: has startfile on Windows
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+        except OSError as exc:
+            messagebox.showerror("Error", str(exc))
+
+    def _push_history(self, src, dest):
+        if not self.history_enabled:
+            return
+        if src:
+            self._src_hist = history.push(self._src_hist, src, self.history_max)
+        if dest:
+            self._dst_hist = history.push(self._dst_hist, dest, self.history_max)
+        self.source_entry.config(values=self._src_hist)
+        self.dest_entry.config(values=self._dst_hist)
+        self.settings.set("history", "sources", history.join(self._src_hist))
+        self.settings.set("history", "dests", history.join(self._dst_hist))
+        try:
+            self.settings.save()
+        except OSError:
+            pass
+
     def _append(self, text):
         self.log.config(state="normal")
         self.log.insert("end", text + "\n")
         self.log.see("end")
         self.log.config(state="disabled")
+
+    def _clear_log(self):
+        self.log.config(state="normal")
+        self.log.delete("1.0", "end")
+        self.log.config(state="disabled")
+
+    def _open_log_folder(self):
+        self._open_path(self._current_output_dir())
+
+    def _open_log_file(self):
+        out = self._current_output_dir()
+        self._open_path(os.path.join(out, LOG_FILENAME) if out else "")
 
     def _drain_log(self):
         try:
@@ -263,25 +334,57 @@ class ExtractorApp:
         self.ok_btn.config(state=state)
         self.batch_btn.config(state=state)
 
+    # ---- context menu ----------------------------------------------------
+    def _context_menu_parts(self):
+        """Launcher argv the Explorer verb runs (before the "%1" file)."""
+        if getattr(sys, "frozen", False):
+            return [sys.executable]  # the GUI exe itself
+        return [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")]
+
+    def _install_context_menu(self):
+        if not context_menu.is_supported():
+            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.")
+            return
+        try:
+            context_menu.install(self._context_menu_parts())
+            messagebox.showinfo("Done", "Added 'Extract with Magic Extractor' to the Explorer menu.")
+        except OSError as exc:
+            messagebox.showerror("Error", str(exc))
+
+    def _uninstall_context_menu(self):
+        if not context_menu.is_supported():
+            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.")
+            return
+        try:
+            context_menu.uninstall()
+            messagebox.showinfo("Done", "Removed from the Explorer menu.")
+        except OSError as exc:
+            messagebox.showerror("Error", str(exc))
+
     # ---- actions ---------------------------------------------------------
-    def _run_jobs(self, sources):
+    def _run_jobs(self, jobs):
+        """jobs: list of (mode, source, dest). Runs them sequentially, streaming."""
         try:
             prefix = runner.resolve_backend()
         except FileNotFoundError as exc:
             messagebox.showerror("Backend not found", str(exc))
             return
-        mode = self.mode.get()
-        dest = self.dest.get()
         opts = self._current_opts()
-        if mode == "extract":
-            opts["delete_source"] = self._resolve_delete()
+        needs_extract = any(mode == "extract" for mode, _, _ in jobs)
+        # Resolve the Keep/Ask/Delete prompt once, on the main thread.
+        delete_flag = self._resolve_delete() if needs_extract else False
+        for _, src, dest in jobs:
+            self._push_history(src, dest)
         self.cancel_flag.clear()
         self._set_running(True)
 
         def work():
-            for src in sources:
+            for mode, src, dest in jobs:
+                job_opts = dict(opts)
+                if mode == "extract":
+                    job_opts["delete_source"] = delete_flag
                 self.log_queue.put(f"=== {mode}: {src} ===")
-                argv = runner.build_command(prefix, mode, src, dest, opts)
+                argv = runner.build_command(prefix, mode, src, dest, job_opts)
                 self.log_queue.put("$ " + " ".join(argv))
                 code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
                 self.log_queue.put(f"[exit {code}]")
@@ -303,14 +406,44 @@ class ExtractorApp:
         if not src:
             messagebox.showwarning("No source", "Select a source file first.")
             return
-        self._run_jobs([src])
+        self._run_jobs([(self.mode.get(), src, self.dest.get())])
 
     def _on_batch(self):
-        paths_ = filedialog.askopenfilenames(title="Select files to extract")
-        if paths_:
-            self.mode.set("extract")
-            self._sync_mode()
-            self._run_jobs(list(paths_))
+        """UniExtract semantics: with a source, enqueue it; empty source runs the
+        queue; empty source + empty queue opens a multi-file picker and runs."""
+        src = self.source.get().strip()
+        if src:
+            self.batch_queue.append((self.mode.get(), src, self.dest.get()))
+            self._append(f"[queued] {src}")
+            self.source.set("")
+            if not self.lock_dest.get():
+                self.dest.set("")
+            return
+        if self.batch_queue:
+            self._run_queue()
+            return
+        picked = filedialog.askopenfilenames(title="Select files to extract")
+        for path in picked:
+            self.batch_queue.append(("extract", path, ""))
+        if self.batch_queue:
+            self._run_queue()
+
+    def _run_queue(self):
+        jobs = list(self.batch_queue)
+        self.batch_queue.clear()
+        self._run_jobs(jobs)
+
+    def _show_batch(self):
+        if not self.batch_queue:
+            self._append("[batch] queue empty")
+            return
+        self._append("[batch queue]")
+        for index, (mode, src, dest) in enumerate(self.batch_queue):
+            self._append(f"  {index}: {mode} {src} -> {dest or '(auto)'}")
+
+    def _clear_batch(self):
+        self.batch_queue.clear()
+        self._append("[batch] queue cleared")
 
     def _on_cancel(self):
         if self.worker and self.worker.is_alive():
