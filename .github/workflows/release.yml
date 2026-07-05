@@ -16,7 +16,9 @@ jobs:
           python-version: '3.13'
 
       - name: Install dependencies
-        run: pip install -r src/requirements.txt
+        run: |
+          pip install -r src/requirements.txt
+          pip install -r gui/requirements.txt
 
       - name: Install PyInstaller and pyinstaller-versionfile
         run: |
@@ -53,7 +55,7 @@ jobs:
 
       - name: Build the GUI .exe application
         working-directory: ./src
-        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io
+        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --collect-data sv_ttk
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash

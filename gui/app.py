@@ -5,7 +5,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io
+from gui import runner, config_io, theme
 
 CONFIG_KEYS = [
     "open_output_folder", "check_free_space", "check_unicode",
@@ -22,6 +22,7 @@ class ExtractorApp:
         self.cancel_flag = threading.Event()
 
         # State
+        self.theme_mode = theme.initial_mode()
         self.mode = tk.StringVar(value="extract")
         self.source = tk.StringVar()
         self.dest = tk.StringVar()
@@ -35,6 +36,8 @@ class ExtractorApp:
 
         self._build_menu()
         self._build_body()
+        theme.apply(self.root, self.theme_mode)
+        theme.restyle_text(self.log, self.theme_mode)
         self.root.after(100, self._drain_log)
 
     # ---- UI construction -------------------------------------------------
@@ -50,6 +53,8 @@ class ExtractorApp:
         edit_menu = tk.Menu(menubar, tearoff=0)
         edit_menu.add_command(label="Run options...", command=self._open_run_options)
         edit_menu.add_command(label="Preferences...", command=self._open_preferences)
+        edit_menu.add_separator()
+        edit_menu.add_command(label="Toggle dark mode", command=self._toggle_theme)
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -195,9 +200,14 @@ class ExtractorApp:
         else:
             self.root.quit()
 
+    def _toggle_theme(self):
+        self.theme_mode = theme.toggle(self.root)
+        theme.restyle_text(self.log, self.theme_mode)
+
     # ---- dialogs ---------------------------------------------------------
     def _open_run_options(self):
         win = tk.Toplevel(self.root)
+        theme.restyle_toplevel(win, self.theme_mode)
         win.title("Run options")
         ttk.Checkbutton(win, text="Recursive", variable=self.opt_recursive).pack(anchor="w", padx=8, pady=2)
         row = ttk.Frame(win); row.pack(anchor="w", padx=8, pady=2)
@@ -215,6 +225,7 @@ class ExtractorApp:
         current = config_io.read_config(path)
         vars_ = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
         win = tk.Toplevel(self.root)
+        theme.restyle_toplevel(win, self.theme_mode)
         win.title("Preferences")
         for key in CONFIG_KEYS:
             ttk.Checkbutton(win, text=key, variable=vars_[key]).pack(anchor="w", padx=8, pady=2)
