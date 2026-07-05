@@ -20,7 +20,7 @@ jobs:
 
       - name: Install PyInstaller and pyinstaller-versionfile
         run: |
-          pip install pyinstaller pillow
+          pip install pyinstaller
           pip install pyinstaller-versionfile
 
       - name: Determine version from release tag (fallback 0.0.0)
