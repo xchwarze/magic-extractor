@@ -11,13 +11,26 @@ from gui import runner, config_io, theme, paths, history, context_menu
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
-# CLI config.ini flags surfaced in Preferences.
-CONFIG_KEYS = [
-    "open_output_folder", "check_free_space", "check_unicode",
-    "fix_file_extensions", "create_log_files", "delete_to_recycle_bin",
-]
+# CLI config.ini flags surfaced in Preferences, with human-readable labels.
+CONFIG_LABELS = {
+    "open_output_folder": "Open the output folder when finished",
+    "check_free_space": "Check free disk space before extracting",
+    "check_unicode": "Warn about non-ASCII characters in file names",
+    "fix_file_extensions": "Fix wrong file extensions automatically",
+    "create_log_files": "Write a magic-extractor.log in the output folder",
+    "delete_to_recycle_bin": "Send deleted sources to the Recycle Bin (not permanent)",
+}
+CONFIG_KEYS = list(CONFIG_LABELS)
+
+# gui.ini interface toggles surfaced in Preferences.
+GUI_LABELS = {
+    "auto_fill_destination": "Auto-fill the destination from the source file",
+    "keep_open": "Keep the window open after a run finishes",
+    "always_on_top": "Keep the window always on top",
+}
 
 LOG_FILENAME = "magic-extractor.log"
+LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
 
 
 class ExtractorApp:
@@ -91,13 +104,24 @@ class ExtractorApp:
 
     def _apply_window_prefs(self):
         self.root.attributes("-topmost", self.always_on_top.get())
+        geometry = ""
         if self.settings.get_bool("window", "remember_geometry", True):
             geometry = self.settings.get("window", "geometry", "")
-            if geometry:
-                try:
-                    self.root.geometry(geometry)
-                except tk.TclError:
-                    pass
+        if geometry:
+            try:
+                self.root.geometry(geometry)
+                return
+            except tk.TclError:
+                pass
+        self._center_on_screen()
+
+    def _center_on_screen(self):
+        self.root.update_idletasks()
+        w = max(self.root.winfo_reqwidth(), 460)
+        h = max(self.root.winfo_reqheight(), 360)
+        sw = self.root.winfo_screenwidth()
+        sh = self.root.winfo_screenheight()
+        self.root.geometry(f"{w}x{h}+{(sw - w) // 2}+{(sh - h) // 2}")
 
     def _save_settings(self):
         s = self.settings
@@ -153,9 +177,9 @@ class ExtractorApp:
         ])
 
     def _build_body(self):
-        pad = {"padx": 6, "pady": 3}
+        pad = {"padx": 10, "pady": 4}
         frm = ttk.Frame(self.root)
-        frm.pack(fill="both", expand=True, padx=8, pady=8)
+        frm.pack(fill="both", expand=True, padx=12, pady=10)
 
         # Source row
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
@@ -190,9 +214,15 @@ class ExtractorApp:
         self.batch_btn = ttk.Button(row, text="Batch", width=10, command=self._on_batch)
         self.batch_btn.pack(side="left", padx=4)
 
+        ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
+
         # Log pane
-        self.log = tk.Text(frm, height=14, state="disabled", wrap="none")
+        self.log = tk.Text(frm, height=14, state="disabled", wrap="none",
+                           relief="flat", borderwidth=1, padx=8, pady=6)
         self.log.pack(fill="both", expand=True, **pad)
+        self.log.tag_config("hint", foreground="#888888")
+        self._log_empty = True
+        self._show_placeholder()
         self._sync_mode()
 
     # ---- helpers ---------------------------------------------------------
@@ -308,16 +338,24 @@ class ExtractorApp:
         except OSError:
             pass
 
+    def _show_placeholder(self):
+        self.log.config(state="normal")
+        self.log.delete("1.0", "end")
+        self.log.insert("1.0", LOG_PLACEHOLDER, ("hint",))
+        self.log.config(state="disabled")
+        self._log_empty = True
+
     def _append(self, text):
         self.log.config(state="normal")
+        if self._log_empty:
+            self.log.delete("1.0", "end")  # drop the placeholder on first real line
+            self._log_empty = False
         self.log.insert("end", text + "\n")
         self.log.see("end")
         self.log.config(state="disabled")
 
     def _clear_log(self):
-        self.log.config(state="normal")
-        self.log.delete("1.0", "end")
-        self.log.config(state="disabled")
+        self._show_placeholder()
 
     def _open_log_folder(self):
         self._open_path(self._current_output_dir())
@@ -468,13 +506,17 @@ class ExtractorApp:
 
     # ---- dialogs ---------------------------------------------------------
     def _make_dialog(self, title):
-        """A themed Toplevel, hidden until centered so it never flashes off-screen."""
+        """A themed, non-resizable Toplevel hidden until centered; returns
+        (window, padded body frame). Content goes in the body."""
         win = tk.Toplevel(self.root)
         win.withdraw()
         win.transient(self.root)
+        win.resizable(False, False)
         theme.restyle_toplevel(win, self.theme_mode)
         win.title(title)
-        return win
+        body = ttk.Frame(win, padding=14)
+        body.pack(fill="both", expand=True)
+        return win, body
 
     def _center_on_parent(self, win):
         """Center win over the main window, then reveal it."""
@@ -486,38 +528,46 @@ class ExtractorApp:
         win.deiconify()
 
     def _open_run_options(self):
-        win = self._make_dialog("Run options")
-        ttk.Checkbutton(win, text="Recursive", variable=self.opt_recursive).pack(anchor="w", padx=8, pady=2)
-        row = ttk.Frame(win); row.pack(anchor="w", padx=8, pady=2)
+        win, body = self._make_dialog("Run options")
+
+        opts = ttk.LabelFrame(body, text="Extraction", padding=10)
+        opts.pack(fill="x")
+        ttk.Checkbutton(opts, text="Recursive (extract nested archives)", variable=self.opt_recursive).pack(anchor="w", pady=2)
+        row = ttk.Frame(opts); row.pack(anchor="w", pady=2)
         ttk.Label(row, text="Max depth:").pack(side="left")
-        ttk.Spinbox(row, from_=1, to=99, width=5, textvariable=self.opt_max_depth).pack(side="left", padx=4)
-        ttk.Checkbutton(win, text="Bruteforce (try every handler)", variable=self.opt_bruteforce).pack(anchor="w", padx=8, pady=2)
-        ttk.Checkbutton(win, text="Fast type check", variable=self.opt_fast_check).pack(anchor="w", padx=8, pady=2)
-        row = ttk.Frame(win); row.pack(anchor="w", padx=8, pady=2)
+        ttk.Spinbox(row, from_=1, to=99, width=5, textvariable=self.opt_max_depth).pack(side="left", padx=6)
+        ttk.Checkbutton(opts, text="Bruteforce (try every handler)", variable=self.opt_bruteforce).pack(anchor="w", pady=2)
+        ttk.Checkbutton(opts, text="Fast type check", variable=self.opt_fast_check).pack(anchor="w", pady=2)
+        row = ttk.Frame(opts); row.pack(anchor="w", pady=2, fill="x")
         ttk.Label(row, text="Password:").pack(side="left")
-        ttk.Entry(row, textvariable=self.opt_password, show="*").pack(side="left", padx=4)
+        ttk.Entry(row, textvariable=self.opt_password, show="*").pack(side="left", padx=6, fill="x", expand=True)
 
-        ttk.Label(win, text="After extract (source file):").pack(anchor="w", padx=8, pady=(8, 2))
-        for value, label in (("keep", "Keep"), ("ask", "Ask"), ("delete", "Delete")):
-            ttk.Radiobutton(win, text=label, variable=self.opt_delete, value=value).pack(anchor="w", padx=16)
+        after = ttk.LabelFrame(body, text="After a successful extraction", padding=10)
+        after.pack(fill="x", pady=(10, 0))
+        for value, label in (("keep", "Keep the source file"),
+                             ("ask", "Ask before deleting the source"),
+                             ("delete", "Delete the source file")):
+            ttk.Radiobutton(after, text=label, variable=self.opt_delete, value=value).pack(anchor="w", pady=1)
 
-        ttk.Button(win, text="Close", command=win.destroy).pack(pady=6)
+        ttk.Button(body, text="Close", command=win.destroy).pack(pady=(12, 0))
         self._center_on_parent(win)
 
     def _open_preferences(self):
         path = runner.resolve_config_path()
         current = config_io.read_config(path)
         cfg_vars = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
-        win = self._make_dialog("Preferences")
+        win, body = self._make_dialog("Preferences")
 
-        ttk.Label(win, text="Extraction (config.ini):").pack(anchor="w", padx=8, pady=(8, 2))
+        extraction = ttk.LabelFrame(body, text="Extraction", padding=10)
+        extraction.pack(fill="x")
         for key in CONFIG_KEYS:
-            ttk.Checkbutton(win, text=key, variable=cfg_vars[key]).pack(anchor="w", padx=16, pady=1)
+            ttk.Checkbutton(extraction, text=CONFIG_LABELS[key], variable=cfg_vars[key]).pack(anchor="w", pady=1)
 
-        ttk.Label(win, text="Interface (gui.ini):").pack(anchor="w", padx=8, pady=(8, 2))
-        ttk.Checkbutton(win, text="auto_fill_destination", variable=self.auto_fill).pack(anchor="w", padx=16, pady=1)
-        ttk.Checkbutton(win, text="keep_open", variable=self.keep_open).pack(anchor="w", padx=16, pady=1)
-        ttk.Checkbutton(win, text="always_on_top", variable=self.always_on_top).pack(anchor="w", padx=16, pady=1)
+        interface = ttk.LabelFrame(body, text="Interface", padding=10)
+        interface.pack(fill="x", pady=(10, 0))
+        ttk.Checkbutton(interface, text=GUI_LABELS["auto_fill_destination"], variable=self.auto_fill).pack(anchor="w", pady=1)
+        ttk.Checkbutton(interface, text=GUI_LABELS["keep_open"], variable=self.keep_open).pack(anchor="w", pady=1)
+        ttk.Checkbutton(interface, text=GUI_LABELS["always_on_top"], variable=self.always_on_top).pack(anchor="w", pady=1)
 
         def save():
             config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
@@ -525,7 +575,9 @@ class ExtractorApp:
             self._save_settings()
             win.destroy()
 
-        ttk.Button(win, text="Save", command=save).pack(pady=6)
+        buttons = ttk.Frame(body); buttons.pack(pady=(12, 0))
+        ttk.Button(buttons, text="Save", command=save).pack(side="left", padx=4)
+        ttk.Button(buttons, text="Cancel", command=win.destroy).pack(side="left", padx=4)
         self._center_on_parent(win)
 
     def _about(self):
