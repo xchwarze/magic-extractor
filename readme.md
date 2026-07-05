@@ -1,5 +1,9 @@
 # Magic Extractor
 
+<p align="center">
+  <img src="assets/icon.png" alt="Magic Extractor" width="250" height="250">
+</p>
+
 ## Description
 Magic Extractor is a universal extraction tool for Windows that identifies a file
 with several detectors and routes it to the right bundled extractor. It aims to
