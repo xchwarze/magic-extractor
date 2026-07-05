@@ -11,17 +11,20 @@ cover mainstream compression formats, the installers you actually see today, and
 range of less common archivers.
 
 ## Quick Start
-```bash
-# from source: install deps once (or just use the release .exe)
-pip install -r src/requirements.txt
+1. **Download** the latest release `.zip` and **unzip** it. Keep the folder intact —
+   `magic-extractor.exe` must stay next to the `bin/` and `data/` folders.
+2. Open a terminal in that folder and extract anything (the type is auto-detected):
+   ```text
+   magic-extractor.exe extract mystery.bin
+   ```
+   Output lands in `mystery_extracted/`.
+3. Not sure what a file is? Ask, without extracting:
+   ```text
+   magic-extractor.exe identify mystery.bin
+   ```
 
-# extract anything — the type is auto-detected, output goes to <name>_extracted/
-python src/main.py extract some-archive.7z
-
-# not sure what a file is? ask (no extraction):
-python src/main.py identify some-file.bin
-```
 That's it. See [Examples](#examples) for `list`, `carve`, `--recursive` and `--bruteforce`.
+(Running from source instead? Use `python src/main.py …` — same arguments.)
 
 ## Project Structure
 - `src`: source code.
@@ -77,7 +80,8 @@ loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist
 ## Supported Formats
 See [formats.md](formats.md) for the full list of formats and their handlers.
 
-## Installation
+## Installation (from source)
+Most users just download the release (see [Quick Start](#quick-start)). To run from source:
 ```bash
 git clone <repo-url>
 cd magic-extractor
