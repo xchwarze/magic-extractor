@@ -10,6 +10,19 @@ with several detectors and routes it to the right bundled extractor. It aims to
 cover mainstream compression formats, the installers you actually see today, and a
 range of less common archivers.
 
+## Quick Start
+```bash
+# from source: install deps once (or just use the release .exe)
+pip install -r src/requirements.txt
+
+# extract anything — the type is auto-detected, output goes to <name>_extracted/
+python src/main.py extract some-archive.7z
+
+# not sure what a file is? ask (no extraction):
+python src/main.py identify some-file.bin
+```
+That's it. See [Examples](#examples) for `list`, `carve`, `--recursive` and `--bruteforce`.
+
 ## Project Structure
 - `src`: source code.
   - `bin`: bundled detector and extractor binaries.
@@ -98,6 +111,56 @@ python src/main.py <path> <output_dir> [options]
 
 `carve` options: `--list` (print the binwalk fragment table), `--fragment N` (carve one
 fragment by index), `--raw` (carve every fragment, not only handler-known ones).
+
+> In the examples below, `magic-extractor` is the built `.exe`. From source, replace
+> it with `python src/main.py` — the arguments are identical.
+
+## Examples
+
+**Extract an archive** — you don't need to know its type; it is auto-detected:
+```text
+magic-extractor extract mystery.bin
+# extracts into mystery_extracted/ next to the file
+```
+
+**Identify** a file without touching it — shows what each detector saw and which
+handler would run:
+```text
+magic-extractor identify setup.exe
+File: setup.exe
+  [DIE] detect   inno setup installer
+Candidate handlers (in order):
+  - FormatInnoSetupHandler
+```
+
+**List** an archive's contents (no extraction):
+```text
+magic-extractor list backup.7z
+```
+
+**Recursive** — extract archives found inside the output (e.g. a .tar.gz, or an
+installer that contains more archives), up to `--max-depth` levels:
+```text
+magic-extractor extract app-1.0.tar.gz --recursive
+```
+
+**Bruteforce** — when detection is unsure, try every handler that matched instead
+of stopping at the first:
+```text
+magic-extractor extract weird-archive.dat --bruteforce
+```
+
+**Carve** — pull archives that are embedded at some offset inside a bigger file
+(classic for firmware images). Inspect first, then carve:
+```text
+magic-extractor carve router-firmware.bin --list
+IDX      OFFSET          SIZE  NAME       DESCRIPTION
+  0  0x00000000       793,720  pe         Windows PE binary
+  1  0x000c1c78     2,495,983  lzma       LZMA compressed data
+
+magic-extractor carve router-firmware.bin              # carve + extract the known blobs
+magic-extractor carve router-firmware.bin --fragment 1 # carve only fragment #1
+```
 
 ## Building (Windows)
 ```bash
