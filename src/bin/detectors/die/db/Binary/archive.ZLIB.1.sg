@@ -1,13 +1,14 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: LinXP
 
-init("data", "");
+meta("data");
 includeScript("zlib");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
-    if (detect_zlib(Binary, 0, bShowOptions)) {
+function detect() {
+    if (detect_zlib(Binary, 0)) {
         sName = "ZLIB data";
         bDetected = true;
-    };
-    return result(bShowType, bShowVersion, bShowOptions);
+    }
+
+    return result();
 }

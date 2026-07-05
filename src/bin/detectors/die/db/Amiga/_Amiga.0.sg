@@ -1,8 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("operation system", "Amiga");
+meta("operation system", "AmigaOS");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (Amiga.isVerbose()) {
         sName = Amiga.getOperationSystemName();
         sVersion = Amiga.getOperationSystemVersion();
@@ -11,5 +12,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

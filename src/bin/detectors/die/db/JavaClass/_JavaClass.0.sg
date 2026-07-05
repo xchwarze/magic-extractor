@@ -1,0 +1,14 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("format", "JavaClass");
+
+function detect() {
+    sName = JavaClass.getFileFormatName();
+    sVersion = JavaClass.getFileFormatVersion();
+    sOptions = JavaClass.getFileFormatOptions();
+
+    bDetected = true;
+
+    return result();
+}

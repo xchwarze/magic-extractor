@@ -1,0 +1,46 @@
+// Detect It Easy: detection rule file
+
+// Author: DosX
+// E-Mail: collab@kay-software.ru
+// GitHub: https://github.com/DosX-dev
+// Telegram: @DosX_dev
+
+// https://github.com/praeclarum/sqlite-net (.NET)
+meta("library", "SQLite");
+
+function detect() {
+    var sLibrary = PE.isLibraryPresentExp(/sqlite\d+/i);
+    if (sLibrary) {
+        var match = /sqlite(\d+)/i.exec(sLibrary);
+
+        if (match) {
+            sVersion = match[1];
+        }
+
+        bDetected = true;
+    } else {
+        var sExportFunction = PE.isExportFunctionPresentExp(/sqlite\d+/i);
+        if (sExportFunction) {
+            sOptions = "static"; // EAT
+
+            var match = /sqlite(\d+)/i.exec(sExportFunction);
+
+            if (match) {
+                sVersion = match[1];
+            }
+
+            bDetected = true;
+        } else if (PE.isLibraryPresentExp(/sqlite|sqlmin|sqllang|sqltses|sqldk/i)) {
+            bDetected = true;
+        }
+    }
+
+    if (!bDetected && PE.isNet()) {
+        if (PE.isNetObjectPresent("SQLite-net")) {
+            sName += "-net";
+            bDetected = true;
+        }
+    }
+
+    return result();
+}

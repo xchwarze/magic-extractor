@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("compiler", "Small C");
+meta("compiler", "Small C");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("b8....8ed826a1....2d....80fc..72..b8....b1..d3e0fa8cdb8ed38be050fbb8....2d....d3e08bd8fec73bdc72..b8....50e8")) {
         sVersion = "2.2";
         sOptions = "1982-88 by J. E. Hendrix";
@@ -14,7 +14,7 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
+    sLang = "C";
 
-    _setLang("C", bDetected);
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

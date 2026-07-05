@@ -1,9 +1,10 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: Jason Hood <jadoxa@yahoo.com.au>
 
-includeScript("rar");
+includeScript("rar-file");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
-    detect_RAR(0, bShowOptions);
-    return result(bShowType, bShowVersion, bShowOptions);
+function detect() {
+    detect_RAR(0);
+
+    return result();
 }

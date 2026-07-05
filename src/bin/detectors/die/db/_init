@@ -1,128 +1,87 @@
-/**
- * The type of the signature. For example <code>compiler</code> or <code>packer</code>.
- */
-var sType;
-/**
- * The name of the signature.
- */
-var sName;
-/**
- * The version of the signature.
- */
-var sVersion;
-/**
- * Options used by the signature.
- */
-var sOptions;
-/**
- * The flag to indicate the signature was found.
- */
-var bDetected;
+// Detect It Easy: DiE-JS framework file
+// Don't change anything unless you're sure about what you're doing
+
+includeScript("_debug");
+includeScript("_runtime_helpers");
+includeScript("language");
+
+var bDetected,
+    sType,
+    sName,
+    sVersion,
+    sOptions,
+    sLang,
+    sLangVersion;
 
 /**
- * Initialize a signature.
- * @param {String} [sType="unknown"] - The signature type.
- * @param {String} [sName="unknown"] - The signature name.
- * @param {String} [sVersion=""] - The signature version.
- * @param {String} [sOptions=""] - The signature options.
+ * Initializes the detection process with the given parameters.
+ *
+ * @param {string} sType - The type of the item to detect.
+ * @param {string} sName - The name of the item to detect.
+ * @param {string} [sVersion] - The version of the item to detect. Optional.
+ * @param {string} [sOptions] - Additional options for detection. Optional.
+ * @param {string} [sLang] - The programming language of the item to detect. Optional.
+ * @param {string} [sLangVersion] - The version of the programming language. Optional.
  */
-function init() {
-    sType = arguments[0] ? arguments[0] : "unknown";
-    sName = arguments[1] ? arguments[1] : "unknown";
-    sVersion = arguments[2] ? arguments[2] : "";
-    sOptions = arguments[3] ? arguments[3] : "";
+function meta(
+    sTypeInput,       // (*) type
+    sNameInput,       // (*) name
+    sVersionInput,    //     version
+    sOptionsInput,    //     options
+    sLangInput,       //     language
+    sLangVersionInput //     language version
+) {
+    if (!sTypeInput) _error("No input detection type.");
+
+    sType = sTypeInput;
+    sName = sNameInput ? sNameInput : String();
+
+    sVersion = sVersionInput ? sVersionInput : String();
+    sOptions = sOptionsInput ? sOptionsInput : String();
+    sLang = sLangInput ? sLangInput : String();
+    sLangVersion = sLangVersionInput ? sLangVersionInput : String();
+
     bDetected = false;
 }
 
+function init() { meta.apply(null, arguments); }
+
+
 /**
- * Append one or more strings.
- * @param {...String} sString - String(s) to append.
- * @returns {String} The new string.
- * @global
- * @example
- * sOptions=sOptions.append("debug",string1);
+ * Processes the detection result and resets the detection variables.
+ *
+ * If a detection has been made (bDetected is true), this function sets the result
+ * using the _setResult function with the provided type, name, version, and options.
+ * After setting the result, it resets the detection flag (bDetected) to false.
+ *
+ * Regardless of whether a detection was made, it resets the sName, sVersion, and sOptions
+ * variables to empty strings.
  */
-String.prototype.append = function() {
-    var s = this.valueOf();
-    var sep = ",";
-    if (arguments.length) {
-        if (s) s += sep;
-        s += arguments[0];
-        for (var i = 1; i < arguments.length; i++) {
-            s += sep + arguments[i];
+function result() {
+    if (bDetected) {
+        sVersion = sVersion ? sVersion : String();
+        sOptions = sOptions ? sOptions : String();
+
+        if (sName) {
+            _setResult(sType, sName, sVersion, sOptions);
+
+            if (sLang) {
+                if (sLangVersion) {
+                    _setLang(sLang, sLangVersion);
+                } else {
+                    _setLang(sLang);
+                }
+            }
+        } else {
+            _error("No input detection name.");
         }
     }
-    return s;
-}
 
-/**
- * Append a string with a custom separator.
- * @param {String} sString - String to append.
- * @param {String} [sSep=","] - Separator string.
- * @returns {String} The new string.
- * @global
- * @example
- * sOptions=sOptions.appendS("debug","::");
- */
-String.prototype.appendS = function() {
-    var s = this.valueOf();
-    var sep = arguments[1] ? arguments[1] : ",";
-    if (arguments.length) {
-        if (s) s += sep;
-        s += arguments[0];
-    }
-    return s
-}
+    sName = sVersion = sOptions = sLang = sLangVersion = '';
 
-String.prototype.addIfNone = function() {
-    var s = this.valueOf();
-    if (arguments.length)
-        if (s.indexOf(arguments[0]) < 0) s += arguments[0]
-    return s;
-}
+    var resultValue = bDetected;
 
-/**
- * Pad the start of a line with spaces or the character given.
- * This reimplements missing functionality of the more modern ECMAScript.
- * @param {String or Number} The width desired.
- * @param {Number} [nPad=" "] The padding string. Loops.
- * @returns {String} The new string.
- * @global
- * @example
- * var a = 12; ...; if("aba12" === a.padStart(5,"ab")) ...
- */
-String.prototype.padStart = function() {
-    var s = this.valueOf();
-    if (!s.length || !arguments.length || s.length <= arguments[0].length) return s;
-    var c = 0,
-        p = ' ';
-    if (arguments.length > 1) p = arguments[1].toString();
-    var pp = "";
-    for (var i = 0; i < Math.max(0, arguments[0] - s.length); i++) {
-        pp += p[c];
-        c++;
-        if (c === p.length) c = 0
-    }
-    return pp + s
-}
+    bDetected = false;
 
-Number.prototype.padStart = function() {
-    var s = this.valueOf().toString();
-    if (!arguments.length || s.length >= arguments[0]) return s;
-    var c = 0,
-        p = ' ';
-    if (arguments.length > 1) p = arguments[1].toString();
-    var pp = "";
-    for (var i = 0; i < Math.max(0, arguments[0] - s.length); i++) {
-        pp += p[c];
-        c++;
-        if (c === p.length) c = 0
-    }
-    return pp + s
+    return resultValue;
 }
-
-function debug(messageText) {
-    _setResult("dev-output", messageText, "", "");
-}
-
-includeScript("language");

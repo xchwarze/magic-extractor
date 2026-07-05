@@ -1,0 +1,14 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "NoobyProtect");
+
+function detect() {
+    var impSection = PE.section[PE.getImportSection()];
+    if (impSection && impSection.Name == "SE") {
+        sVersion = "Safengine";
+        bDetected = true;
+    }
+
+    return result();
+}

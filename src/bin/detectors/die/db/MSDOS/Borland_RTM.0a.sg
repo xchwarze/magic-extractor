@@ -1,7 +1,7 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("extender", "Borland RTM DPMI loader");
+meta("extender", "Borland RTM DPMI loader");
 
 function getBLVersion() {
     var sResult = "";
@@ -16,7 +16,7 @@ function getBLVersion() {
     return sResult;
 }
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("b8....8ed8b8....bb....8ed08be38926....0626......8ec0263b......74..e9")) {
         sVersion = "1.0-1.5";
         bDetected = true;
@@ -24,10 +24,10 @@ function detect(bShowType, bShowVersion, bShowOptions) {
 
     if (bDetected) {
         var sBL = getBLVersion();
-        if (sBL != "") {
+        if (sBL) {
             sVersion = sBL;
         }
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

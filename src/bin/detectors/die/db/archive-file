@@ -1,6 +1,9 @@
+// Detect It Easy: DiE-JS framework file
+// Don't change anything unless you're sure about what you're doing
+
 // Common routines for handling archives.
 
-init("archive");
+meta("archive");
 
 var Archive = {
     nFiles: 0, // number of files in archive

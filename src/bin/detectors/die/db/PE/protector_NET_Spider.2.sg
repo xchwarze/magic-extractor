@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", ".NET Spider");
+
+function detect() {
+    if (PE.isNet() && PE.isSignatureInSectionPresent(0, "'Protected_By_Attribute'00'NETSpider.Attribute'")) {
+        sVersion = "0.5-1.3";
+        bDetected = true;
+    }
+
+    return result();
+}

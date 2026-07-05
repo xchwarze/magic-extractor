@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("library", "Microsoft RTL");
+meta("library", "Microsoft RTL");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("b430cd213c..73..cd208cc18cd32bd981c3....b4..cd2172..8cd6bf....2bf7b1..d3e6fa8ed703e6fb")) {
         bDetected = true;
     } else if (MSDOS.compareEP("1e068cc88ed88cc0a3....83c0..a3....b430cd213c..73..b8....8ed8b8....ea........e8....e8....e8....8e")) {
@@ -44,5 +44,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

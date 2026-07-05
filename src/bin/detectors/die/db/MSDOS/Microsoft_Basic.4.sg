@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("compiler", "Microsoft Basic");
+meta("compiler", "Microsoft Basic");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("eb$$0e1fb8....e8....8eda938a170ad274..b4..cd2143eb..b8....cd21")) {
         sVersion = "7.10";
         bDetected = true;
@@ -17,7 +17,7 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
+    sLang = "Basic";
 
-    _setLang("Basic", bDetected);
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

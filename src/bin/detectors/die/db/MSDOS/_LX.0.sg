@@ -1,0 +1,12 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("type", "LX");
+
+function detect() {
+    if (MSDOS.isLX()) {
+        bDetected = true;
+    }
+
+    return result();
+}

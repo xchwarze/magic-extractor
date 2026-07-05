@@ -1,13 +1,14 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("format", "ISO 9660");
+meta("format", "ISO 9660");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (Binary.getSize() > 0x8010) {
-        if (Binary.compare("01'CD001'01", 0x8000)) {
+        if (Binary.compare("01'CD001'01", 0x8000) || Binary.compare("01'CD001'01", 0x9318) || Binary.compare("01'CD001'01", 0x9310)) {
             bDetected = true;
         }
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

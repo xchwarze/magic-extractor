@@ -1,17 +1,18 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("format", "Archive");
+meta("format", "Archive");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (Archive.isVerbose()) {
         sName = Archive.getFileFormatName();
         sVersion = Archive.getFileFormatVersion();
         sOptions = Archive.getFileFormatOptions();
         
-        if (sName != "") {
+        if (sName) {
             bDetected = true;
         }
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

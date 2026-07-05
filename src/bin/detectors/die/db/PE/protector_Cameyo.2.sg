@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "Cameyo");
+
+function detect() {
+    if (PE.isOverlayPresent() && PE.compareOverlay("'MZ'") && PE.getVersionStringInfo("ProductName") == "Cameyo Application Virtualization") {
+        sVersion = PE.getFileVersion();
+        bDetected = true;
+    }
+
+    return result();
+}

@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("compiler", "Microsoft Quick Basic");
+meta("compiler", "Microsoft Quick Basic");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("1e071e2e8e1e....b430cd2150812e........8b36....ad91ade3..3d....72..3d....73..ba....eb..0bc075..c706........c706........33c99a")) {
         bDetected = true;
     } else if (MSDOS.compareEP("e9$$$$8cda83c2..8edaa1....0e1ffc3d....74..e9....b430cd213c..73..e9$$$$ba....0e1fb409cd21b8....cd21")) {
@@ -25,11 +25,11 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         sVersion = "1.0";
         bDetected = true;
     } else if (MSDOS.compareEP("b8....8ed88c06....fa8ed0bc....fbb430cd21a3....3c..75..06b4..cd218c06....b9")) {
-        sVersion = "4.x";
+        sVersion = "4.X";
         bDetected = true;
     }
 
+    sLang = "Basic";
 
-    _setLang("Basic", bDetected);
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

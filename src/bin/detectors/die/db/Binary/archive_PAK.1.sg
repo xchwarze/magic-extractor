@@ -1,0 +1,29 @@
+// Detect It Easy: detection rule file
+// Author: BJNFNE <bjnfne@web.de>
+
+// PAK archive format is more generic, so extend this signature if required.
+// http://justsolve.archiveteam.org/wiki/PAK
+meta("archive", "PAK");
+
+function detect() {
+    if (Binary.compare("'DPAK'0000010018")) {
+        sVersion = "Lego Creator";
+        bDetected = true;
+    } else if (Binary.compare("'PACK'7faf000080")) {
+        bDetected = true;
+    } else if (Binary.compare("'RWPACK'0000000080")) {  // https://archive.gamedev.net/archive/reference/articles/article1991.html
+        sName = "PAK Compiler";
+        sOptions = "Raymond Wilson";
+        sVersion = "2008";
+        bDetected = true;
+    } else if (Binary.compare("'MUDGE4'2e30")) { // https://www.ign.com/games/producer/witan
+        sVersion = Binary.getString(8);
+        var match = sVersion.match(/(\d{2})\/(\d{2})\/(\d{4}).*Copyright\s+(.+?)(?:\x00|$)/i);
+        if (match) {
+            sVersion = match[1] + "/" + match[2] + "/" + match[3] + ", " + match[4].trim();
+            bDetected = true;
+        }
+    }
+
+    return result();
+}

@@ -1,8 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("compiler", "Borland Kylix");
+meta("compiler", "Borland Kylix");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (ELF.isSectionNamePresent("borland.ressym")) {
         bDetected = true;
     } else if (ELF.isSectionNamePresent("borland.reshash")) {
@@ -13,6 +14,7 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    _setLang("Pascal/C/C++", bDetected);
-    return result(bShowType, bShowVersion, bShowOptions);
+    sLang = "Pascal/C/C++";
+
+    return result();
 }

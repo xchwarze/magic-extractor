@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "G!X Protector");
+
+function detect() {
+    if (PE.compareEP("60EB05E8EB044000EBFAE80A000000")) {
+        sVersion = "1.2";
+        bDetected = true;
+    }
+
+    return result();
+}

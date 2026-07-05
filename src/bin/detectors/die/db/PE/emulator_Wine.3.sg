@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("emulator", "Wine");
+
+function detect() {
+    if (PE.compare("'Wine'", 0x40)) {
+        sVersion = "1.X";
+        bDetected = true;
+    }
+
+    return result();
+}

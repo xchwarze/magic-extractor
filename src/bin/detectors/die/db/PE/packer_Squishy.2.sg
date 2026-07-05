@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+// Made by KDSS-Research
+
+meta("packer", "Squishy");
+
+function detect() {
+    if (PE.isSectionNamePresent("logicoma")) {
+        bDetected = true;
+    }
+
+    return result();
+}

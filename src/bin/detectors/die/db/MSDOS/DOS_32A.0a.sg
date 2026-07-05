@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("extender", "DOS/32A DOS Extender");
+meta("extender", "DOS/32A DOS Extender");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("fb0e1f8c1e....8c06....8c16....26a1....a3....fce8....e8....e8....8cd0268b36....05")) {
         sVersion = "R9-07.0101.2011";
         sOptions = "1996-98, 2002 by Narech Koumar (Supernar Systems, Ltd.)";
@@ -18,5 +18,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

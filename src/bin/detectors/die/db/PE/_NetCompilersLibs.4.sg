@@ -1,10 +1,11 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+
 // Author: DosX
 // E-Mail: collab@kay-software.ru
 // GitHub: https://github.com/DosX-dev
+// Telegram: @DosX_dev
 
 function detect() {
-
     // https://github.com/0xd4d/dnlib
     if (PE.isNetObjectPresent("dnlib") && PE.isNetObjectPresent("ModuleDef"))
         _setResult("library", "dnlib", "", "");
@@ -25,12 +26,12 @@ function detect() {
             languages = "C#";
 
         if (PE.isNetObjectPresent("VBCodeProvider"))
-            languages += (languages != "" ? " + " : "") + "VB.NET";
+            languages += (languages ? " + " : "") + "VB.NET";
 
         if (PE.isNetObjectPresent("JScriptCodeProvider")) // Should check the relation to System.CodeDom......
-            languages += (languages != "" ? " + " : "") + "JScript";
+            languages += (languages ? " + " : "") + "JScript";
 
-        if (languages != "") {
+        if (languages) {
             _setResult("library", "CodeDom Compiler", "", languages);
         }
     }

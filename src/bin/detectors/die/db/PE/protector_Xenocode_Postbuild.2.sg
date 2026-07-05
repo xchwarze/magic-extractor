@@ -1,0 +1,15 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "Xenocode Postbuild");
+
+function detect() {
+    if (PE.isNetObjectPresent("Xenocode.Client.Attributes.AssemblyAttributes")) {
+        sVersion = "2.X-3.X";
+        bDetected = true;
+    } else if (PE.isSectionNamePresent(".xcpad") && PE.compareOverlay("'xvm'0001")) {
+        bDetected = true;
+    }
+
+    return result();
+}

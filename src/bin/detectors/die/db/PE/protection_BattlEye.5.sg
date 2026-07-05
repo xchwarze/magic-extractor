@@ -1,0 +1,19 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+// https://www.battleye.com/
+meta("protection", "BattlEye");
+
+function detect() {
+    if (PE.getSectionNameCollision("0", "1") === ".be" && // VMProtect'ed
+        (PE.isLibraryPresentExp(/ntdll/) || PE.isFunctionPresent("CryptCATAdminAcquireContext")) &&
+        PE.isSigned()) {
+        bDetected = true;
+
+        if (PE.isSignaturePresent(0x00, PE.getSize() - PE.getOverlaySize(), "'https://cdn.battleye.com/%S/%s/%s'")) {
+            sVersion = "Launcher";
+        }
+    }
+
+    return result();
+}

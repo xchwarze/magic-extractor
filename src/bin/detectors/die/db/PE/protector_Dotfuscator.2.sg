@@ -1,0 +1,12 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "Dotfuscator");
+
+function detect() {
+    if (_getNumberOfResults("protector") <= 2 && PE.isNetObjectPresent("DotfuscatorAttribute")) {
+        bDetected = true;
+    }
+
+    return result();
+}

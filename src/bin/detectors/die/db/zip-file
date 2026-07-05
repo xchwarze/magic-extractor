@@ -1,10 +1,13 @@
+// Detect It Easy: DiE-JS framework file
+// Don't change anything unless you're sure about what you're doing
+
 // Detect a zip archive.
 // Author: Jason Hood <jadoxa@yahoo.com.au>
 
 includeScript("archive-file");
 sName = "Zip";
 
-function detect_Zip(bFile, bShowOptions) {
+function detect_Zip(bFile) {
     var nOffset = 0;
     if (bFile) {
         // Don't know what this is, but I happened to have a file that started
@@ -60,33 +63,28 @@ function detect_Zip(bFile, bShowOptions) {
         }
 
         var nVer = 0;
-        if (!bShowOptions) {
-            // Just take the first file and assume it carries through.
-            if (File.readByte(nOffset + 6) & 1) {
-                sOptions = "encrypted";
+
+        var bEncrypted = 0;
+        do {
+            var v = File.readByte(nOffset + 4);
+            if (v > nVer) {
+                nVer = v;
             }
-            nVer = File.readByte(nOffset + 4);
-        } else {
-            var bEncrypted = 0;
-            do {
-                var v = File.readByte(nOffset + 4);
-                if (v > nVer) {
-                    nVer = v;
-                }
-                if (!bEncrypted && (File.readByte(nOffset + 6) & 1)) {
-                    bEncrypted = 1;
-                }
-                var nPacked = File.readDword(nOffset + 0x12);
-                var nName = File.readWord(nOffset + 0x1A);
-                Archive.add(File.readDword(nOffset + 0x16), nPacked,
-                    nPacked == 0 && File.readByte(nOffset + 0x1E + nName - 1) == 0x2F);
-                nOffset += 0x1E + nName + File.readWord(nOffset + 0x1C) + nPacked;
-            } while (File.compare("'PK'0304", nOffset));
-            if (bEncrypted) {
-                sOptions = "encrypted";
+            if (!bEncrypted && (File.readByte(nOffset + 6) & 1)) {
+                bEncrypted = 1;
             }
-            sOptions = sOptions.append(Archive.contents());
+            var nPacked = File.readDword(nOffset + 0x12);
+            var nName = File.readWord(nOffset + 0x1A);
+            Archive.add(File.readDword(nOffset + 0x16), nPacked,
+                nPacked == 0 && File.readByte(nOffset + 0x1E + nName - 1) == 0x2F);
+            nOffset += 0x1E + nName + File.readWord(nOffset + 0x1C) + nPacked;
+        } while (File.compare("'PK'0304", nOffset));
+
+        if (bEncrypted) {
+            sOptions = "encrypted";
         }
+        sOptions = sOptions.append(Archive.contents());
+
         sVersion = (nVer / 10).toFixed(1);
     }
 }

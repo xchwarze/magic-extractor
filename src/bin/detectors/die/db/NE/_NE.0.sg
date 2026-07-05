@@ -1,8 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("operation system", "Windows");
+meta("operation system", "Windows");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (NE.isVerbose()) {
         sName = NE.getOperationSystemName();
         sVersion = NE.getOperationSystemVersion();
@@ -11,5 +12,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

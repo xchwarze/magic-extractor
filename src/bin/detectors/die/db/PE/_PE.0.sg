@@ -1,22 +1,23 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("operation system", "Windows");
+meta("operation system", "Windows");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (PE.isVerbose()) {
         sName = PE.getOperationSystemName();
-        sVersion = PE.getOperationSystemVersion();
         sOptions = PE.getOperationSystemOptions();
 
         bDetected = true;
 
-        if (PE.section[".rossym"]) {
-            if (PE.section[".rossym"].Characteristics == 0x42000802) {
-                sVersion = "v0.3+";
-                sName = "React OS";
-            }
+        var rossymSection = PE.section[".rossym"];
+
+        if (rossymSection && rossymSection.Characteristics == 0x42000802) {
+            sVersion = "React OS, 0.3+";
+        } else {
+            sVersion = PE.getOperationSystemVersion();
         }
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

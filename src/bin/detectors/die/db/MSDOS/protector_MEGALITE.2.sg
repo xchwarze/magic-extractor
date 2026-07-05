@@ -1,0 +1,13 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "MEGALITE");
+
+function detect() {
+    if (MSDOS.compareEP("B8....BA....05....3B2D73..72..B409BA....CD21CD90")) {
+        sVersion = "1.20a";
+        bDetected = true;
+    }
+
+    return result();
+}

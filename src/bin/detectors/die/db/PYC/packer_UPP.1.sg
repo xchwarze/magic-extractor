@@ -1,0 +1,14 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+// https://github.com/KatzenTechnologies/UPP
+init("packer", "UPP");
+
+function detect() {
+    if (PYC.isConstPresent("UPP!1.10")) {
+        sVersion = "1.10";
+        bDetected = true;
+    }
+
+    return result();
+}

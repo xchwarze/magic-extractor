@@ -1,8 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
 
-init("virtual machine", "JVM");
+meta("virtual machine", "JVM");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (JAR.isVerbose()) {
         sName = JAR.getOperationSystemName();
         sVersion = JAR.getOperationSystemVersion();
@@ -11,5 +12,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

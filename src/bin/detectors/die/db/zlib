@@ -1,7 +1,10 @@
+// Detect It Easy: DiE-JS framework file
+// Don't change anything unless you're sure about what you're doing
+
 // Detect a ZLIB.
 // Author: LinXP
 
-function detect_zlib(bFile, nOffset, bShowOptions) {
+function detect_zlib(bFile, nOffset) {
     var sInfo = "ZLIB compression";
     if (bFile.compare("7801", nOffset)) {
         if (bFile.isVerbose()) { sInfo += " fastest" }

@@ -1,9 +1,8 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: Jason Hood <jadoxa@yahoo.com.au>
 
 includeScript("zip-file");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
-    detect_Zip(0, bShowOptions);
-    return result(bShowType, bShowVersion, bShowOptions);
+function detect() {
+    detect_Zip(0);
 }

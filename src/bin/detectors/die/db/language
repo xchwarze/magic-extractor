@@ -1,3 +1,6 @@
+// Detect It Easy: DiE-JS framework file
+// Don't change anything unless you're sure about what you're doing
+
 // Author: DosX
 // E-Mail: collab@kay-software.ru
 // GitHub: https://github.com/DosX-dev
@@ -11,38 +14,41 @@ function _isLangDetected() {
     return _getNumberOfResults("language") || _getNumberOfResults("~language");
 }
 
-function _setLang(languageName, isPositive, version) {
-    if (isPositive == true || isPositive == undefined) {
-        // if "C/C++" already detected
-        if (_isLangPresent("C/C++") && (languageName == "C" || languageName == "C++")) {
-            _removeResult("language", "C/C++");
-        }
+function _setLang(languageName, version) {
+    // WAYBACK SUPPORT; WILL BE REMOVED.
+    if (typeof version === "boolean" && !version) {
+        return null;
+    }
 
-        // if "C" or "C++"" detected
-        if (languageName == "C/C++" && (_isLangPresent("C") || _isLangPresent("C++"))) {
-            return null;
-        }
+    // if "C/C++" already detected
+    if (_isLangPresent("C/C++") && (languageName == "C" || languageName == "C++")) {
+        _removeResult("language", "C/C++");
+    }
 
-        // False-positive detection of C
-        if (_isLangPresent("C") && languageName !== "C") {
-            _removeResult("language", "C");
-        }
+    // if "C" or "C++"" detected
+    if (languageName == "C/C++" && (_isLangPresent("C") || _isLangPresent("C++"))) {
+        return null;
+    }
 
-        // False-positive detection of C++
-        if (_isLangPresent("C++") && languageName !== "C++") {
-            _removeResult("language", "C++");
-        }
+    // False-positive detection of C
+    if (_isLangPresent("C") && languageName !== "C") {
+        _removeResult("language", "C");
+    }
 
-        // If the language already detected
-        if (_isLangDetected() && (languageName == "C" || languageName == "C++")) {
-            return null;
-        }
+    // False-positive detection of C++
+    if (_isLangPresent("C++") && languageName !== "C++") {
+        _removeResult("language", "C++");
+    }
 
-        if (File.isVerbose() && !_isLangPresent(languageName)) {
-            var isHeurResult = (version == "HEUR");
+    // If the language already detected
+    if (_isLangDetected() && (languageName == "C/C++" || languageName == "C++" || languageName == "C")) {
+        return null;
+    }
 
-            _setResult((isHeurResult ? "~" : "") + "language", languageName, (version && !isHeurResult ? version : ""), "", "");
-        }
+    if (File.isVerbose() && !_isLangPresent(languageName)) {
+        var isHeurResult = (version == "HEUR");
+
+        _setResult((isHeurResult ? "~" : "") + "language", languageName, (version && !isHeurResult ? version : ""), "");
     }
 
 }

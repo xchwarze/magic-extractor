@@ -1,0 +1,15 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("protector", "ActiveMARK");
+
+function detect() {
+    if (PE.compareOverlay("00'TMSAMVOH'")) {
+        sVersion = "5.X";
+        bDetected = true;
+    } else if (PE.compareEP("8925........EB")) {
+        bDetected = true;
+    }
+
+    return result();
+}

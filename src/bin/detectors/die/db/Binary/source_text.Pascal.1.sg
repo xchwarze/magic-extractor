@@ -1,0 +1,18 @@
+// Detect It Easy: detection rule file
+// Author: horsicq <horsicq@gmail.com>
+
+meta("source", "Pascal");
+
+function detect() {
+    var sText = Binary.getHeaderString();
+    /* if(/^unit/im.test(sText)) {
+        bDetected = true;
+    } */
+    if (/^\s*program\s.*\s*uses\s/im.test(sText)) {
+        bDetected = true;
+    }
+
+    sLang = "Pascal";
+
+    return result();
+}

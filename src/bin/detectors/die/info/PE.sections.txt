@@ -62,6 +62,8 @@
 .ccg|packer|CCG Packer (Chinese Packer)
 .ccp3p|protector|CrypToCrack Pe Protector
 .charmve|tool|Added by the PIN tool
+.cms_t|protector|SecuROM code entry
+.cms_d|protector|SecuROM data entry
 .code|compiler|Code Section
 .complua|compiler|Most likely compiled LUA (also used by one of the downware installers based on LUA)
 .cormeta|compiler|.CLR Metadata Section

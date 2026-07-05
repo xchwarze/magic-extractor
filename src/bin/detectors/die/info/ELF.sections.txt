@@ -24,6 +24,7 @@
 .line|compiler|Line number information for symbolic debugging.
 .note|compiler|Note Section.
 .plt|compiler|The procedure linkage table.
+.reginfo|compiler|Register usage information.
 .rodata|compiler|Read-only data.
 .rodata1|compiler|Read-only data.
 .shstrtab|compiler|Section names.

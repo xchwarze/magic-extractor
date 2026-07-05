@@ -4,7 +4,6 @@
 // Telegram: @DosX_dev
 
 function detect() {
-
     removeFalsePositive({
         falsePositive: { packer: "AHpacker" },
         ifPresents: { packer: "ExE Pack" }
@@ -21,7 +20,7 @@ function detect() {
     });
 
     removeFalsePositive({
-        falsePositive: { compiler: "FASM" },
+        falsePositive: { compiler: "FASM", language: "ASMx86" },
         ifPresents: { packer: "Simple Pack" }
     });
 
@@ -35,14 +34,10 @@ function detect() {
     }
 
     // Visual Studio? -> C#
-    if (_isLangPresent("MSIL/C#") && _isResultPresent("tool", "Visual Studio")) {
+    if (_isLangPresent("MSIL/C#") && _isResultPresent("tool", "Microsoft Visual Studio")) {
         _removeResult("language", "MSIL/C#");
         _setLang("C#");
     }
-
-
-
-    return null;
 }
 
 function removeFalsePositive(data) {
@@ -75,5 +70,4 @@ function removeFalsePositive(data) {
     if (_isResultPresent(falsePositiveKey, falsePositiveValue) && _isResultPresent(ifPresentsKey, ifPresentsValue)) {
         _removeResult(falsePositiveKey, falsePositiveValue);
     }
-
 }

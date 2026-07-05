@@ -1,12 +1,12 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: Jason Hood <jadoxa@yahoo.com.au>
 
-init("compiler", "Microsoft");
+meta("compiler", "Microsoft");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("b430cd213c..73..33c00650cbbf....8b36....2bf781fe....72..be....fa8ed781c4....fb73..161f")) {
         sName += " Quick C";
-        sVersion = "2.5x";
+        sVersion = "2.5X";
         sOptions = "1990";
         bDetected = true;
     } else if (MSDOS.compareEP("fc8cc02ea3....8ed8a1....2ea3....2ea3....be....ac32e403f0c6....b8....8ec02680........75")) {
@@ -47,11 +47,11 @@ function detect(bShowType, bShowVersion, bShowOptions) {
             sVersion = "2.00";
             sOptions = "1989";
         } else if (MSDOS.compareEP("8b", 54)) {
-            sVersion = "2.x";
+            sVersion = "2.X";
             sOptions = "1989";
         }
         bDetected = true;
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }

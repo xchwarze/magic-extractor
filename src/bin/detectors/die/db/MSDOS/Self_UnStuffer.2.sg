@@ -1,9 +1,9 @@
-// Detect It Easy: detection rule file format
+// Detect It Easy: detection rule file
 // Author: hypn0 <hypn0@mail.ru>
 
-init("sfx", "Self UnStuffer");
+meta("sfx", "Self UnStuffer");
 
-function detect(bShowType, bShowVersion, bShowOptions) {
+function detect() {
     if (MSDOS.compareEP("86e303e9ace3$$1000e3$$00e40ec400e3")) {
         if (MSDOS.compareOverlay("0101'Aladdin'")) {
             sVersion = "1.1";
@@ -12,5 +12,5 @@ function detect(bShowType, bShowVersion, bShowOptions) {
         }
     }
 
-    return result(bShowType, bShowVersion, bShowOptions);
+    return result();
 }
