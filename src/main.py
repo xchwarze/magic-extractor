@@ -5,7 +5,7 @@ import os
 import pathlib
 from logger import setup_logging
 from config import Config
-from file_type import determine_file_type_with_magic, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid, determine_file_type_with_magika, binwalk_file_map
+from file_type import determine_file_type_with_magic, determine_file_type_with_signatures, determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_magika, binwalk_file_map
 from formats import init_handlers, get_handler_from_mime, get_handler_from_detection, HANDLER_REGISTRY
 from detection_filter import init_blacklist, filter_mimes, filter_detections, is_generic_detection
 
@@ -110,15 +110,15 @@ def _detector_outputs(file_path, fast_check):
     """
     Yield (source, mime_list, detection_list) per detector, lazily so callers can
     stop early. Each detector contributes uniquely: puremagic (free MIME for clean
-    archives), TrID (descriptive archive names), DIE (installers / PE / SFX),
-    binwalk (short type keys), Magika (AI catch-all). Cheapest first; Magika (ML)
-    last so early-exit usually avoids it.
+    archives), built-in signatures (magic bytes for BCM/DGCA/KGB/UHARC), DIE
+    (installers / PE / SFX), binwalk (short type keys), Magika (AI catch-all).
+    Cheapest first; Magika (ML) last so early-exit usually avoids it.
     """
     mime_types = determine_file_type_with_magic(file_path=file_path, fast_check=fast_check)
     yield ("puremagic", list(mime_types) if mime_types else [], [])
 
     for source, detector in (
-        ("TrID", determine_file_type_with_trid),
+        ("signatures", determine_file_type_with_signatures),
         ("DIE", determine_file_type_with_die),
         ("binwalk", determine_file_type_with_binwalk),
     ):

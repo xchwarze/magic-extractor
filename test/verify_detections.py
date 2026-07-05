@@ -27,9 +27,9 @@ sys.path.insert(0, SRC_PATH)
 import formats
 from file_type import (
     determine_file_type_with_magic,
+    determine_file_type_with_signatures,
     determine_file_type_with_binwalk,
     determine_file_type_with_die,
-    determine_file_type_with_trid,
     determine_file_type_with_magika,
 )
 
@@ -55,7 +55,7 @@ def collect_for(file_path):
         mimes.update(value.lower() for value in magika_result["mime_types"])
         detections.update(value.lower() for value in magika_result["labels"])
 
-    for detector in (determine_file_type_with_binwalk, determine_file_type_with_die, determine_file_type_with_trid):
+    for detector in (determine_file_type_with_signatures, determine_file_type_with_binwalk, determine_file_type_with_die):
         result = detector(file_path=file_path, bin_path=BIN_PATH)
         if result:
             detections.update(value.lower() for value in result)

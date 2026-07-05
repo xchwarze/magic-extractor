@@ -1,0 +1,1845 @@
+[
+  {
+    "name": "ashampoo burning studio autorun editor theme",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304140000000800"
+      },
+      {
+        "pos": 26,
+        "hex": "0A000000696D616765302E706E67"
+      }
+    ]
+  },
+  {
+    "name": "android apex launcher backup",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304140008080800"
+      },
+      {
+        "pos": 14,
+        "hex": "00000000000000000000000011000000617065785F73657474696E67732E62616B"
+      }
+    ]
+  },
+  {
+    "name": "7-zip compressed archive (v0.4)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "377ABCAF271C0004"
+      }
+    ]
+  },
+  {
+    "name": "7-zip compressed archive (gen)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "377ABCAF271C"
+      }
+    ]
+  },
+  {
+    "name": "ace compressed archive",
+    "patterns": [
+      {
+        "pos": 3,
+        "hex": "0000"
+      },
+      {
+        "pos": 7,
+        "hex": "2A2A4143452A2A"
+      }
+    ]
+  },
+  {
+    "name": "alzip compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "414C5A01"
+      }
+    ]
+  },
+  {
+    "name": "ar archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "213C617263683E"
+      }
+    ]
+  },
+  {
+    "name": "freearc compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "41724301"
+      }
+    ]
+  },
+  {
+    "name": "arj compressed archive (multi volume 0x14)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "60EA"
+      },
+      {
+        "pos": 8,
+        "hex": "14"
+      },
+      {
+        "pos": 10,
+        "hex": "02"
+      }
+    ]
+  },
+  {
+    "name": "arj compressed archive (standard)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "60EA"
+      },
+      {
+        "pos": 6,
+        "hex": "01"
+      },
+      {
+        "pos": 10,
+        "hex": "02"
+      }
+    ]
+  },
+  {
+    "name": "arj compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "60EA"
+      }
+    ]
+  },
+  {
+    "name": "arjz compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "60EA"
+      },
+      {
+        "pos": 5,
+        "hex": "33"
+      },
+      {
+        "pos": 10,
+        "hex": "02"
+      }
+    ]
+  },
+  {
+    "name": "bcm compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "42434D21"
+      }
+    ]
+  },
+  {
+    "name": "bzip2 compressed archive (old)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "425A30"
+      },
+      {
+        "pos": 4,
+        "hex": "314159265359"
+      }
+    ]
+  },
+  {
+    "name": "bzip2 compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "425A68"
+      },
+      {
+        "pos": 4,
+        "hex": "314159265359"
+      }
+    ]
+  },
+  {
+    "name": "bga compressed archive (bzip2)",
+    "patterns": [
+      {
+        "pos": 4,
+        "hex": "425A3200"
+      }
+    ]
+  },
+  {
+    "name": "diagnostic cabinet",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "windows installer merge module (cab)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "microsoft publisher document (cabinet packed and go)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      },
+      {
+        "pos": 12,
+        "hex": "000000002C0000000000000003010100"
+      },
+      {
+        "pos": 30,
+        "hex": "000000000000"
+      },
+      {
+        "pos": 42,
+        "hex": "0100"
+      },
+      {
+        "pos": 48,
+        "hex": "000000000000"
+      },
+      {
+        "pos": 59,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "microsoft windows ce installation cabinet archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      },
+      {
+        "pos": 12,
+        "hex": "00000000"
+      },
+      {
+        "pos": 17,
+        "hex": "000000000000000301"
+      }
+    ]
+  },
+  {
+    "name": "microsoft cabinet archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (byte swapped binary)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "71C7"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (binary)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "C771"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (portable with crc)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373032"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (portable new)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373031"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (portable old)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373037"
+      }
+    ]
+  },
+  {
+    "name": "cpio archive (portable)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3037303730"
+      }
+    ]
+  },
+  {
+    "name": "dgca digital g codec archiver",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "44474341"
+      },
+      {
+        "pos": 32,
+        "hex": "44415441"
+      }
+    ]
+  },
+  {
+    "name": "egg compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "454747410001"
+      }
+    ]
+  },
+  {
+    "name": "gzipped data",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "1F8B08"
+      }
+    ]
+  },
+  {
+    "name": "bga compressed archive (gzip)",
+    "patterns": [
+      {
+        "pos": 4,
+        "hex": "475A4950"
+      }
+    ]
+  },
+  {
+    "name": "kgb archiver compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4B47425F61726368202D"
+      },
+      {
+        "pos": 11,
+        "hex": "0D0A"
+      }
+    ]
+  },
+  {
+    "name": "lharc/lzark compressed archive (generic)",
+    "patterns": [
+      {
+        "pos": 2,
+        "hex": "2D6C68"
+      },
+      {
+        "pos": 6,
+        "hex": "2D"
+      }
+    ]
+  },
+  {
+    "name": "lhark compressed archive",
+    "patterns": [
+      {
+        "pos": 2,
+        "hex": "2D6C68"
+      },
+      {
+        "pos": 6,
+        "hex": "2D"
+      }
+    ]
+  },
+  {
+    "name": "lzip compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4C5A4950"
+      }
+    ]
+  },
+  {
+    "name": "lzma compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "5D0000"
+      }
+    ]
+  },
+  {
+    "name": "larc compressed archive",
+    "patterns": [
+      {
+        "pos": 2,
+        "hex": "2D6C7A"
+      },
+      {
+        "pos": 6,
+        "hex": "2D"
+      }
+    ]
+  },
+  {
+    "name": "pea compressed archive (v1.x)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "EA01"
+      }
+    ]
+  },
+  {
+    "name": "pmarc compressed archive",
+    "patterns": [
+      {
+        "pos": 2,
+        "hex": "2D706D"
+      },
+      {
+        "pos": 6,
+        "hex": "2D"
+      }
+    ]
+  },
+  {
+    "name": "rar compressed archive (v-4.x)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "526172211A0700"
+      }
+    ]
+  },
+  {
+    "name": "rar compressed archive (v1.x)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "52457E5E"
+      }
+    ]
+  },
+  {
+    "name": "rar compressed archive (v5.0)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "526172211A070100"
+      }
+    ]
+  },
+  {
+    "name": "winrar self extracting archive (4.x-5.x)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5A"
+      },
+      {
+        "pos": 3,
+        "hex": "00"
+      },
+      {
+        "pos": 5,
+        "hex": "0000000400"
+      },
+      {
+        "pos": 11,
+        "hex": "00FFFF0000B80000000000000040"
+      },
+      {
+        "pos": 62,
+        "hex": "0000"
+      },
+      {
+        "pos": 67,
+        "hex": "0E"
+      },
+      {
+        "pos": 69,
+        "hex": "B409CD21B8014CCD21"
+      },
+      {
+        "pos": 96,
+        "hex": "742062652072756E20"
+      },
+      {
+        "pos": 106,
+        "hex": "6E"
+      }
+    ]
+  },
+  {
+    "name": "rar compressed archive (gen)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "526172211A"
+      }
+    ]
+  },
+  {
+    "name": "rpm package (v3.0 source)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "EDABEEDB0300000100"
+      },
+      {
+        "pos": 75,
+        "hex": "0000010005000000000000000000000000000000008EADE80100000000"
+      }
+    ]
+  },
+  {
+    "name": "rpm package (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "EDABEEDB"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (directory)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "35"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (file)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "30"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (gnu)",
+    "patterns": [
+      {
+        "pos": 257,
+        "hex": "7573746172202000"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (hard link)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "31"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (longname)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "4C"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (multi volume)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "4D"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (symlink)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "32"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "tar - tape archive (volume)",
+    "patterns": [
+      {
+        "pos": 156,
+        "hex": "56"
+      },
+      {
+        "pos": 500,
+        "hex": "0000000000000000"
+      },
+      {
+        "pos": 511,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "uharc compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "554841"
+      }
+    ]
+  },
+  {
+    "name": "xar archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "78617221"
+      }
+    ]
+  },
+  {
+    "name": "xz compressed container",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "FD377A585A00"
+      }
+    ]
+  },
+  {
+    "name": "unix compressed data",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "1F9D90"
+      }
+    ]
+  },
+  {
+    "name": "zip compressed archive (empty)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0506"
+      }
+    ]
+  },
+  {
+    "name": "zip compressed archive (multivolume)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0708"
+      }
+    ]
+  },
+  {
+    "name": "zip compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "name": "zpaq compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "376B5374"
+      }
+    ]
+  },
+  {
+    "name": "windows help file",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "49545346"
+      }
+    ]
+  },
+  {
+    "name": "debian linux package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "213C617263683E0A64656269616E2D62696E617279"
+      }
+    ]
+  },
+  {
+    "name": "windows 8-10 desktop theme package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      },
+      {
+        "pos": 12,
+        "hex": "00000000"
+      },
+      {
+        "pos": 20,
+        "hex": "000000000301"
+      },
+      {
+        "pos": 30,
+        "hex": "000000000000"
+      },
+      {
+        "pos": 42,
+        "hex": "0315"
+      }
+    ]
+  },
+  {
+    "name": "windows device metadata",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "macintosh encrypted disk image (v1)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "63647361656E6372"
+      }
+    ]
+  },
+  {
+    "name": "macintosh encrypted disk image (v2)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "656E637263647361"
+      }
+    ]
+  },
+  {
+    "name": "macintosh disk image (bzlib compressed)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "78"
+      }
+    ]
+  },
+  {
+    "name": "onlyoffice form template",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      },
+      {
+        "pos": 23,
+        "hex": "070000130000005B436F6E74656E745F54797065735D2E786D6CEFBBBF3C3F786D6C2076657273696F6E3D22312E302220656E636F64696E673D225554462D3822207374616E64616C6F6E653D22796573223F3E3C547970657320786D6C6E733D22687474703A2F2F736368656D61732E6F70656E786D6C666F726D6174732E6F72672F7061636B6167652F323030362F636F6E74656E742D7479706573223E3C44656661756C742020457874656E73696F6E3D22776D662220436F6E74656E74547970653D22696D6167652F782D776D66222F3E3C44656661756C742020457874656E73696F6E3D22706E672220436F6E74656E74547970653D22696D6167652F706E67222F3E3C44656661756C742020457874656E73696F6E3D226A70"
+      },
+      {
+        "pos": 364,
+        "hex": "2220436F6E74656E74547970653D22"
+      },
+      {
+        "pos": 390,
+        "hex": "2F"
+      }
+    ]
+  },
+  {
+    "name": "python egg",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "name": "arj self-extracting archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5A"
+      },
+      {
+        "pos": 5,
+        "hex": "0000000200"
+      },
+      {
+        "pos": 12,
+        "hex": "FFFF"
+      },
+      {
+        "pos": 16,
+        "hex": "800000000E00"
+      },
+      {
+        "pos": 24,
+        "hex": "1C000000524A5358FFFFBA"
+      }
+    ]
+  },
+  {
+    "name": "inno setup installer",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5A500002000000"
+      },
+      {
+        "pos": 11,
+        "hex": "00FFFF0000B80000000000000040001A000000000000000000000000000000000000000000"
+      },
+      {
+        "pos": 60,
+        "hex": "00010000BA10000E1FB409CD21B8014CCD219090546869732070726F6772616D206D7573742062652072756E20756E6465722057696E33320D0A243700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000504500004C01"
+      },
+      {
+        "pos": 263,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "nsis - nullsoft scriptable install system",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "pos": 61,
+        "hex": "0000000E1FBA0E00B409CD21B8014CCD21546869732070726F6772616D2063616E6E6F742062652072756E20696E20444F53206D6F64652E0D0D0A2400000000000000"
+      }
+    ]
+  },
+  {
+    "name": "foobar2000 component",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "name": "incredimail animation",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "avm fritz!box firmware",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "2E2F"
+      },
+      {
+        "pos": 5,
+        "hex": "2F000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030"
+      },
+      {
+        "pos": 103,
+        "hex": "303735"
+      },
+      {
+        "pos": 107,
+        "hex": "0030303030303030003030303030303000303030303030303030303000"
+      },
+      {
+        "pos": 147,
+        "hex": "00"
+      },
+      {
+        "pos": 154,
+        "hex": "002035000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      },
+      {
+        "pos": 336,
+        "hex": "00"
+      },
+      {
+        "pos": 344,
+        "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002E2F"
+      },
+      {
+        "pos": 517,
+        "hex": "2F"
+      },
+      {
+        "pos": 540,
+        "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030"
+      },
+      {
+        "pos": 614,
+        "hex": "3030"
+      },
+      {
+        "pos": 619,
+        "hex": "0030303030303030003030303030303000"
+      },
+      {
+        "pos": 666,
+        "hex": "002030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      }
+    ]
+  },
+  {
+    "name": "vmware 4 virtual disk description (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "23204469736B2044657363726970746F7246696C65"
+      }
+    ]
+  },
+  {
+    "name": "incredimail emoticon",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail letter/ecard flavor",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "macintosh disk image (bz2 compressed)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "425A68"
+      },
+      {
+        "pos": 4,
+        "hex": "314159265359"
+      }
+    ]
+  },
+  {
+    "name": "qcow2 disk image",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "514649FB00000002"
+      }
+    ]
+  },
+  {
+    "name": "virtual pc virtual hd image (dynamic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "636F6E6563746978"
+      },
+      {
+        "pos": 512,
+        "hex": "6378737061727365FFFFFFFFFFFFFFFF"
+      }
+    ]
+  },
+  {
+    "name": "incredimail notifier (with flash)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail skin",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail sound (midi music)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail sound (wav)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail data (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      },
+      {
+        "pos": 12,
+        "hex": "000000002C0000000000000003010100"
+      },
+      {
+        "pos": 30,
+        "hex": "0000"
+      },
+      {
+        "pos": 34,
+        "hex": "0000"
+      },
+      {
+        "pos": 42,
+        "hex": "0315"
+      },
+      {
+        "pos": 48,
+        "hex": "000000000000"
+      },
+      {
+        "pos": 59,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "iso 9660 cd image",
+    "patterns": [
+      {
+        "pos": 436,
+        "hex": "00"
+      },
+      {
+        "pos": 461,
+        "hex": "00"
+      },
+      {
+        "pos": 477,
+        "hex": "00"
+      },
+      {
+        "pos": 489,
+        "hex": "00"
+      },
+      {
+        "pos": 493,
+        "hex": "0000"
+      },
+      {
+        "pos": 498,
+        "hex": "00"
+      },
+      {
+        "pos": 502,
+        "hex": "0000"
+      },
+      {
+        "pos": 505,
+        "hex": "000000"
+      },
+      {
+        "pos": 556,
+        "hex": "00"
+      },
+      {
+        "pos": 588,
+        "hex": "0000"
+      },
+      {
+        "pos": 593,
+        "hex": "00"
+      },
+      {
+        "pos": 613,
+        "hex": "00"
+      },
+      {
+        "pos": 637,
+        "hex": "00"
+      },
+      {
+        "pos": 705,
+        "hex": "00"
+      },
+      {
+        "pos": 717,
+        "hex": "00"
+      },
+      {
+        "pos": 729,
+        "hex": "00"
+      },
+      {
+        "pos": 737,
+        "hex": "00"
+      },
+      {
+        "pos": 741,
+        "hex": "0000"
+      },
+      {
+        "pos": 749,
+        "hex": "0000"
+      },
+      {
+        "pos": 753,
+        "hex": "00"
+      },
+      {
+        "pos": 757,
+        "hex": "00"
+      },
+      {
+        "pos": 760,
+        "hex": "00"
+      },
+      {
+        "pos": 777,
+        "hex": "00"
+      },
+      {
+        "pos": 780,
+        "hex": "00"
+      },
+      {
+        "pos": 788,
+        "hex": "00"
+      },
+      {
+        "pos": 805,
+        "hex": "00"
+      },
+      {
+        "pos": 809,
+        "hex": "00"
+      },
+      {
+        "pos": 829,
+        "hex": "0000"
+      },
+      {
+        "pos": 849,
+        "hex": "00"
+      },
+      {
+        "pos": 873,
+        "hex": "00"
+      },
+      {
+        "pos": 893,
+        "hex": "00"
+      },
+      {
+        "pos": 908,
+        "hex": "0000"
+      },
+      {
+        "pos": 921,
+        "hex": "00"
+      },
+      {
+        "pos": 941,
+        "hex": "00"
+      },
+      {
+        "pos": 985,
+        "hex": "00"
+      },
+      {
+        "pos": 1017,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "apple partition map (apm) disk image",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4552"
+      },
+      {
+        "pos": 3,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "iso base media container",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "0000"
+      },
+      {
+        "pos": 4,
+        "hex": "66747970"
+      }
+    ]
+  },
+  {
+    "name": "bsd library",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "213C617263683E0A"
+      }
+    ]
+  },
+  {
+    "name": "system v 64-bit library",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "213C617263683E0A2F53594D36342F202020202020202020"
+      }
+    ]
+  },
+  {
+    "name": "pa-risc relocatable library",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "213C617263683E0A2F202020202020202020202020202020"
+      },
+      {
+        "pos": 70,
+        "hex": "061905124000"
+      }
+    ]
+  },
+  {
+    "name": "incredimail letter creator project",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "microsoft windows installer",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "D0CF11E0A1B11AE1"
+      }
+    ]
+  },
+  {
+    "name": "windows update package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "windows update package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3F786D6C2076657273696F6E3D"
+      }
+    ]
+  },
+  {
+    "name": "onlyoffice form for online completion",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      },
+      {
+        "pos": 30,
+        "hex": "5B436F6E74656E745F54797065735D2E786D6CEFBBBF3C3F786D6C2076657273696F6E3D22312E302220656E636F64696E673D225554462D3822207374616E64616C6F6E653D22796573223F3E3C547970657320786D6C6E733D22687474703A2F2F736368656D61732E6F70656E786D6C666F726D6174732E6F72672F7061636B6167652F323030362F636F6E74656E742D7479706573223E3C44656661756C742020457874656E73696F6E3D22776D662220436F6E74656E74547970653D22696D6167652F782D776D66222F3E3C44656661756C742020457874656E73696F6E3D22706E672220436F6E74656E74547970653D22696D6167652F706E67222F3E3C44656661756C742020457874656E73696F6E3D226A70"
+      },
+      {
+        "pos": 364,
+        "hex": "2220436F6E74656E74547970653D22"
+      },
+      {
+        "pos": 390,
+        "hex": "2F"
+      }
+    ]
+  },
+  {
+    "name": "power bi report",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      },
+      {
+        "pos": 30,
+        "hex": "56657273696F6E"
+      },
+      {
+        "pos": 40,
+        "hex": "00"
+      }
+    ]
+  },
+  {
+    "name": "microsoft windows provisioning package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5357494D000000D0000000000D01008200020000800000"
+      },
+      {
+        "pos": 40,
+        "hex": "0100010001000000"
+      }
+    ]
+  },
+  {
+    "name": "squashsf image file (big endian)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "73717368"
+      }
+    ]
+  },
+  {
+    "name": "squashsf image file (little endian)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "68737173"
+      }
+    ]
+  },
+  {
+    "name": "sweet home 3d design (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "name": "sweet home 3d textures library",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      }
+    ]
+  },
+  {
+    "name": "microsoft access report snapshot",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D534346"
+      },
+      {
+        "pos": 60,
+        "hex": "5F4163635270745F2E736E70"
+      }
+    ]
+  },
+  {
+    "name": "conda tar package (unbzip2ed)",
+    "patterns": [
+      {
+        "pos": 20,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030303030"
+      },
+      {
+        "pos": 257,
+        "hex": "7573746172202000"
+      }
+    ]
+  },
+  {
+    "name": "windows desktop theme package",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      },
+      {
+        "pos": 12,
+        "hex": "00000000"
+      },
+      {
+        "pos": 20,
+        "hex": "000000000301"
+      },
+      {
+        "pos": 30,
+        "hex": "000000000000"
+      },
+      {
+        "pos": 42,
+        "hex": "0315"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C20"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (innotek)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C20696E6E6F74656B205669727475616C426F78204469736B20496D616765203E3E3E"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (oracle)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C204F7261636C6520564D205669727475616C426F78204469736B20496D616765203E3E3E"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (qemu)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C2051454D5520564D205669727475616C204469736B20496D616765203E3E3E"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (sun)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C2053756E2078564D205669727475616C426F78204469736B20496D616765203E3E3E"
+      }
+    ]
+  },
+  {
+    "name": "virtualbox disk image (sun old)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "3C3C3C2053756E205669727475616C426F78204469736B20496D616765203E3E3E"
+      }
+    ]
+  },
+  {
+    "name": "virtual pc virtual hd image",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "636F6E6563746978"
+      }
+    ]
+  },
+  {
+    "name": "virtual hd image extended",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "7668647866696C65"
+      }
+    ]
+  },
+  {
+    "name": "webmin theme (gif)",
+    "patterns": [
+      {
+        "pos": 100,
+        "hex": "3030"
+      },
+      {
+        "pos": 103,
+        "hex": "3037"
+      },
+      {
+        "pos": 106,
+        "hex": "3500"
+      },
+      {
+        "pos": 115,
+        "hex": "00"
+      },
+      {
+        "pos": 123,
+        "hex": "00303030303030303030303000"
+      },
+      {
+        "pos": 147,
+        "hex": "00"
+      },
+      {
+        "pos": 154,
+        "hex": "002035000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      },
+      {
+        "pos": 296,
+        "hex": "00"
+      },
+      {
+        "pos": 329,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "pos": 612,
+        "hex": "30"
+      },
+      {
+        "pos": 615,
+        "hex": "30"
+      },
+      {
+        "pos": 619,
+        "hex": "00"
+      },
+      {
+        "pos": 627,
+        "hex": "00"
+      },
+      {
+        "pos": 635,
+        "hex": "00"
+      },
+      {
+        "pos": 647,
+        "hex": "00"
+      },
+      {
+        "pos": 659,
+        "hex": "00"
+      },
+      {
+        "pos": 666,
+        "hex": "0020"
+      },
+      {
+        "pos": 669,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      },
+      {
+        "pos": 808,
+        "hex": "00"
+      },
+      {
+        "pos": 841,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  {
+    "name": "webmin theme",
+    "patterns": [
+      {
+        "pos": 100,
+        "hex": "3030"
+      },
+      {
+        "pos": 103,
+        "hex": "3037"
+      },
+      {
+        "pos": 106,
+        "hex": "3500"
+      },
+      {
+        "pos": 115,
+        "hex": "00"
+      },
+      {
+        "pos": 123,
+        "hex": "00303030303030303030303000"
+      },
+      {
+        "pos": 147,
+        "hex": "00"
+      },
+      {
+        "pos": 154,
+        "hex": "002035000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      },
+      {
+        "pos": 296,
+        "hex": "00"
+      },
+      {
+        "pos": 329,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "pos": 612,
+        "hex": "30"
+      },
+      {
+        "pos": 615,
+        "hex": "30"
+      },
+      {
+        "pos": 619,
+        "hex": "00"
+      },
+      {
+        "pos": 627,
+        "hex": "00"
+      },
+      {
+        "pos": 635,
+        "hex": "00"
+      },
+      {
+        "pos": 647,
+        "hex": "00"
+      },
+      {
+        "pos": 659,
+        "hex": "00"
+      },
+      {
+        "pos": 666,
+        "hex": "0020"
+      },
+      {
+        "pos": 669,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007573746172202000"
+      },
+      {
+        "pos": 808,
+        "hex": "00"
+      },
+      {
+        "pos": 841,
+        "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ]
+  },
+  {
+    "name": "windows imaging format (esd)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5357494D000000"
+      },
+      {
+        "pos": 12,
+        "hex": "000E0000"
+      }
+    ]
+  },
+  {
+    "name": "windows imaging format (wim)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5357494D000000"
+      },
+      {
+        "pos": 42,
+        "hex": "0100"
+      }
+    ]
+  },
+  {
+    "name": "windows imaging format (pipable wimlib)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "574C50574D000000"
+      }
+    ]
+  },
+  {
+    "name": "windows imaging format (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D5357494D0000"
+      }
+    ]
+  },
+  {
+    "name": "infopath dynamic form - template",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "4D53434600000000"
+      }
+    ]
+  },
+  {
+    "name": "zip document container (generic)",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "504B0304"
+      },
+      {
+        "pos": 30,
+        "hex": "6D696D6574797065"
+      }
+    ]
+  },
+  {
+    "name": "zstandard compressed data",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "28B52FFD"
+      }
+    ]
+  },
+  {
+    "name": "zstandard compressed data (old/generic)",
+    "patterns": [
+      {
+        "pos": 1,
+        "hex": "B52FFD"
+      }
+    ]
+  },
+  {
+    "name": "bcm compressed archive",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "42434d32"
+      }
+    ]
+  }
+]

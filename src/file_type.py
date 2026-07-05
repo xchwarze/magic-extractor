@@ -11,6 +11,78 @@ from trid_wrapper import TrIDLib
 #   * TrID https://mark0.net/soft-trid-e.html
 #   * DIE https://github.com/horsicq/Detect-It-Easy/
 #####################################
+
+# Built-in magic-byte detector. Signatures are harvested from the public TrID
+# defs into data/signatures.json by tools/convert_trid_defs.py, so the formats
+# TrID named can be detected without running trid.exe.
+_SIGNATURES_CACHE = None
+_SIGNATURES_READ_LEN = 4096
+
+def _load_signatures(data_path):
+    """Load and cache the compiled signatures from data/signatures.json."""
+    global _SIGNATURES_CACHE, _SIGNATURES_READ_LEN
+    if _SIGNATURES_CACHE is not None:
+        return _SIGNATURES_CACHE
+
+    _SIGNATURES_CACHE = []
+    signatures_file = os.path.join(data_path, 'signatures.json')
+    try:
+        with open(signatures_file, encoding='utf-8') as sig_fh:
+            raw = json.load(sig_fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        logging.error(f"Failed to load signatures from {signatures_file}: {exc}")
+        return _SIGNATURES_CACHE
+
+    max_len = 0
+    for entry in raw:
+        patterns = []
+        for pattern in entry.get('patterns', []):
+            try:
+                blob = bytes.fromhex(pattern['hex'])
+            except (ValueError, KeyError, TypeError):
+                continue
+            pos = pattern.get('pos', 0)
+            patterns.append((pos, blob))
+            max_len = max(max_len, pos + len(blob))
+        if patterns:
+            _SIGNATURES_CACHE.append((entry['name'], patterns))
+
+    _SIGNATURES_READ_LEN = max(max_len, 16)
+    return _SIGNATURES_CACHE
+
+def determine_file_type_with_signatures(file_path, bin_path=None):
+    """
+    Built-in magic-byte detector driven by data/signatures.json (harvested from
+    the public TrID defs). Pure-python, no subprocess.
+
+    Args:
+        file_path (str): The path to the file to analyze.
+        bin_path (str): Path to the 'bin' dir; data/ is resolved beside it.
+
+    Returns:
+        list: Matched detection names, or None.
+    """
+    data_path = os.path.join(os.path.dirname(bin_path), 'data') if bin_path else 'data'
+    signatures = _load_signatures(data_path)
+    if not signatures:
+        return None
+
+    try:
+        with open(file_path, 'rb') as signature_fh:
+            header = signature_fh.read(_SIGNATURES_READ_LEN)
+    except OSError as exc:
+        logging.error(f"Could not read {file_path} for signature detection: {exc}")
+        return None
+
+    names = []
+    for name, patterns in signatures:
+        if all(header[pos:pos + len(blob)] == blob for pos, blob in patterns) and name not in names:
+            names.append(name)
+
+    if names:
+        logging.debug(f"Signature detection: {names}")
+    return names or None
+
 def determine_file_type_with_magic(file_path, fast_check=False):
     """
     Determines the MIME type of a file using content-based identification.
