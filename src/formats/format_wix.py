@@ -10,6 +10,10 @@ class FormatWixHandler(BaseExtractor):
     Usage: dark.exe [-nologo] <database.msi> -x <output_dir> [<source.wxs>]
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['wix toolset installer']  # DIE
+
     def extract(self):
         """
         Extracts an MSI/WiX package's streams to the output directory.

@@ -9,6 +9,10 @@ class FormatCicdecHandler(BaseExtractor):
     Usage: cicdec.exe <installer> <output_directory>
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['clickteam']  # DIE
+
     def extract(self):
         """
         Extracts a Clickteam installer to the output directory.

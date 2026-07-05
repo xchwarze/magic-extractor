@@ -9,6 +9,10 @@ class FormatBitrockHandler(BaseExtractor):
     Usage: bitrock-unpacker.exe INSTALLER.EXE OUTPUT_DIR
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['bitrock installer']  # DIE
+
     def extract(self):
         """
         Extracts a BitRock installer to the output directory.

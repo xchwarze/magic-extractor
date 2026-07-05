@@ -13,7 +13,7 @@ class FormatMsiHandler(BaseExtractor):
     @classmethod
     def detection_names(cls):
         # OLE2 magic is ambiguous (also .doc/.xls), so no custom signature here.
-        return ['microsoft windows installer']  # DIE
+        return ['microsoft windows installer', 'advanced installer']  # DIE
 
     def _extract_lessmsi(self):
         command_list = [
