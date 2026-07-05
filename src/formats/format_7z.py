@@ -44,8 +44,16 @@ class Format7zHandler(BaseExtractor):
 
     @classmethod
     def detection_signatures(cls):
-        # '7z\xbc\xaf\x27\x1c' at 0 (robust even if the engines miss it).
-        return [{'name': '7-zip', 'patterns': [{'pos': 0, 'hex': '377abcaf271c'}]}]
+        return [
+            # '7z\xbc\xaf\x27\x1c' at 0.
+            {'name': '7-zip', 'patterns': [{'pos': 0, 'hex': '377abcaf271c'}]},
+            # cpio magics (engines miss binary cpio): binary LE/BE + ASCII odc/newc/newc-crc.
+            {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': 'c771'}]},
+            {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '71c7'}]},
+            {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373037'}]},
+            {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373031'}]},
+            {'name': 'cpio', 'patterns': [{'pos': 0, 'hex': '303730373032'}]},
+        ]
 
     def list_contents(self):
         """List archive contents using '7z l'. Returns the listing text, or None on error."""

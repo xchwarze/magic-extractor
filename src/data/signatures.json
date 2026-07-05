@@ -9,6 +9,51 @@
     ]
   },
   {
+    "name": "cpio",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "c771"
+      }
+    ]
+  },
+  {
+    "name": "cpio",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "71c7"
+      }
+    ]
+  },
+  {
+    "name": "cpio",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373037"
+      }
+    ]
+  },
+  {
+    "name": "cpio",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373031"
+      }
+    ]
+  },
+  {
+    "name": "cpio",
+    "patterns": [
+      {
+        "pos": 0,
+        "hex": "303730373032"
+      }
+    ]
+  },
+  {
     "name": "ace compressed archive",
     "patterns": [
       {
