@@ -113,6 +113,7 @@
     "pea compressed archive (v1.x)": "FormatPeaHandler",
     "winrar": "FormatRarHandler",
     "rar": "FormatRarHandler",
+    "winrar installer": "FormatRarHandler",
     "rar compressed archive": "FormatRarHandler",
     "uharc compressed archive": "FormatUharcHandler",
     "wix toolset installer": "FormatWixHandler",

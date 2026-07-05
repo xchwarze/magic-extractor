@@ -14,7 +14,7 @@ class FormatRarHandler(BaseExtractor):
 
     @classmethod
     def detection_names(cls):
-        return ['winrar', 'rar']  # DIE (sfx) / binwalk-Magika
+        return ['winrar', 'rar', 'winrar installer']  # DIE (sfx/installer) / binwalk-Magika
 
     @classmethod
     def detection_signatures(cls):
