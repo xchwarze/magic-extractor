@@ -18,7 +18,7 @@ the on-disk layout may still change.
   - `data`: runtime configuration, loaded dynamically (see below).
   - `formats`: one handler module per format family.
 - `test`: sample files per format (fixtures for the extraction/detection tests).
-- `tools`: developer tooling (`build_handlers.py`).
+- `tools`: developer tooling (`generate_data.py` — builds the data files from handlers).
 
 The compiled build keeps `bin/`, `data/` and `config.ini` external to the exe so
 they can be updated with a file swap; the path resolver in `main.py` finds them
@@ -29,17 +29,21 @@ For normal extraction, detectors run in this order with **early-exit** — the f
 one that yields a known handler wins (cheapest first, so the ML model is usually skipped):
 
 1. **puremagic** — pure-python, no subprocess; a cheap MIME check for well-formed archives.
-2. **built-in signatures** — magic-byte patterns in `data/signatures.json`, harvested
-   from the public TrID defs by `tools/convert_trid_defs.py`; names most archivers
-   (alzip, freearc, dgca, kgb, uharc, ...) with no external process.
+2. **built-in signatures** — magic-byte patterns in `data/signatures.json`; names
+   archivers the engines miss (bcm, dgca, kgb, uharc, alzip, freearc, ...) with no
+   external process.
 3. **DIE** (Detect It Easy) — signature engine; the specialist for installers, PE and SFX.
 4. **binwalk** — short type keys (cpio, lzma, ...) and embedded content.
 5. **Magika** — Google's AI content-type detector, as a catch-all.
 
 Each detector contributes uniquely (they are complementary, not redundant): the
-signature DB names most archivers, DIE handles installers/PE, binwalk catches a
-few types the others miss, puremagic/Magika cover MIME. (TrID itself is no longer
-run — its signatures live in `data/signatures.json`.)
+signature DB names archivers the engines miss, DIE handles installers/PE, binwalk
+catches a few types the others miss, puremagic/Magika cover MIME.
+
+Each handler declares its own indicators via `detection_mimes()` /
+`detection_names()` / `detection_signatures()`; `tools/generate_data.py` compiles
+these into `data/handlers.json` and `data/signatures.json` (with an optional
+`data/extra_detections.json` merged on top). TrID is not used.
 
 - `--bruteforce` disables early-exit: every detector runs and each detected handler
   is tried in turn (useful when the first guess is wrong).
