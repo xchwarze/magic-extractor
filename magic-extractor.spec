@@ -15,13 +15,16 @@
 # (on Windows use xcopy /E for the folders). The exe then finds bin/data/config
 # beside itself, and updating an extractor or the routing map is just a file swap.
 
+from PyInstaller.utils.hooks import collect_data_files
+
 block_cipher = None
 
 a = Analysis(
     ['src/main.py'],
     pathex=['src'],          # so the flat 'from formats import ...' etc. resolve
     binaries=[],
-    datas=[],                # bin/data/config stay external, see header
+    datas=collect_data_files('puremagic'),  # bundle puremagic's magic_data.json
+                                            # bin/data/config stay external, see header
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],
