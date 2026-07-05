@@ -8,6 +8,45 @@ class Format7zHandler(BaseExtractor):
     Handler class for .7z files that utilizes 7z for extraction.
     """
 
+    @classmethod
+    def detection_mimes(cls):
+        # 7-Zip is the workhorse: it opens most mainstream archive / disk-image MIMEs.
+        return [
+            'application/x-7z-compressed', 'application/x-xz', 'application/x-bzip2',
+            'application/gzip', 'application/x-gzip', 'application/x-tar', 'application/x-gtar',
+            'application/zip', 'application/x-ms-wim', 'application/x-apfs-image',
+            'application/x-archive', 'application/x-arj', 'application/vnd.ms-cab-compressed',
+            'application/vnd.ms-htmlhelp', 'application/x-cpio', 'application/x-cramfs',
+            'application/x-apple-diskimage', 'application/x-extfs-image', 'application/x-fatfs-image',
+            'application/x-hfs', 'application/x-iso9660-image', 'application/x-lzh-compressed',
+            'application/x-lzma', 'application/x-qemu-disk', 'application/x-rpm',
+            'application/x-squashfs', 'application/x-udf', 'application/x-virtualbox-vdi',
+            'application/x-vhd', 'application/x-vhdx', 'application/x-vmdk', 'application/x-xar',
+            'application/x-compress', 'application/zstd', 'application/vnd.squashfs',
+            'application/vnd.debian.binary-package', 'application/x-zstd-compressed-tar',
+        ]
+
+    @classmethod
+    def detection_names(cls):
+        return [
+            # binwalk short keys
+            '7zip', 'xz', 'bzip2', 'gzip', 'tar', 'apfs', 'cab', 'chm', 'cpio', 'cramfs',
+            'dmg', 'ext', 'fat', 'efigpt', 'iso9660', 'lzma', 'mbr', 'ntfs', 'squashfs',
+            'zip', 'zlib', 'zstd', 'compressd',
+            # Magika labels
+            'sevenzip', 'gzipped data',
+            # DIE names
+            '7-zip', 'gzip (.gz)', 'nullsoft scriptable install system',
+            'microsoft cabinet file', 'ar archive', 'debian linux package', 'rpm package',
+            'xar', 'bzip2 compressed archive', 'cpio archive (binary)',
+            'debian software package (.deb)', 'zstandard compressed data',
+        ]
+
+    @classmethod
+    def detection_signatures(cls):
+        # '7z\xbc\xaf\x27\x1c' at 0 (robust even if the engines miss it).
+        return [{'name': '7-zip', 'patterns': [{'pos': 0, 'hex': '377abcaf271c'}]}]
+
     def list_contents(self):
         """List archive contents using '7z l'. Returns the listing text, or None on error."""
         command_list = [

@@ -8,6 +8,20 @@ class FormatAceHandler(BaseExtractor):
     Handler class for ACE archive files that utilizes unace for extraction.
     """
 
+    @classmethod
+    def detection_mimes(cls):
+        return ['application/x-ace', 'application/x-ace-compressed']  # puremagic / Magika
+
+    @classmethod
+    def detection_names(cls):
+        return ['winace', 'ace']  # DIE (sfx) / binwalk-Magika
+
+    @classmethod
+    def detection_signatures(cls):
+        # '**ACE**' signature at offset 7.
+        return [{'name': 'ace compressed archive',
+                 'patterns': [{'pos': 7, 'hex': '2a2a4143452a2a'}]}]
+
     def extract(self):
         """
         Extracts ACE files using the unace command-line tool.

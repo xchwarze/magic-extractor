@@ -8,6 +8,11 @@ class FormatZpaqHandler(BaseExtractor):
     Handler class for ZPAQ archive files that utilizes zpaq for extraction.
     """
 
+    @classmethod
+    def detection_signatures(cls):
+        # '7kSt' at 0.
+        return [{'name': 'zpaq compressed archive', 'patterns': [{'pos': 0, 'hex': '376b5374'}]}]
+
     def extract(self):
         """
         Extracts ZPAQ files using the zpaq command-line tool.

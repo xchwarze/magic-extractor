@@ -11,6 +11,11 @@ class FormatUharcHandler(BaseExtractor):
     # Common constants
     UHARC_VERSIONS = ['uharc-v0.6b.exe', 'uharc-v0.4.exe']
 
+    @classmethod
+    def detection_signatures(cls):
+        # 'UHA' at 0. No engine names UHARC.
+        return [{'name': 'uharc compressed archive', 'patterns': [{'pos': 0, 'hex': '554841'}]}]
+
     def extract(self):
         """
         Attempts to extract UHARC files using different versions of uharc command-line tools.

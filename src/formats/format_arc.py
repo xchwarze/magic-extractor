@@ -8,6 +8,11 @@ class FormatArcHandler(BaseExtractor):
     Handler class for ARC archive files that utilizes unarc.exe for extraction.
     """
 
+    @classmethod
+    def detection_signatures(cls):
+        # 'ArC\x01' at 0 (FreeArc).
+        return [{'name': 'freearc compressed archive', 'patterns': [{'pos': 0, 'hex': '41724301'}]}]
+
     def extract(self):
         """
         Extracts ARC files using the unarc.exe command-line tool.

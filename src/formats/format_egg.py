@@ -8,6 +8,11 @@ class FormatEggHandler(BaseExtractor):
     Handler class for EGG archive files that utilizes ALZipCon for extraction.
     """
 
+    @classmethod
+    def detection_signatures(cls):
+        # 'EGGA\x00\x01' at 0.
+        return [{'name': 'egg compressed archive', 'patterns': [{'pos': 0, 'hex': '454747410001'}]}]
+
     def extract(self):
         """
         Extracts EGG files using the ALZipCon command-line tool.

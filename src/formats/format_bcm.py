@@ -12,6 +12,14 @@ class FormatBcmHandler(BaseExtractor):
     # Newest first: v2.03 reads BCM2, v1.60 reads the older BCM! format.
     BCM_EXES = ('bcm-v203x64.exe', 'bcm-v160x32.exe')
 
+    @classmethod
+    def detection_signatures(cls):
+        # BCM! (v1) and BCM2 (v2), both at offset 0. No engine names BCM.
+        return [
+            {'name': 'bcm compressed archive', 'patterns': [{'pos': 0, 'hex': '42434d21'}]},
+            {'name': 'bcm compressed archive', 'patterns': [{'pos': 0, 'hex': '42434d32'}]},
+        ]
+
     def extract(self):
         """
         Extracts files using the BCM command-line tool.

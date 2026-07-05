@@ -8,6 +8,10 @@ class FormatInnoSetupHandler(BaseExtractor):
     Handler class for Inno Setup files that utilizes innounp for extraction.
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['inno setup installer', 'inno setup module']  # DIE
+
     def extract(self):
         """
         Extracts Inno Setup files to a specified output directory using innounp executable.

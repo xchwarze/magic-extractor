@@ -8,6 +8,19 @@ class FormatRarHandler(BaseExtractor):
     Handler class for .rar files that utilizes UnRar for extraction.
     """
 
+    @classmethod
+    def detection_mimes(cls):
+        return ['application/vnd.rar', 'application/x-rar']  # puremagic / Magika
+
+    @classmethod
+    def detection_names(cls):
+        return ['winrar', 'rar']  # DIE (sfx) / binwalk-Magika
+
+    @classmethod
+    def detection_signatures(cls):
+        # 'Rar!\x1a' at 0 (covers RAR 4.x and 5.x).
+        return [{'name': 'rar compressed archive', 'patterns': [{'pos': 0, 'hex': '526172211a'}]}]
+
     def extract(self):
         """
         Extracts RAR files using the unrar command-line tool.

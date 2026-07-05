@@ -9,6 +9,12 @@ class FormatDgcaHandler(BaseExtractor):
     Usage: dgcac.exe e [-pPASSWORD] <archive> <output_dir>
     """
 
+    @classmethod
+    def detection_signatures(cls):
+        # 'DGCA' at 0 + 'DATA' at 32. No engine names DGCA.
+        return [{'name': 'dgca digital g codec archiver',
+                 'patterns': [{'pos': 0, 'hex': '44474341'}, {'pos': 32, 'hex': '44415441'}]}]
+
     def extract(self):
         """
         Extracts a DGCA archive into the output directory.

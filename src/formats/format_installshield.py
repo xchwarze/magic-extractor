@@ -10,6 +10,10 @@ class FormatInstallShieldHandler(BaseExtractor):
     obfuscated; if extraction fails, unshield-deobfuscate is tried first.
     """
 
+    @classmethod
+    def detection_names(cls):
+        return ['installshield setup']  # DIE
+
     def _unshield_exe(self):
         return os.path.join(self.extractors_path, 'unshield', 'unshield.exe')
 

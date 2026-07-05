@@ -14,6 +14,30 @@ class BaseExtractor:
     # Rough multiplier applied to the archive size to estimate extracted size.
     FREE_SPACE_FACTOR = 3
 
+    # --- Detection scope --------------------------------------------------
+    # Each handler declares the indicators that route files to it. A generator
+    # (tools/generate_data.py) collects these into data/handlers.json and
+    # data/signatures.json. Override in subclasses.
+
+    @classmethod
+    def detection_mimes(cls):
+        """MIME types (from puremagic / Magika) that route to this handler."""
+        return []
+
+    @classmethod
+    def detection_names(cls):
+        """Detector strings (from DIE / binwalk / Magika) that route to this handler."""
+        return []
+
+    @classmethod
+    def detection_signatures(cls):
+        """
+        Custom magic-byte signatures for formats the engines miss. Each entry:
+        {'name': <detection name>, 'patterns': [{'pos': int, 'hex': str}, ...]}.
+        The name is auto-added to detection_names by the generator.
+        """
+        return []
+
     def __init__(self, cli_args, bin_path):
         """
         Initialize the extractor with command-line arguments and the binary tools directory.

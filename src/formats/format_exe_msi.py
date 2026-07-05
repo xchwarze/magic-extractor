@@ -10,6 +10,11 @@ class FormatMsiHandler(BaseExtractor):
     further UniExtract fallbacks but are not bundled here.)
     """
 
+    @classmethod
+    def detection_names(cls):
+        # OLE2 magic is ambiguous (also .doc/.xls), so no custom signature here.
+        return ['microsoft windows installer']  # DIE
+
     def _extract_lessmsi(self):
         command_list = [
             os.path.join(self.extractors_path, 'lessmsi', 'lessmsi.exe'),

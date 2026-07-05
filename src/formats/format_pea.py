@@ -8,6 +8,11 @@ class FormatPeaHandler(BaseExtractor):
     Handler class for PEA archive files that utilizes PeaZip for extraction.
     """
 
+    @classmethod
+    def detection_signatures(cls):
+        # PEA magic 0xEA 0x01 at 0.
+        return [{'name': 'pea compressed archive (v1.x)', 'patterns': [{'pos': 0, 'hex': 'ea01'}]}]
+
     def extract(self):
         """
         Extracts PEA files using the PeaZip command-line tool.

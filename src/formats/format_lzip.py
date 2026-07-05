@@ -11,6 +11,15 @@ class FormatLzipHandler(BaseExtractor):
     Usage: plzip -d -k -f -o <output_file> <file>
     """
 
+    @classmethod
+    def detection_mimes(cls):
+        return ['application/x-lzip']  # puremagic / Magika
+
+    @classmethod
+    def detection_signatures(cls):
+        # 'LZIP' at 0.
+        return [{'name': 'lzip compressed archive', 'patterns': [{'pos': 0, 'hex': '4c5a4950'}]}]
+
     def _output_name(self):
         base = os.path.basename(self.target_file)
         return base[:-3] if base.lower().endswith('.lz') else base + '.out'

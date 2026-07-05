@@ -9,6 +9,15 @@ class FormatAlzipHandler(BaseExtractor):
     If I want to use a 100% gpl version of the decompressor I can use unalz.exe which is already downloaded in the bin folder.
     """
 
+    @classmethod
+    def detection_mimes(cls):
+        return ['application/x-alz']  # puremagic / Magika
+
+    @classmethod
+    def detection_signatures(cls):
+        # 'ALZ\x01' at 0.
+        return [{'name': 'alzip compressed archive', 'patterns': [{'pos': 0, 'hex': '414c5a01'}]}]
+
     def extract(self):
         """
         Extracts ALZip files using the ALZipCon command-line tool.
