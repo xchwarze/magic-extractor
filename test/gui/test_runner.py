@@ -76,6 +76,14 @@ class BuildCommandTest(unittest.TestCase):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"debug": False})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
 
+    def test_scan_no_fast_check(self):
+        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": False})
+        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z", "--no-fast-check"])
+
+    def test_scan_fast_check_on_no_flag(self):
+        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z"])
+
 
 if __name__ == "__main__":
     unittest.main()
