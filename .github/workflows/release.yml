@@ -51,6 +51,10 @@ jobs:
         working-directory: ./src
         run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic
 
+      - name: Build the GUI .exe application
+        working-directory: ./src
+        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io
+
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash
         run: |
@@ -58,6 +62,7 @@ jobs:
           cp -r src/data src/dist/data
           cp src/config.ini src/dist/config.ini
           cp LICENSE.txt readme.md formats.md src/dist/
+          test -f src/dist/magic-extractor-gui.exe
 
       - name: Smoke test (extract a bundled sample)
         run: ./src/dist/magic-extractor.exe extract test/7z/test-file.7z
