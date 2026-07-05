@@ -2,270 +2,303 @@
   {
     "name": "7-zip",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "377abcaf271c"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "377abcaf271c"
+        }
+      ]
     ]
   },
   {
     "name": "cpio",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "c771"
-      }
-    ]
-  },
-  {
-    "name": "cpio",
-    "patterns": [
-      {
-        "pos": 0,
-        "hex": "71c7"
-      }
-    ]
-  },
-  {
-    "name": "cpio",
-    "patterns": [
-      {
-        "pos": 0,
-        "hex": "303730373037"
-      }
-    ]
-  },
-  {
-    "name": "cpio",
-    "patterns": [
-      {
-        "pos": 0,
-        "hex": "303730373031"
-      }
-    ]
-  },
-  {
-    "name": "cpio",
-    "patterns": [
-      {
-        "pos": 0,
-        "hex": "303730373032"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "c771"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "71c7"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373037"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373031"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373032"
+        }
+      ]
     ]
   },
   {
     "name": "arj",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "60ea"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "60ea"
+        }
+      ]
     ]
   },
   {
     "name": "lzh",
     "patterns": [
-      {
-        "pos": 2,
-        "hex": "2d6c68"
-      }
+      [
+        {
+          "pos": 2,
+          "hex": "2d6c68"
+        }
+      ]
     ]
   },
   {
     "name": "chm",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "49545346"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "49545346"
+        }
+      ]
     ]
   },
   {
     "name": "qcow2",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "514649fb"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "514649fb"
+        }
+      ]
     ]
   },
   {
     "name": "vhdx",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "7668647866696c65"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "7668647866696c65"
+        }
+      ]
     ]
   },
   {
     "name": "vmdk",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "4b444d56"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "4b444d56"
+        }
+      ]
     ]
   },
   {
     "name": "vdi",
     "patterns": [
-      {
-        "pos": 64,
-        "hex": "7f10dabe"
-      }
+      [
+        {
+          "pos": 64,
+          "hex": "7f10dabe"
+        }
+      ]
     ]
   },
   {
     "name": "wim",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "4d5357494d000000"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "4d5357494d000000"
+        }
+      ]
     ]
   },
   {
     "name": "apfs",
     "patterns": [
-      {
-        "pos": 32,
-        "hex": "4e585342"
-      }
+      [
+        {
+          "pos": 32,
+          "hex": "4e585342"
+        }
+      ]
     ]
   },
   {
     "name": "xar",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "78617221"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "78617221"
+        }
+      ]
     ]
   },
   {
     "name": "ace compressed archive",
     "patterns": [
-      {
-        "pos": 7,
-        "hex": "2a2a4143452a2a"
-      }
+      [
+        {
+          "pos": 7,
+          "hex": "2a2a4143452a2a"
+        }
+      ]
     ]
   },
   {
     "name": "alzip compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "414c5a01"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "414c5a01"
+        }
+      ]
     ]
   },
   {
     "name": "freearc compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "41724301"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "41724301"
+        }
+      ]
     ]
   },
   {
     "name": "bcm compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "42434d21"
-      }
-    ]
-  },
-  {
-    "name": "bcm compressed archive",
-    "patterns": [
-      {
-        "pos": 0,
-        "hex": "42434d32"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "42434d21"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "42434d32"
+        }
+      ]
     ]
   },
   {
     "name": "dgca digital g codec archiver",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "44474341"
-      },
-      {
-        "pos": 32,
-        "hex": "44415441"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "44474341"
+        },
+        {
+          "pos": 32,
+          "hex": "44415441"
+        }
+      ]
     ]
   },
   {
     "name": "egg compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "454747410001"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "454747410001"
+        }
+      ]
     ]
   },
   {
     "name": "kgb archiver compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "4b47425f61726368202d"
-      },
-      {
-        "pos": 11,
-        "hex": "0d0a"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "4b47425f61726368202d"
+        },
+        {
+          "pos": 11,
+          "hex": "0d0a"
+        }
+      ]
     ]
   },
   {
     "name": "lzip compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "4c5a4950"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "4c5a4950"
+        }
+      ]
     ]
   },
   {
     "name": "pea compressed archive (v1.x)",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "ea01"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "ea01"
+        }
+      ]
     ]
   },
   {
     "name": "rar compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "526172211a"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "526172211a"
+        }
+      ]
     ]
   },
   {
     "name": "uharc compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "554841"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "554841"
+        }
+      ]
     ]
   },
   {
     "name": "zpaq compressed archive",
     "patterns": [
-      {
-        "pos": 0,
-        "hex": "376b5374"
-      }
+      [
+        {
+          "pos": 0,
+          "hex": "376b5374"
+        }
+      ]
     ]
   }
 ]

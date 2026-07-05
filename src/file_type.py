@@ -33,19 +33,25 @@ def _load_signatures(data_path):
         logging.error(f"Failed to load signatures from {signatures_file}: {exc}")
         return _SIGNATURES_CACHE
 
+    # Each entry: {name, patterns: [group, ...]} where a group is a list of
+    # {pos, hex} matched with AND; groups are OR alternatives.
     max_len = 0
     for entry in raw:
-        patterns = []
-        for pattern in entry.get('patterns', []):
-            try:
-                blob = bytes.fromhex(pattern['hex'])
-            except (ValueError, KeyError, TypeError):
-                continue
-            pos = pattern.get('pos', 0)
-            patterns.append((pos, blob))
-            max_len = max(max_len, pos + len(blob))
-        if patterns:
-            _SIGNATURES_CACHE.append((entry['name'], patterns))
+        groups = []
+        for group in entry.get('patterns', []):
+            compiled = []
+            for pattern in group:
+                try:
+                    blob = bytes.fromhex(pattern['hex'])
+                except (ValueError, KeyError, TypeError):
+                    continue
+                pos = pattern.get('pos', 0)
+                compiled.append((pos, blob))
+                max_len = max(max_len, pos + len(blob))
+            if compiled:
+                groups.append(compiled)
+        if groups:
+            _SIGNATURES_CACHE.append((entry['name'], groups))
 
     _SIGNATURES_READ_LEN = max(max_len, 16)
     return _SIGNATURES_CACHE
@@ -75,8 +81,9 @@ def determine_file_type_with_signatures(file_path, bin_path=None):
         return None
 
     names = []
-    for name, patterns in signatures:
-        if all(header[pos:pos + len(blob)] == blob for pos, blob in patterns) and name not in names:
+    for name, groups in signatures:
+        matched = any(all(header[pos:pos + len(blob)] == blob for pos, blob in group) for group in groups)
+        if matched and name not in names:
             names.append(name)
 
     if names:

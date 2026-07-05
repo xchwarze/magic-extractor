@@ -43,6 +43,15 @@ def main():
             detection_handlers[key] = handler_name       # ensure the magic name routes
             signatures.append({'name': key, 'patterns': signature['patterns']})
 
+    # Group signatures by name: one entry per name whose `patterns` is a list of
+    # alternative pattern-groups (OR of AND). Avoids repeating a name across entries.
+    grouped = {}
+    for signature in signatures:
+        groups = grouped.setdefault(signature['name'], [])
+        if signature['patterns'] not in groups:
+            groups.append(signature['patterns'])
+    signatures = [{'name': name, 'patterns': groups} for name, groups in grouped.items()]
+
     # Optional hand-maintained extras (do not override handler declarations).
     if os.path.exists(EXTRAS_FILE):
         with open(EXTRAS_FILE, encoding='utf-8') as fh:
