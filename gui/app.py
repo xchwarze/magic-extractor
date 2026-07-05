@@ -24,6 +24,9 @@ class ExtractorApp:
     def __init__(self, root, initial_source=None, initial_dest=None, initial_mode=None):
         self.root = root
         self.root.title("Magic Extractor")
+        # Stay hidden until geometry from gui.ini is applied, so the window does
+        # not first paint at the default spot and then jump to its saved position.
+        self.root.withdraw()
         self.log_queue = queue.Queue()
         self.worker = None
         self.cancel_flag = threading.Event()
@@ -57,6 +60,7 @@ class ExtractorApp:
 
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(100, self._drain_log)
+        self.root.deiconify()  # geometry is set; reveal at the final position
 
     # ---- settings --------------------------------------------------------
     def _load_settings(self):
@@ -263,7 +267,8 @@ class ExtractorApp:
         if mode == "ask":
             return messagebox.askyesno(
                 "Delete source",
-                "Delete each source file after a successful extraction?")
+                "Delete each source file after a successful extraction?",
+                parent=self.root)
         return False
 
     def _current_output_dir(self):
@@ -275,7 +280,7 @@ class ExtractorApp:
 
     def _open_path(self, path):
         if not path or not os.path.exists(path):
-            messagebox.showinfo("Not found", f"Not found:\n{path}")
+            messagebox.showinfo("Not found", f"Not found:\n{path}", parent=self.root)
             return
         try:
             if sys.platform == "win32":
@@ -285,7 +290,7 @@ class ExtractorApp:
             else:
                 subprocess.Popen(["xdg-open", path])
         except OSError as exc:
-            messagebox.showerror("Error", str(exc))
+            messagebox.showerror("Error", str(exc), parent=self.root)
 
     def _push_history(self, src, dest):
         if not self.history_enabled:
@@ -343,23 +348,23 @@ class ExtractorApp:
 
     def _install_context_menu(self):
         if not context_menu.is_supported():
-            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.")
+            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.", parent=self.root)
             return
         try:
             context_menu.install(self._context_menu_parts())
-            messagebox.showinfo("Done", "Added 'Extract with Magic Extractor' to the Explorer menu.")
+            messagebox.showinfo("Done", "Added 'Extract with Magic Extractor' to the Explorer menu.", parent=self.root)
         except OSError as exc:
-            messagebox.showerror("Error", str(exc))
+            messagebox.showerror("Error", str(exc), parent=self.root)
 
     def _uninstall_context_menu(self):
         if not context_menu.is_supported():
-            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.")
+            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.", parent=self.root)
             return
         try:
             context_menu.uninstall()
-            messagebox.showinfo("Done", "Removed from the Explorer menu.")
+            messagebox.showinfo("Done", "Removed from the Explorer menu.", parent=self.root)
         except OSError as exc:
-            messagebox.showerror("Error", str(exc))
+            messagebox.showerror("Error", str(exc), parent=self.root)
 
     # ---- actions ---------------------------------------------------------
     def _run_jobs(self, jobs):
@@ -367,7 +372,7 @@ class ExtractorApp:
         try:
             prefix = runner.resolve_backend()
         except FileNotFoundError as exc:
-            messagebox.showerror("Backend not found", str(exc))
+            messagebox.showerror("Backend not found", str(exc), parent=self.root)
             return
         opts = self._current_opts()
         needs_extract = any(mode == "extract" for mode, _, _ in jobs)
@@ -404,7 +409,7 @@ class ExtractorApp:
     def _on_ok(self):
         src = self.source.get().strip()
         if not src:
-            messagebox.showwarning("No source", "Select a source file first.")
+            messagebox.showwarning("No source", "Select a source file first.", parent=self.root)
             return
         self._run_jobs([(self.mode.get(), src, self.dest.get())])
 
@@ -462,10 +467,26 @@ class ExtractorApp:
         self.menubar.recolor(self.theme_mode)
 
     # ---- dialogs ---------------------------------------------------------
-    def _open_run_options(self):
+    def _make_dialog(self, title):
+        """A themed Toplevel, hidden until centered so it never flashes off-screen."""
         win = tk.Toplevel(self.root)
+        win.withdraw()
+        win.transient(self.root)
         theme.restyle_toplevel(win, self.theme_mode)
-        win.title("Run options")
+        win.title(title)
+        return win
+
+    def _center_on_parent(self, win):
+        """Center win over the main window, then reveal it."""
+        win.update_idletasks()
+        px, py = self.root.winfo_rootx(), self.root.winfo_rooty()
+        pw, ph = self.root.winfo_width(), self.root.winfo_height()
+        w, h = win.winfo_width(), win.winfo_height()
+        win.geometry(f"+{px + (pw - w) // 2}+{py + (ph - h) // 2}")
+        win.deiconify()
+
+    def _open_run_options(self):
+        win = self._make_dialog("Run options")
         ttk.Checkbutton(win, text="Recursive", variable=self.opt_recursive).pack(anchor="w", padx=8, pady=2)
         row = ttk.Frame(win); row.pack(anchor="w", padx=8, pady=2)
         ttk.Label(row, text="Max depth:").pack(side="left")
@@ -481,14 +502,13 @@ class ExtractorApp:
             ttk.Radiobutton(win, text=label, variable=self.opt_delete, value=value).pack(anchor="w", padx=16)
 
         ttk.Button(win, text="Close", command=win.destroy).pack(pady=6)
+        self._center_on_parent(win)
 
     def _open_preferences(self):
         path = runner.resolve_config_path()
         current = config_io.read_config(path)
         cfg_vars = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
-        win = tk.Toplevel(self.root)
-        theme.restyle_toplevel(win, self.theme_mode)
-        win.title("Preferences")
+        win = self._make_dialog("Preferences")
 
         ttk.Label(win, text="Extraction (config.ini):").pack(anchor="w", padx=8, pady=(8, 2))
         for key in CONFIG_KEYS:
@@ -506,6 +526,7 @@ class ExtractorApp:
             win.destroy()
 
         ttk.Button(win, text="Save", command=save).pack(pady=6)
+        self._center_on_parent(win)
 
     def _about(self):
-        messagebox.showinfo("About", "Magic Extractor GUI\nWrapper for the magic-extractor CLI.")
+        messagebox.showinfo("About", "Magic Extractor GUI\nWrapper for the magic-extractor CLI.", parent=self.root)
