@@ -63,6 +63,7 @@ jobs:
           cp -r src/bin  src/dist/bin
           cp -r src/data src/dist/data
           cp src/config.ini src/dist/config.ini
+          cp gui/gui.ini src/dist/gui.ini
           cp LICENSE.txt readme.md formats.md src/dist/
           test -f src/dist/magic-extractor-gui.exe
 
