@@ -23,12 +23,21 @@ jobs:
           pip install pyinstaller
           pip install pyinstaller-versionfile
 
+      - name: Determine version from release tag (fallback 0.0.0)
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"          # strip a leading 'v'
+          VERSION="${VERSION:-0.0.0}" # fallback for workflow_dispatch / no tag
+          echo "Detected VERSION: $VERSION"
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Generate version file
         shell: bash
         run: |
           pyivf-make_version \
             --outfile src/version_info.txt \
-            --version 1.0.0.0 \
+            --version ${{ env.PROJECT_VERSION }} \
             --company-name "DSR!" \
             --file-description "Magic Extractor - universal extraction tool" \
             --internal-name "magic-extractor" \
