@@ -58,7 +58,7 @@ The detection → handler routing map lives in `data/handlers.json` (hand-curate
 loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist.json`.
 
 ## Supported Formats
-See `formats.md` for the full list of formats and their handlers.
+See [formats.md](formats.md) for the full list of formats and their handlers.
 
 ## Installation
 ```bash
