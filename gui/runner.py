@@ -30,6 +30,8 @@ def build_command(prefix, mode, source, dest, opts):
         cmd += ["-r", "--max-depth", str(opts.get("max_depth", 5))]
     if opts.get("bruteforce"):
         cmd.append("-b")
+    if opts.get("delete_source"):
+        cmd.append("--delete-source")
     if not opts.get("fast_check", True):
         cmd.append("--no-fast-check")
 
@@ -56,10 +58,17 @@ def resolve_backend():
 
 
 def resolve_config_path():
-    """config.ini beside the backend exe (frozen) or under src/ (dev)."""
+    """config.ini (CLI extraction settings) beside the backend exe (frozen) or under src/ (dev)."""
     if getattr(sys, "frozen", False):
         return os.path.join(os.path.dirname(sys.executable), "config.ini")
     return os.path.join(_repo_root(), "src", "config.ini")
+
+
+def resolve_gui_config_path():
+    """gui.ini (GUI-only settings) beside the GUI exe (frozen) or under gui/ (dev)."""
+    if getattr(sys, "frozen", False):
+        return os.path.join(os.path.dirname(sys.executable), "gui.ini")
+    return os.path.join(_repo_root(), "gui", "gui.ini")
 
 
 def run_streaming(argv, on_line, should_cancel):
@@ -68,12 +77,16 @@ def run_streaming(argv, on_line, should_cancel):
     Polls should_cancel(); terminates the process if it returns True.
     Returns the process exit code (or -1 if cancelled).
     """
+    # CREATE_NO_WINDOW stops a console window from popping up for each child on
+    # Windows when the GUI itself is windowed (--noconsole); 0 elsewhere.
+    creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     process = subprocess.Popen(
         argv,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        creationflags=creationflags,
     )
     try:
         for line in iter(process.stdout.readline, ""):

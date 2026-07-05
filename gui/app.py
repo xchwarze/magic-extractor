@@ -1,39 +1,40 @@
 """Universal-Extractor-style Tk window that drives the magic-extractor CLI."""
-import os
 import queue
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io, theme
+from gui import runner, config_io, theme, paths
+from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
+# CLI config.ini flags surfaced in Preferences.
 CONFIG_KEYS = [
     "open_output_folder", "check_free_space", "check_unicode",
-    "fix_file_extensions", "create_log_files",
+    "fix_file_extensions", "create_log_files", "delete_to_recycle_bin",
 ]
 
 
 class ExtractorApp:
-    def __init__(self, root):
+    def __init__(self, root, initial_source=None, initial_dest=None, initial_mode=None):
         self.root = root
         self.root.title("Magic Extractor")
         self.log_queue = queue.Queue()
         self.worker = None
         self.cancel_flag = threading.Event()
 
-        # State
-        self.theme_mode = theme.initial_mode()
-        self.mode = tk.StringVar(value="extract")
-        self.source = tk.StringVar()
-        self.dest = tk.StringVar()
-        self.lock_dest = tk.BooleanVar(value=False)
-        # per-run options
-        self.opt_recursive = tk.BooleanVar(value=False)
-        self.opt_max_depth = tk.IntVar(value=5)
-        self.opt_bruteforce = tk.BooleanVar(value=False)
-        self.opt_password = tk.StringVar()
-        self.opt_fast_check = tk.BooleanVar(value=True)
+        # Persisted GUI settings (gui.ini).
+        self.settings = GuiSettings(runner.resolve_gui_config_path())
+        self._theme_forced = False
+        self._load_settings()
+
+        # Command-line arguments win over persisted defaults.
+        if initial_mode:
+            self.mode.set(initial_mode)
+        if initial_source:
+            self.source.set(initial_source)
+        if initial_dest:
+            self.dest.set(initial_dest)
 
         self._build_menu()
         self._build_body()
@@ -41,7 +42,67 @@ class ExtractorApp:
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
         self._enable_dnd()
+        self._apply_window_prefs()
+
+        # Auto-fill the destination as the source is typed/changed.
+        self.source.trace_add("write", lambda *a: self._autofill(force=False))
+        if initial_source and not initial_dest:
+            self._autofill(force=True)
+
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(100, self._drain_log)
+
+    # ---- settings --------------------------------------------------------
+    def _load_settings(self):
+        s = self.settings
+        theme_pref = (s.get("gui", "theme", "auto") or "auto").lower()
+        self.theme_mode = theme.initial_mode() if theme_pref == "auto" else theme_pref
+        self.keep_open = tk.BooleanVar(value=s.get_bool("gui", "keep_open", True))
+        self.always_on_top = tk.BooleanVar(value=s.get_bool("gui", "always_on_top", False))
+
+        self.mode = tk.StringVar(value=s.get("defaults", "mode", "extract"))
+        self.auto_fill = tk.BooleanVar(value=s.get_bool("defaults", "auto_fill_destination", True))
+        self.source = tk.StringVar()
+        self.dest = tk.StringVar()
+        self.lock_dest = tk.BooleanVar(value=s.get_bool("defaults", "lock_destination", False))
+        self.opt_delete = tk.StringVar(value=s.get("defaults", "delete_source", "keep"))
+
+        self.opt_recursive = tk.BooleanVar(value=s.get_bool("defaults", "recursive", False))
+        self.opt_max_depth = tk.IntVar(value=s.get_int("defaults", "max_depth", 5))
+        self.opt_bruteforce = tk.BooleanVar(value=s.get_bool("defaults", "bruteforce", False))
+        self.opt_password = tk.StringVar()
+        self.opt_fast_check = tk.BooleanVar(value=s.get_bool("defaults", "fast_check", True))
+
+    def _apply_window_prefs(self):
+        self.root.attributes("-topmost", self.always_on_top.get())
+        if self.settings.get_bool("window", "remember_geometry", True):
+            geometry = self.settings.get("window", "geometry", "")
+            if geometry:
+                try:
+                    self.root.geometry(geometry)
+                except tk.TclError:
+                    pass
+
+    def _save_settings(self):
+        s = self.settings
+        if self._theme_forced:
+            s.set("gui", "theme", self.theme_mode)
+        s.set("gui", "keep_open", self.keep_open.get())
+        s.set("gui", "always_on_top", self.always_on_top.get())
+        s.set("defaults", "mode", self.mode.get())
+        s.set("defaults", "auto_fill_destination", self.auto_fill.get())
+        s.set("defaults", "lock_destination", self.lock_dest.get())
+        s.set("defaults", "delete_source", self.opt_delete.get())
+        s.set("defaults", "recursive", self.opt_recursive.get())
+        s.set("defaults", "max_depth", self.opt_max_depth.get())
+        s.set("defaults", "bruteforce", self.opt_bruteforce.get())
+        s.set("defaults", "fast_check", self.opt_fast_check.get())
+        if self.settings.get_bool("window", "remember_geometry", True):
+            s.set("window", "geometry", self.root.geometry())
+        try:
+            s.save()
+        except OSError:
+            pass
 
     # ---- UI construction -------------------------------------------------
     def _build_menu(self):
@@ -53,7 +114,7 @@ class ExtractorApp:
             ("Open source...", self._browse_source),
             ("Open destination...", self._browse_dest),
             None,
-            ("Exit", self.root.quit),
+            ("Exit", self._on_close),
         ])
         self.menubar.add_menu("Edit", [
             ("Run options...", self._open_run_options),
@@ -115,13 +176,27 @@ class ExtractorApp:
         self.dest_entry.config(state=state)
         self.dest_btn.config(state=state)
         self.lock_chk.config(state=state)
+        if not scan:
+            self._autofill(force=False)
+
+    def _autofill(self, force=False):
+        """Fill the destination from the source. force=True overwrites an existing
+        (auto-filled) value; otherwise a non-empty destination is left alone so a
+        user-typed path is never clobbered."""
+        if self.mode.get() == "scan" or not self.auto_fill.get() or self.lock_dest.get():
+            return
+        src = self.source.get().strip()
+        if not src:
+            return
+        if self.dest.get().strip() and not force:
+            return
+        self.dest.set(paths.default_output_dir(src))
 
     def _browse_source(self):
         path = filedialog.askopenfilename(title="Select archive/installer")
         if path:
             self.source.set(path)
-            if not self.lock_dest.get():
-                self.dest.set("")  # let the CLI derive <name>_extracted
+            self._autofill(force=True)
 
     def _browse_dest(self):
         path = filedialog.askdirectory(title="Select destination directory")
@@ -143,12 +218,11 @@ class ExtractorApp:
 
     def _on_drop(self, event):
         # tk.splitlist handles brace-wrapped, space-containing, multi-file payloads.
-        paths = self.root.tk.splitlist(event.data)
-        if not paths:
+        paths_ = self.root.tk.splitlist(event.data)
+        if not paths_:
             return
-        self.source.set(paths[0])
-        if not self.lock_dest.get():
-            self.dest.set("")  # let the CLI derive <name>_extracted
+        self.source.set(paths_[0])
+        self._autofill(force=True)
 
     def _current_opts(self):
         return {
@@ -158,6 +232,17 @@ class ExtractorApp:
             "password": self.opt_password.get(),
             "fast_check": self.opt_fast_check.get(),
         }
+
+    def _resolve_delete(self):
+        """Keep/Ask/Delete → boolean flag for the CLI. Ask confirms before the run."""
+        mode = self.opt_delete.get()
+        if mode == "delete":
+            return True
+        if mode == "ask":
+            return messagebox.askyesno(
+                "Delete source",
+                "Delete each source file after a successful extraction?")
+        return False
 
     def _append(self, text):
         self.log.config(state="normal")
@@ -188,6 +273,8 @@ class ExtractorApp:
         mode = self.mode.get()
         dest = self.dest.get()
         opts = self._current_opts()
+        if mode == "extract":
+            opts["delete_source"] = self._resolve_delete()
         self.cancel_flag.clear()
         self._set_running(True)
 
@@ -201,10 +288,15 @@ class ExtractorApp:
                 if self.cancel_flag.is_set():
                     self.log_queue.put("[cancelled]")
                     break
-            self.root.after(0, lambda: self._set_running(False))
+            self.root.after(0, self._on_run_finished)
 
         self.worker = threading.Thread(target=work, daemon=True)
         self.worker.start()
+
+    def _on_run_finished(self):
+        self._set_running(False)
+        if not self.keep_open.get():
+            self._on_close()
 
     def _on_ok(self):
         src = self.source.get().strip()
@@ -214,20 +306,25 @@ class ExtractorApp:
         self._run_jobs([src])
 
     def _on_batch(self):
-        paths = filedialog.askopenfilenames(title="Select files to extract")
-        if paths:
+        paths_ = filedialog.askopenfilenames(title="Select files to extract")
+        if paths_:
             self.mode.set("extract")
             self._sync_mode()
-            self._run_jobs(list(paths))
+            self._run_jobs(list(paths_))
 
     def _on_cancel(self):
         if self.worker and self.worker.is_alive():
             self.cancel_flag.set()
         else:
-            self.root.quit()
+            self._on_close()
+
+    def _on_close(self):
+        self._save_settings()
+        self.root.destroy()
 
     def _toggle_theme(self):
         self.theme_mode = theme.toggle(self.root)
+        self._theme_forced = True
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
 
@@ -245,20 +342,34 @@ class ExtractorApp:
         row = ttk.Frame(win); row.pack(anchor="w", padx=8, pady=2)
         ttk.Label(row, text="Password:").pack(side="left")
         ttk.Entry(row, textvariable=self.opt_password, show="*").pack(side="left", padx=4)
+
+        ttk.Label(win, text="After extract (source file):").pack(anchor="w", padx=8, pady=(8, 2))
+        for value, label in (("keep", "Keep"), ("ask", "Ask"), ("delete", "Delete")):
+            ttk.Radiobutton(win, text=label, variable=self.opt_delete, value=value).pack(anchor="w", padx=16)
+
         ttk.Button(win, text="Close", command=win.destroy).pack(pady=6)
 
     def _open_preferences(self):
         path = runner.resolve_config_path()
         current = config_io.read_config(path)
-        vars_ = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
+        cfg_vars = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
         win = tk.Toplevel(self.root)
         theme.restyle_toplevel(win, self.theme_mode)
         win.title("Preferences")
+
+        ttk.Label(win, text="Extraction (config.ini):").pack(anchor="w", padx=8, pady=(8, 2))
         for key in CONFIG_KEYS:
-            ttk.Checkbutton(win, text=key, variable=vars_[key]).pack(anchor="w", padx=8, pady=2)
+            ttk.Checkbutton(win, text=key, variable=cfg_vars[key]).pack(anchor="w", padx=16, pady=1)
+
+        ttk.Label(win, text="Interface (gui.ini):").pack(anchor="w", padx=8, pady=(8, 2))
+        ttk.Checkbutton(win, text="auto_fill_destination", variable=self.auto_fill).pack(anchor="w", padx=16, pady=1)
+        ttk.Checkbutton(win, text="keep_open", variable=self.keep_open).pack(anchor="w", padx=16, pady=1)
+        ttk.Checkbutton(win, text="always_on_top", variable=self.always_on_top).pack(anchor="w", padx=16, pady=1)
 
         def save():
-            config_io.write_config(path, {k: vars_[k].get() for k in CONFIG_KEYS})
+            config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
+            self.root.attributes("-topmost", self.always_on_top.get())
+            self._save_settings()
             win.destroy()
 
         ttk.Button(win, text="Save", command=save).pack(pady=6)

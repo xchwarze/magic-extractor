@@ -18,9 +18,19 @@ def _make_root():
         return tk.Tk()
 
 
+def _parse_args(argv):
+    """Parse `magic-extractor-gui.exe <file> [<outdir>|/scan]` → prefill values."""
+    mode = "scan" if "/scan" in argv else None
+    positionals = [a for a in argv if not a.startswith(("/", "-"))]
+    source = positionals[0] if positionals else None
+    dest = positionals[1] if len(positionals) > 1 else None
+    return source, dest, mode
+
+
 def main():
     root = _make_root()
-    ExtractorApp(root)
+    source, dest, mode = _parse_args(sys.argv[1:])
+    ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
     root.minsize(460, 360)
     root.mainloop()
 

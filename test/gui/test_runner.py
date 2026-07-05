@@ -52,6 +52,18 @@ class BuildCommandTest(unittest.TestCase):
         cmd = runner.build_command(self.PREFIX, "scan", "a.7z", "out", opts)
         self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z"])
 
+    def test_delete_source_flag(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"delete_source": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--delete-source"])
+
+    def test_delete_source_omitted_when_false(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"delete_source": False})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
+
+    def test_scan_ignores_delete_source(self):
+        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"delete_source": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z"])
+
 
 if __name__ == "__main__":
     unittest.main()
