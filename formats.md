@@ -88,10 +88,17 @@ the bundled 7-Zip's `Formats/` folder.
 
 ## Other
 
-| Format                        | Extension(s) | Handler         |
-|-------------------------------|--------------|-----------------|
-| Microsoft Compiled HTML Help  | .chm         | Format7zHandler |
-| Z (compress)                  | .Z           | Format7zHandler |
+| Format                        | Extension(s) | Handler          |
+|-------------------------------|--------------|------------------|
+| Microsoft Compiled HTML Help  | .chm         | Format7zHandler  |
+| Z (compress)                  | .Z           | Format7zHandler  |
+| Electron Asar                 | .asar        | Format7zHandler † |
+
+> **† Needs a 7-Zip plugin.** These formats are detected and routed to 7-Zip,
+> but 7-Zip only extracts them when the matching plugin is present in the bundled
+> 7-Zip's `Formats/` folder: **Asar** for `.asar`, **forensic7z** for the
+> forensic images above. Without the plugin, the file is identified but
+> extraction fails.
 
 ## Notes
 - Self-extracting `.exe` archives (7-Zip, RAR, Inno) are detected and routed to
