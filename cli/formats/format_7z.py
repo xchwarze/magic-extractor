@@ -76,6 +76,14 @@ class Format7zHandler(BaseExtractor):
             {'name': 'encase lx01', 'patterns': [{'pos': 0, 'hex': '4c5646320d0a8100'}]},     # 'LVF2\r\n\x81\x00'
             {'name': 'ftk ad1', 'patterns': [{'pos': 0, 'hex': '41445345474d454e54454446494c4500'}]},  # 'ADSEGMENTEDFILE\x00'
             {'name': 'aff', 'patterns': [{'pos': 0, 'hex': '41464631300d0a00'}]},             # 'AFF10\r\n\x00' (AFFLIB)
+            # Disc images (extracted by 7-Zip with the Iso7z plugin).
+            {'name': 'ciso/cso', 'patterns': [{'pos': 0, 'hex': '4349534f'}]},                # 'CISO' (Compact/Compressed ISO)
+            {'name': 'chd', 'patterns': [{'pos': 0, 'hex': '4d436f6d70724844'}]},             # 'MComprHD' (MAME CHD)
+            {'name': 'ecm', 'patterns': [{'pos': 0, 'hex': '45434d00'}]},                     # 'ECM\x00'
+            {'name': 'isz', 'patterns': [{'pos': 0, 'hex': '49735a21'}]},                     # 'IsZ!' (UltraISO)
+            {'name': 'alcohol mds', 'patterns': [{'pos': 0, 'hex': '4d454449412044455343524950544f52'}]},  # 'MEDIA DESCRIPTOR'
+            {'name': 'clonecd ccd', 'patterns': [{'pos': 0, 'hex': '5b436c6f6e6543445d'}]},   # '[CloneCD]'
+            {'name': 'zisofs', 'patterns': [{'pos': 0, 'hex': '37e45396c9dbd607'}]},          # zisofs block magic
             # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
             # Both conditions (AND) keep the generic 04000000 from false-matching.
             {'name': 'asar archive (electron)', 'patterns': [

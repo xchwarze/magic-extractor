@@ -255,6 +255,83 @@
     ]
   },
   {
+    "name": "ciso/cso",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4349534f"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "chd",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4d436f6d70724844"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "ecm",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "45434d00"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "isz",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "49735a21"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "alcohol mds",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4d454449412044455343524950544f52"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "clonecd ccd",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "5b436c6f6e6543445d"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "zisofs",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "37e45396c9dbd607"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [

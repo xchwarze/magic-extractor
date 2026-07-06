@@ -47,7 +47,7 @@ dedicated handlers cover the rest.
 | InstallShield                   | .cab         | FormatInstallShieldHandler |
 | BitRock / InstallBuilder        | .exe         | FormatBitrockHandler       |
 | Clickteam Install Creator       | .exe         | FormatCicdecHandler        |
-| PyInstaller                     | .exe         | FormatPyInstallerHandler   |
+| PyInstaller                     | .exe         | Format7zHandler †          |
 
 ## Disk Images
 
@@ -86,6 +86,24 @@ the bundled 7-Zip's `Formats/` folder.
 > WinHex WHX (`.whx`) is a forensic7z target too, but its magic could not be
 > confirmed, so it is not auto-detected yet.
 
+## Disc Images (Iso7z plugin)
+
+Detected and routed to 7-Zip; extraction requires the **Iso7z** plugin.
+
+| Format                                | Extension(s)   | Handler           |
+|---------------------------------------|----------------|-------------------|
+| Compact / Compressed ISO              | .ciso, .cso    | Format7zHandler † |
+| MAME CHD                              | .chd           | Format7zHandler † |
+| ECM                                   | .ecm           | Format7zHandler † |
+| UltraISO ISZ                          | .isz           | Format7zHandler † |
+| Alcohol 120% descriptor               | .mds           | Format7zHandler † |
+| CloneCD control                       | .ccd           | Format7zHandler † |
+| zisofs                                | —              | Format7zHandler † |
+
+> Also Iso7z targets but not auto-detected (no reliable start-of-file magic):
+> NRG (Nero), CDI (DiscJuggler), GDI (Dreamcast), CUE/BIN. Their data files are
+> raw/text; add them manually if needed.
+
 ## Other
 
 | Format                        | Extension(s) | Handler          |
@@ -96,9 +114,15 @@ the bundled 7-Zip's `Formats/` folder.
 
 > **† Needs a 7-Zip plugin.** These formats are detected and routed to 7-Zip,
 > but 7-Zip only extracts them when the matching plugin is present in the bundled
-> 7-Zip's `Formats/` folder: **Asar** for `.asar`, **forensic7z** for the
-> forensic images above. Without the plugin, the file is identified but
-> extraction fails.
+> 7-Zip's `Formats/` (or `Codecs/`) folder. Without the plugin the file is
+> identified but extraction fails. Plugin per format:
+>
+> | Plugin       | Covers                                                    |
+> |--------------|-----------------------------------------------------------|
+> | **Asar**     | Electron `.asar`                                          |
+> | **forensic7z** | EWF (E01/S01/Ex01/L01/Lx01), FTK AD1, AFF (forensic images) |
+> | **Iso7z**    | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs)   |
+> | **Py7z**     | PyInstaller executables                                   |
 
 ## Notes
 - Self-extracting `.exe` archives (7-Zip, RAR, Inno) are detected and routed to
@@ -134,7 +158,6 @@ which is a pip dependency). Tool paths are relative to those directories.
 | FormatInstallShieldHandler | `unshield/unshield.exe` | https://github.com/ScoopInstaller/Main/blob/master/bucket/unshield.json |
 | FormatBitrockHandler | `bitrock-unpacker/bitrock-unpacker.exe` | https://gist.github.com/mickael9/0b902da7c13207d1b86e |
 | FormatCicdecHandler | `cicdec/cicdec.exe` | https://github.com/Bioruebe/cicdec |
-| FormatPyInstallerHandler | `pyinstxtractor-ng/pyinstxtractor-ng.exe` | https://github.com/pyinstxtractor/pyinstxtractor-ng |
 | DIE (detector) | `detectors/die/diec.exe` | https://github.com/horsicq/Detect-It-Easy |
 | Magika (detector) | `detectors/magika/magika.exe` | https://github.com/google/magika |
 | binwalk (detector) | `detectors/binwalk/binwalk.exe` | https://github.com/ReFirmLabs/binwalk |
