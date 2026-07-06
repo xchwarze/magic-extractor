@@ -175,7 +175,7 @@ def _candidates_from_outputs(outputs):
 PE_INSTALLER_FALLBACK = (
     'FormatInnoSetupHandler', 'FormatRarHandler', 'FormatAceHandler',
     'FormatArcHandler', 'FormatKgbHandler', 'FormatUharcHandler',
-    'FormatBitrockHandler', 'FormatCicdecHandler', 'FormatPyInstallerHandler',
+    'FormatBitrockHandler', 'FormatCicdecHandler',
 )
 
 def _is_pe(file_path):

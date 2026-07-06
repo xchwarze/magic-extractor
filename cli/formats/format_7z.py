@@ -41,7 +41,7 @@ class Format7zHandler(BaseExtractor):
             'microsoft cabinet file', 'ar archive', 'debian linux package', 'rpm package',
             'xar', 'bzip2 compressed archive', 'cpio archive (binary)',
             'debian software package (.deb)', 'zstandard compressed data',
-            'asar archive (electron)',
+            'asar archive (electron)', 'pyinstaller',
         ]
 
     @classmethod
