@@ -64,7 +64,7 @@ jobs:
           cp -r cli/data cli/dist/data
           cp cli/config.ini cli/dist/config.ini
           cp gui/gui.ini cli/dist/gui.ini
-          cp LICENSE.txt readme.md formats.md cli/dist/
+          cp LICENSE.txt readme.md formats.md THIRD-PARTY-NOTICES.md cli/dist/
           test -f cli/dist/magic-extractor-gui.exe
 
       - name: Smoke test (extract a bundled sample)
