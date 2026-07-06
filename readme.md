@@ -166,7 +166,9 @@ Then copy `bin/`, `data/` and `config.ini` next to `dist/magic-extractor.exe`.
 CI does this automatically — see `.github/workflows/release.yml`.
 
 ## License
-LGPL-3.0-only — see `LICENSE.txt`.
+MIT — see `LICENSE.txt`. Note: the bundled third-party extractor/detector
+binaries under `cli/bin/` keep their own licenses (some proprietary freeware)
+and are not covered by MIT; verify their redistribution terms before shipping.
 
 ## Authors
 - Lead Developer: DSR! — xchwarze@gmail.com
