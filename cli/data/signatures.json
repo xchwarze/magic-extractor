@@ -167,6 +167,17 @@
     ]
   },
   {
+    "name": "exfat",
+    "patterns": [
+      [
+        {
+          "pos": 3,
+          "hex": "4558464154202020"
+        }
+      ]
+    ]
+  },
+  {
     "name": "ntfs",
     "patterns": [
       [

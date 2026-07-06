@@ -67,6 +67,7 @@ class Format7zHandler(BaseExtractor):
             {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
             {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
             {'name': 'uefi', 'patterns': [{'pos': 40, 'hex': '5f465648'}]},        # '_FVH' @0x28 (UEFI firmware volume)
+            {'name': 'exfat', 'patterns': [{'pos': 3, 'hex': '4558464154202020'}]}, # 'EXFAT   ' @3 (needs ExFat7z plugin)
             {'name': 'ntfs', 'patterns': [{'pos': 3, 'hex': '4e544653'}]},         # 'NTFS' OEM id @3 (redundant w/ binwalk)
             {'name': 'efigpt', 'patterns': [{'pos': 512, 'hex': '4546492050415254'}]},  # 'EFI PART' @0x200 (GPT header)
             # Forensic disk images (extracted by 7-Zip with the forensic7z plugin).

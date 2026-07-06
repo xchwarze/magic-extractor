@@ -95,6 +95,7 @@
     "vdi": "Format7zHandler",
     "wim": "Format7zHandler",
     "uefi": "Format7zHandler",
+    "exfat": "Format7zHandler",
     "encase e01/s01": "Format7zHandler",
     "encase ex01": "Format7zHandler",
     "encase l01": "Format7zHandler",

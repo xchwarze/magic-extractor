@@ -65,6 +65,7 @@ dedicated handlers cover the rest.
 | cramfs / squashfs             | .cramfs, .sqsh | Format7zHandler |
 | MBR / GPT partition table     | .img, .bin     | Format7zHandler |
 | UEFI firmware volume          | .fd, .rom, .bin| Format7zHandler |
+| ExFAT                         | .img           | Format7zHandler † |
 
 > Intel HEX (`.hex`) is supported by the underlying 7-Zip but is a plain-text
 > format with no reliable signature, so it is not auto-detected/routed.
@@ -122,6 +123,7 @@ Detected and routed to 7-Zip; extraction requires the **Iso7z** plugin.
 > | **Asar**     | Electron `.asar`                                          |
 > | **forensic7z** | EWF (E01/S01/Ex01/L01/Lx01), FTK AD1, AFF (forensic images) |
 > | **Iso7z**    | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs)   |
+> | **ExFat7z**  | ExFAT disk images                                        |
 > | **Py7z**     | PyInstaller executables                                   |
 
 ## Notes
