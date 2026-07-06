@@ -210,12 +210,12 @@ class ExtractorApp:
         self.dest_btn.pack(side="left", padx=4)
 
         # Buttons
-        row = ttk.Frame(frm); row.pack(fill="x", **pad)
+        row = ttk.Frame(frm); row.pack(fill="x", padx=10, pady=(8, 4))
         self.ok_btn = ttk.Button(row, text="OK", width=10, command=self._on_ok)
-        self.ok_btn.pack(side="left", padx=4)
-        ttk.Button(row, text="Cancel", width=10, command=self._on_cancel).pack(side="left", padx=4)
+        self.ok_btn.pack(side="left", padx=(0, 8))
+        ttk.Button(row, text="Cancel", width=10, command=self._on_cancel).pack(side="left", padx=8)
         self.batch_btn = ttk.Button(row, text="Batch", width=10, command=self._on_batch)
-        self.batch_btn.pack(side="left", padx=4)
+        self.batch_btn.pack(side="left", padx=8)
 
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
 
@@ -586,4 +586,10 @@ class ExtractorApp:
         self._center_on_parent(win)
 
     def _about(self):
-        messagebox.showinfo("About", "Magic Extractor GUI\nWrapper for the magic-extractor CLI.", parent=self.root)
+        messagebox.showinfo(
+            "About",
+            "Magic Extractor\n"
+            "Universal extraction tool.\n\n"
+            "Author: DSR! (xchwarze)\n"
+            "https://github.com/xchwarze/magic-extractor",
+            parent=self.root)
