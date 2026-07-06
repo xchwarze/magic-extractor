@@ -105,6 +105,22 @@ Detected and routed to 7-Zip; extraction requires the **Iso7z** plugin.
 > NRG (Nero), CDI (DiscJuggler), GDI (Dreamcast), CUE/BIN. Their data files are
 > raw/text; add them manually if needed.
 
+## Mail / Encoding (eDecoder plugin)
+
+Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
+
+| Format                                | Extension(s)   | Handler           |
+|---------------------------------------|----------------|-------------------|
+| TNEF (Outlook winmail.dat)            | .dat           | Format7zHandler † |
+| Outlook Express mail store            | .dbx           | Format7zHandler † |
+| Web ARChive                           | .warc          | Format7zHandler † |
+| BinHex                                | .hqx           | Format7zHandler † |
+| yEnc                                  | .ntx           | Format7zHandler † |
+
+> Other eDecoder targets are plain text with no reliable signature, so they are
+> not auto-detected: MBOX, EML/NWS/MHT/MHTML/B64, EMLX, UUE/XXE, MGS, MBX, TBB,
+> PMM, and MacBinary (.bin). The plugin can still extract them if reached.
+
 ## Other
 
 | Format                        | Extension(s) | Handler          |
@@ -124,6 +140,7 @@ Detected and routed to 7-Zip; extraction requires the **Iso7z** plugin.
 > | **forensic7z** | EWF (E01/S01/Ex01/L01/Lx01), FTK AD1, AFF (forensic images) |
 > | **Iso7z**    | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs)   |
 > | **ExFat7z**  | ExFAT disk images                                        |
+> | **eDecoder** | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc)             |
 > | **Py7z**     | PyInstaller executables                                   |
 
 ## Notes

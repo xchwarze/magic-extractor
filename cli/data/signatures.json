@@ -343,6 +343,61 @@
     ]
   },
   {
+    "name": "tnef",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "789f3e22"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "dbx",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "cfad12fe"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "warc",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "574152432f"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "binhex",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "28546869732066696c65206d75737420626520636f6e766572746564"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "yenc",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "3d79626567696e"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [

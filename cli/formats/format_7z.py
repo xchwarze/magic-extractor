@@ -85,6 +85,12 @@ class Format7zHandler(BaseExtractor):
             {'name': 'alcohol mds', 'patterns': [{'pos': 0, 'hex': '4d454449412044455343524950544f52'}]},  # 'MEDIA DESCRIPTOR'
             {'name': 'clonecd ccd', 'patterns': [{'pos': 0, 'hex': '5b436c6f6e6543445d'}]},   # '[CloneCD]'
             {'name': 'zisofs', 'patterns': [{'pos': 0, 'hex': '37e45396c9dbd607'}]},          # zisofs block magic
+            # Mail / encoding formats (extracted by 7-Zip with the eDecoder plugin).
+            {'name': 'tnef', 'patterns': [{'pos': 0, 'hex': '789f3e22'}]},                    # winmail.dat (TNEF, 0x223E9F78 LE)
+            {'name': 'dbx', 'patterns': [{'pos': 0, 'hex': 'cfad12fe'}]},                     # Outlook Express DBX
+            {'name': 'warc', 'patterns': [{'pos': 0, 'hex': '574152432f'}]},                  # 'WARC/' web archive
+            {'name': 'binhex', 'patterns': [{'pos': 0, 'hex': '28546869732066696c65206d75737420626520636f6e766572746564'}]},  # '(This file must be converted' (BinHex .hqx)
+            {'name': 'yenc', 'patterns': [{'pos': 0, 'hex': '3d79626567696e'}]},              # '=ybegin' (yEnc .ntx)
             # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
             # Both conditions (AND) keep the generic 04000000 from false-matching.
             {'name': 'asar archive (electron)', 'patterns': [
