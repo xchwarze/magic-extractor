@@ -33,6 +33,11 @@ Usage:
     python test/run_battery.py --unit-only     # stage 1 only (safe in WSL)
     python test/run_battery.py --battery-only  # stage 2 only (Windows)
     python test/run_battery.py --timeout 300   # per-command timeout (seconds)
+    python test/run_battery.py --debug         # add --debug to every CLI call
+
+Failing samples always print their captured stdout+stderr (the CLI logs tool
+errors like a missing DLL at ERROR level, shown without --debug); pass --debug
+only when you also want the full verbose trace of the passing steps.
 
 Exit code is 0 only when every executed item passed; non-zero if any unit
 test or any battery item (identify or extract) failed.
@@ -160,11 +165,18 @@ def first_candidate(identify_stdout):
     return ""
 
 
-def run_cli(command, sample, extra=None, timeout=180):
-    """Run `python cli/main.py <command> <sample> [extra]`; return (rc, stdout)."""
+def run_cli(command, sample, extra=None, timeout=180, debug=False):
+    """Run `python cli/main.py <command> <sample> [extra]`; return (rc, stdout, stderr).
+
+    stderr is always captured so tool failures (e.g. a missing DLL for an
+    extractor .exe) surface in the report — the CLI logs them at ERROR level,
+    which shows without --debug. Pass debug=True to add --debug for the full
+    verbose trace when the ERROR line alone is not enough."""
     argv = [sys.executable, MAIN_PY, command, sample]
     if extra:
         argv.append(extra)
+    if debug:
+        argv.append('--debug')
     try:
         proc = subprocess.run(
             argv,
@@ -172,25 +184,33 @@ def run_cli(command, sample, extra=None, timeout=180):
             stdin=subprocess.DEVNULL,  # never block on an interactive prompt
             timeout=timeout,
         )
-        return proc.returncode, proc.stdout or ""
+        return proc.returncode, proc.stdout or "", proc.stderr or ""
     except subprocess.TimeoutExpired:
-        return 124, ""
+        return 124, "", "TIMEOUT after %ss" % timeout
     except OSError as exc:  # e.g. python/main.py missing
-        return 127, str(exc)
+        return 127, "", str(exc)
 
 
-def run_one_sample(fmt, sample, timeout):
+def run_one_sample(fmt, sample, timeout, debug=False):
     """identify + extract one sample into a throwaway dir; return a result dict."""
-    id_rc, id_out = run_cli('identify', sample, timeout=timeout)
+    id_rc, id_out, id_err = run_cli('identify', sample, timeout=timeout, debug=debug)
     id_ok = id_rc == 0
     handler = first_candidate(id_out)
 
     out_dir = tempfile.mkdtemp(prefix='mx_battery_')
     try:
-        ex_rc, _ = run_cli('extract', sample, extra=out_dir, timeout=timeout)
+        ex_rc, ex_out, ex_err = run_cli('extract', sample, extra=out_dir, timeout=timeout, debug=debug)
         ex_ok = ex_rc == 0 and extracted_something(out_dir)
     finally:
         shutil.rmtree(out_dir, ignore_errors=True)  # never touch the corpus
+
+    # Captured output for the report (identify + extract, stdout + stderr). The
+    # CLI's ERROR log (which includes the failing tool's stderr, e.g. a missing
+    # DLL) lands here even without --debug; printed only for failures below.
+    log = "".join([
+        "$ identify\n", id_out, id_err,
+        "\n$ extract\n", ex_out, ex_err,
+    ]).strip()
 
     return {
         'fmt': fmt,
@@ -201,10 +221,11 @@ def run_one_sample(fmt, sample, timeout):
         'ex_ok': ex_ok,
         'ex_rc': ex_rc,
         'ok': id_ok and ex_ok,
+        'log': log,
     }
 
 
-def run_extraction_battery(timeout):
+def run_extraction_battery(timeout, debug=False):
     """Run stage 2 over every sample; print a per-sample table; return (ok, results)."""
     print("=" * 72)
     print("STAGE 2: extraction battery  (WINDOWS ONLY -- needs cli/bin/*.exe)")
@@ -226,17 +247,23 @@ def run_extraction_battery(timeout):
     results = []
     for fmt, sample in iter_samples():
         try:
-            res = run_one_sample(fmt, sample, timeout)
+            res = run_one_sample(fmt, sample, timeout, debug=debug)
         except Exception as exc:  # keep the battery going on any unexpected error
             res = {'fmt': fmt, 'sample': os.path.relpath(sample, TEST_DIR),
                    'handler': '', 'id_ok': False, 'id_rc': -1,
-                   'ex_ok': False, 'ex_rc': -1, 'ok': False, 'error': str(exc)}
+                   'ex_ok': False, 'ex_rc': -1, 'ok': False, 'log': str(exc)}
         results.append(res)
         status = 'PASS' if res['ok'] else 'FAIL'
         print(f"  {status:<6} {res['fmt']:<12} "
               f"{'OK' if res['id_ok'] else 'FAIL':<6} "
               f"{'OK' if res['ex_ok'] else 'FAIL':<8} "
               f"{res['handler']:<26.26} {res['sample']}")
+        # On failure, dump the captured output so the real error (e.g. a missing
+        # DLL logged at ERROR) is visible in the pipeline log.
+        if not res['ok'] and res.get('log'):
+            for line in res['log'].splitlines():
+                print(f"      | {line}")
+            print()
 
     passed = sum(1 for r in results if r['ok'])
     total = len(results)
@@ -261,6 +288,9 @@ def main():
                         help="Run only the extraction battery (Windows only).")
     parser.add_argument('--timeout', type=int, default=180,
                         help="Per-command timeout in seconds (default 180).")
+    parser.add_argument('--debug', action='store_true',
+                        help="Pass --debug to every CLI call for the full verbose trace "
+                             "(failures already print their captured output without this).")
     args = parser.parse_args()
 
     run_unit = not args.battery_only
@@ -272,7 +302,7 @@ def main():
     if run_unit:
         unit_ok = run_unit_tests()[0]
     if run_battery:
-        battery_ok = run_extraction_battery(args.timeout)[0]
+        battery_ok = run_extraction_battery(args.timeout, debug=args.debug)[0]
 
     print("=" * 72)
     print("SUMMARY")
