@@ -67,6 +67,8 @@ class Format7zHandler(BaseExtractor):
             {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
             {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
             {'name': 'uefi', 'patterns': [{'pos': 40, 'hex': '5f465648'}]},        # '_FVH' @0x28 (UEFI firmware volume)
+            {'name': 'ntfs', 'patterns': [{'pos': 3, 'hex': '4e544653'}]},         # 'NTFS' OEM id @3 (redundant w/ binwalk)
+            {'name': 'efigpt', 'patterns': [{'pos': 512, 'hex': '4546492050415254'}]},  # 'EFI PART' @0x200 (GPT header)
             # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
             # Both conditions (AND) keep the generic 04000000 from false-matching.
             {'name': 'asar archive (electron)', 'patterns': [

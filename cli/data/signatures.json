@@ -167,6 +167,28 @@
     ]
   },
   {
+    "name": "ntfs",
+    "patterns": [
+      [
+        {
+          "pos": 3,
+          "hex": "4e544653"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "efigpt",
+    "patterns": [
+      [
+        {
+          "pos": 512,
+          "hex": "4546492050415254"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [
