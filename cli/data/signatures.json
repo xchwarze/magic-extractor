@@ -189,6 +189,72 @@
     ]
   },
   {
+    "name": "encase e01/s01",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "455646090d0aff00"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "encase ex01",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "455646320d0a8100"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "encase l01",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4c5646090d0aff00"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "encase lx01",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4c5646320d0a8100"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "ftk ad1",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "41445345474d454e54454446494c4500"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "aff",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "41464631300d0a00"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [

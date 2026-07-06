@@ -69,6 +69,13 @@ class Format7zHandler(BaseExtractor):
             {'name': 'uefi', 'patterns': [{'pos': 40, 'hex': '5f465648'}]},        # '_FVH' @0x28 (UEFI firmware volume)
             {'name': 'ntfs', 'patterns': [{'pos': 3, 'hex': '4e544653'}]},         # 'NTFS' OEM id @3 (redundant w/ binwalk)
             {'name': 'efigpt', 'patterns': [{'pos': 512, 'hex': '4546492050415254'}]},  # 'EFI PART' @0x200 (GPT header)
+            # Forensic disk images (extracted by 7-Zip with the forensic7z plugin).
+            {'name': 'encase e01/s01', 'patterns': [{'pos': 0, 'hex': '455646090d0aff00'}]},  # 'EVF\x09\r\n\xff\x00' (EnCase E01 / ASR SMART S01)
+            {'name': 'encase ex01', 'patterns': [{'pos': 0, 'hex': '455646320d0a8100'}]},     # 'EVF2\r\n\x81\x00'
+            {'name': 'encase l01', 'patterns': [{'pos': 0, 'hex': '4c5646090d0aff00'}]},      # 'LVF\x09\r\n\xff\x00'
+            {'name': 'encase lx01', 'patterns': [{'pos': 0, 'hex': '4c5646320d0a8100'}]},     # 'LVF2\r\n\x81\x00'
+            {'name': 'ftk ad1', 'patterns': [{'pos': 0, 'hex': '41445345474d454e54454446494c4500'}]},  # 'ADSEGMENTEDFILE\x00'
+            {'name': 'aff', 'patterns': [{'pos': 0, 'hex': '41464631300d0a00'}]},             # 'AFF10\r\n\x00' (AFFLIB)
             # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
             # Both conditions (AND) keep the generic 04000000 from false-matching.
             {'name': 'asar archive (electron)', 'patterns': [

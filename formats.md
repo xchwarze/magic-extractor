@@ -69,6 +69,23 @@ dedicated handlers cover the rest.
 > Intel HEX (`.hex`) is supported by the underlying 7-Zip but is a plain-text
 > format with no reliable signature, so it is not auto-detected/routed.
 
+## Forensic Images
+
+Detected and routed to 7-Zip; extraction requires the **forensic7z** plugin in
+the bundled 7-Zip's `Formats/` folder.
+
+| Format                                | Extension(s)   | Handler         |
+|---------------------------------------|----------------|-----------------|
+| EnCase / ASR SMART (EWF)              | .E01, .S01     | Format7zHandler |
+| EnCase v7 (EWF2)                      | .Ex01          | Format7zHandler |
+| EnCase Logical                        | .L01           | Format7zHandler |
+| EnCase v7 Logical                     | .Lx01          | Format7zHandler |
+| AccessData FTK Imager Logical         | .AD1           | Format7zHandler |
+| Advanced Forensics Format             | .AFF           | Format7zHandler |
+
+> WinHex WHX (`.whx`) is a forensic7z target too, but its magic could not be
+> confirmed, so it is not auto-detected yet.
+
 ## Other
 
 | Format                        | Extension(s) | Handler         |
