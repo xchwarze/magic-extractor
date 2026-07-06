@@ -41,6 +41,7 @@ class Format7zHandler(BaseExtractor):
             'microsoft cabinet file', 'ar archive', 'debian linux package', 'rpm package',
             'xar', 'bzip2 compressed archive', 'cpio archive (binary)',
             'debian software package (.deb)', 'zstandard compressed data',
+            'asar archive (electron)',
         ]
 
     @classmethod
@@ -65,6 +66,10 @@ class Format7zHandler(BaseExtractor):
             {'name': 'wim', 'patterns': [{'pos': 0, 'hex': '4d5357494d000000'}]},  # 'MSWIM\0\0\0'
             {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
             {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
+            # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
+            # Both conditions (AND) keep the generic 04000000 from false-matching.
+            {'name': 'asar archive (electron)', 'patterns': [
+                {'pos': 0, 'hex': '04000000'}, {'pos': 16, 'hex': '7b2266696c657322'}]},
         ]
 
     def list_contents(self):

@@ -85,6 +85,7 @@
     "cpio archive (binary)": "Format7zHandler",
     "debian software package (.deb)": "Format7zHandler",
     "zstandard compressed data": "Format7zHandler",
+    "asar archive (electron)": "Format7zHandler",
     "arj": "Format7zHandler",
     "lzh": "Format7zHandler",
     "qcow2": "Format7zHandler",
