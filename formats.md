@@ -129,9 +129,10 @@ bundled 7-Zip's `Codecs/` folder.
 | Format                                | Extension(s)   | Handler              |
 |---------------------------------------|----------------|----------------------|
 | LZ4 frame                             | .lz4           | Format7zExtHandler † |
+| Firefox jsonlz4                        | .jsonlz4, .mozlz4 | Format7zExtHandler † |
 
-> Modern7z also adds Brotli, LZ5, Lizard, Fast-LZMA2 and Zstd-in-Zip, but these
-> are single-file raw codec streams with no reliable magic, so they are not
+> Modern7z also adds Brotli, LZ5, Lizard, Fast-LZMA2 and Zstd/Brotli-in-Zip, but
+> these are single-file raw codec streams with no reliable magic, so they are not
 > auto-detected. Plain Zstd (`.zst`) is already handled natively.
 
 ## Other
@@ -154,7 +155,7 @@ bundled 7-Zip's `Codecs/` folder.
 > | **Iso7z**    | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs)   |
 > | **ExFat7z**  | ExFAT disk images                                        |
 > | **eDecoder** | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc)             |
-> | **Modern7z** | LZ4 (Codecs/ folder)                                     |
+> | **Modern7z** | LZ4, Firefox jsonlz4/mozlz4 (Codecs/ folder)             |
 > | **Py7z**     | PyInstaller executables                                   |
 
 ## Notes
