@@ -1,200 +1,11 @@
 [
   {
-    "name": "7-zip",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "377abcaf271c"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "cpio",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "c771"
-        }
-      ],
-      [
-        {
-          "pos": 0,
-          "hex": "71c7"
-        }
-      ],
-      [
-        {
-          "pos": 0,
-          "hex": "303730373037"
-        }
-      ],
-      [
-        {
-          "pos": 0,
-          "hex": "303730373031"
-        }
-      ],
-      [
-        {
-          "pos": 0,
-          "hex": "303730373032"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "arj",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "60ea"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "lzh",
-    "patterns": [
-      [
-        {
-          "pos": 2,
-          "hex": "2d6c68"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "chm",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "49545346"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "qcow2",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "514649fb"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "vhdx",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "7668647866696c65"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "vmdk",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "4b444d56"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "vdi",
-    "patterns": [
-      [
-        {
-          "pos": 64,
-          "hex": "7f10dabe"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "wim",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "4d5357494d000000"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "apfs",
-    "patterns": [
-      [
-        {
-          "pos": 32,
-          "hex": "4e585342"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "xar",
-    "patterns": [
-      [
-        {
-          "pos": 0,
-          "hex": "78617221"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "uefi",
-    "patterns": [
-      [
-        {
-          "pos": 40,
-          "hex": "5f465648"
-        }
-      ]
-    ]
-  },
-  {
     "name": "exfat",
     "patterns": [
       [
         {
           "pos": 3,
           "hex": "4558464154202020"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "ntfs",
-    "patterns": [
-      [
-        {
-          "pos": 3,
-          "hex": "4e544653"
-        }
-      ]
-    ]
-  },
-  {
-    "name": "efigpt",
-    "patterns": [
-      [
-        {
-          "pos": 512,
-          "hex": "4546492050415254"
         }
       ]
     ]
@@ -408,6 +219,195 @@
         {
           "pos": 16,
           "hex": "7b2266696c657322"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "7-zip",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "377abcaf271c"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "cpio",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "c771"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "71c7"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373037"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373031"
+        }
+      ],
+      [
+        {
+          "pos": 0,
+          "hex": "303730373032"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "arj",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "60ea"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "lzh",
+    "patterns": [
+      [
+        {
+          "pos": 2,
+          "hex": "2d6c68"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "chm",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "49545346"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "qcow2",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "514649fb"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "vhdx",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "7668647866696c65"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "vmdk",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4b444d56"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "vdi",
+    "patterns": [
+      [
+        {
+          "pos": 64,
+          "hex": "7f10dabe"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "wim",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "4d5357494d000000"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "apfs",
+    "patterns": [
+      [
+        {
+          "pos": 32,
+          "hex": "4e585342"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "xar",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "78617221"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "uefi",
+    "patterns": [
+      [
+        {
+          "pos": 40,
+          "hex": "5f465648"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "ntfs",
+    "patterns": [
+      [
+        {
+          "pos": 3,
+          "hex": "4e544653"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "efigpt",
+    "patterns": [
+      [
+        {
+          "pos": 512,
+          "hex": "4546492050415254"
         }
       ]
     ]

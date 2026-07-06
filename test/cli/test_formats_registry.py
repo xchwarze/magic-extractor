@@ -5,6 +5,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cli"))
 import formats
 from formats.format_7z import Format7zHandler
+from formats.format_7z_ext import Format7zExtHandler
 from formats.format_rar import FormatRarHandler
 
 # Absolute path to cli/data (holds the real handlers.json).
@@ -21,8 +22,8 @@ class FormatsRegistryTest(unittest.TestCase):
         formats.init_handlers(DATA_PATH)
 
     # --- static registry ------------------------------------------------- #
-    def test_registry_has_nineteen_handlers(self):
-        self.assertEqual(len(formats.HANDLER_REGISTRY), 19)
+    def test_registry_has_twenty_handlers(self):
+        self.assertEqual(len(formats.HANDLER_REGISTRY), 20)
 
     def test_registry_keyed_by_class_name(self):
         self.assertIs(
@@ -37,16 +38,16 @@ class FormatsRegistryTest(unittest.TestCase):
 
     # --- get_handler_from_detection -------------------------------------- #
     def test_detection_routes_to_expected_handler(self):
-        # pyinstaller is now handled by the 7z handler (dedicated handler removed).
+        # pyinstaller needs a 7z plugin, so it routes to the extended handler.
         self.assertIs(
             formats.get_handler_from_detection("pyinstaller"),
-            Format7zHandler,
+            Format7zExtHandler,
         )
 
     def test_detection_lookup_is_case_insensitive(self):
         self.assertIs(
             formats.get_handler_from_detection("PyInstaller"),
-            Format7zHandler,
+            Format7zExtHandler,
         )
 
     def test_unknown_detection_returns_none(self):

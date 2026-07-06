@@ -47,7 +47,7 @@ dedicated handlers cover the rest.
 | InstallShield                   | .cab         | FormatInstallShieldHandler |
 | BitRock / InstallBuilder        | .exe         | FormatBitrockHandler       |
 | Clickteam Install Creator       | .exe         | FormatCicdecHandler        |
-| PyInstaller                     | .exe         | Format7zHandler †          |
+| PyInstaller                     | .exe         | Format7zExtHandler †          |
 
 ## Disk Images
 
@@ -65,7 +65,7 @@ dedicated handlers cover the rest.
 | cramfs / squashfs             | .cramfs, .sqsh | Format7zHandler |
 | MBR / GPT partition table     | .img, .bin     | Format7zHandler |
 | UEFI firmware volume          | .fd, .rom, .bin| Format7zHandler |
-| ExFAT                         | .img           | Format7zHandler † |
+| ExFAT                         | .img           | Format7zExtHandler † |
 
 > Intel HEX (`.hex`) is supported by the underlying 7-Zip but is a plain-text
 > format with no reliable signature, so it is not auto-detected/routed.
@@ -75,14 +75,14 @@ dedicated handlers cover the rest.
 Detected and routed to 7-Zip; extraction requires the **forensic7z** plugin in
 the bundled 7-Zip's `Formats/` folder.
 
-| Format                                | Extension(s)   | Handler         |
-|---------------------------------------|----------------|-----------------|
-| EnCase / ASR SMART (EWF)              | .E01, .S01     | Format7zHandler |
-| EnCase v7 (EWF2)                      | .Ex01          | Format7zHandler |
-| EnCase Logical                        | .L01           | Format7zHandler |
-| EnCase v7 Logical                     | .Lx01          | Format7zHandler |
-| AccessData FTK Imager Logical         | .AD1           | Format7zHandler |
-| Advanced Forensics Format             | .AFF           | Format7zHandler |
+| Format                                | Extension(s)   | Handler              |
+|---------------------------------------|----------------|----------------------|
+| EnCase / ASR SMART (EWF)              | .E01, .S01     | Format7zExtHandler † |
+| EnCase v7 (EWF2)                      | .Ex01          | Format7zExtHandler † |
+| EnCase Logical                        | .L01           | Format7zExtHandler † |
+| EnCase v7 Logical                     | .Lx01          | Format7zExtHandler † |
+| AccessData FTK Imager Logical         | .AD1           | Format7zExtHandler † |
+| Advanced Forensics Format             | .AFF           | Format7zExtHandler † |
 
 > WinHex WHX (`.whx`) is a forensic7z target too, but its magic could not be
 > confirmed, so it is not auto-detected yet.
@@ -93,13 +93,13 @@ Detected and routed to 7-Zip; extraction requires the **Iso7z** plugin.
 
 | Format                                | Extension(s)   | Handler           |
 |---------------------------------------|----------------|-------------------|
-| Compact / Compressed ISO              | .ciso, .cso    | Format7zHandler † |
-| MAME CHD                              | .chd           | Format7zHandler † |
-| ECM                                   | .ecm           | Format7zHandler † |
-| UltraISO ISZ                          | .isz           | Format7zHandler † |
-| Alcohol 120% descriptor               | .mds           | Format7zHandler † |
-| CloneCD control                       | .ccd           | Format7zHandler † |
-| zisofs                                | —              | Format7zHandler † |
+| Compact / Compressed ISO              | .ciso, .cso    | Format7zExtHandler † |
+| MAME CHD                              | .chd           | Format7zExtHandler † |
+| ECM                                   | .ecm           | Format7zExtHandler † |
+| UltraISO ISZ                          | .isz           | Format7zExtHandler † |
+| Alcohol 120% descriptor               | .mds           | Format7zExtHandler † |
+| CloneCD control                       | .ccd           | Format7zExtHandler † |
+| zisofs                                | —              | Format7zExtHandler † |
 
 > Also Iso7z targets but not auto-detected (no reliable start-of-file magic):
 > NRG (Nero), CDI (DiscJuggler), GDI (Dreamcast), CUE/BIN. Their data files are
@@ -111,11 +111,11 @@ Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
 
 | Format                                | Extension(s)   | Handler           |
 |---------------------------------------|----------------|-------------------|
-| TNEF (Outlook winmail.dat)            | .dat           | Format7zHandler † |
-| Outlook Express mail store            | .dbx           | Format7zHandler † |
-| Web ARChive                           | .warc          | Format7zHandler † |
-| BinHex                                | .hqx           | Format7zHandler † |
-| yEnc                                  | .ntx           | Format7zHandler † |
+| TNEF (Outlook winmail.dat)            | .dat           | Format7zExtHandler † |
+| Outlook Express mail store            | .dbx           | Format7zExtHandler † |
+| Web ARChive                           | .warc          | Format7zExtHandler † |
+| BinHex                                | .hqx           | Format7zExtHandler † |
+| yEnc                                  | .ntx           | Format7zExtHandler † |
 
 > Other eDecoder targets are plain text with no reliable signature, so they are
 > not auto-detected: MBOX, EML/NWS/MHT/MHTML/B64, EMLX, UUE/XXE, MGS, MBX, TBB,
@@ -127,7 +127,7 @@ Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
 |-------------------------------|--------------|------------------|
 | Microsoft Compiled HTML Help  | .chm         | Format7zHandler  |
 | Z (compress)                  | .Z           | Format7zHandler  |
-| Electron Asar                 | .asar        | Format7zHandler † |
+| Electron Asar                 | .asar        | Format7zExtHandler † |
 
 > **† Needs a 7-Zip plugin.** These formats are detected and routed to 7-Zip,
 > but 7-Zip only extracts them when the matching plugin is present in the bundled
@@ -159,6 +159,7 @@ which is a pip dependency). Tool paths are relative to those directories.
 | Handler | Tool | URL |
 |---------|------|-----|
 | Format7zHandler | `7z/7z.exe` | http://www.7-zip.org/ |
+| Format7zExtHandler | `7z/7z.exe` + plugins in `7z/Formats/` (Asar, forensic7z, Iso7z, ExFat7z, eDecoder, Py7z) | https://www.tc4shell.com/en/7zip/ |
 | FormatRarHandler | `rar/unrar.exe` | http://www.rarlab.com/rar_add.htm |
 | FormatAceHandler | `unace/unace.exe` | https://sourceforge.net/projects/peazip/files/Resources/PeaZip%20UNACE%20Plugin/ |
 | FormatAlzipHandler | `alzip/ALZipCon.exe` | https://www.altools.com/ |

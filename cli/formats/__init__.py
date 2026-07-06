@@ -2,6 +2,7 @@ import os
 import json
 import logging
 from .format_7z import Format7zHandler
+from .format_7z_ext import Format7zExtHandler
 from .format_rar import FormatRarHandler
 from .format_ace import FormatAceHandler
 from .format_kgb import FormatKgbHandler
@@ -24,7 +25,7 @@ from .format_lzip import FormatLzipHandler
 # Registry mapping the handler class names used in data/handlers.json to the classes.
 # The extraction logic lives in code (format_*.py); only the routing map is data.
 _HANDLER_CLASSES = (
-    Format7zHandler, FormatRarHandler, FormatAceHandler, FormatKgbHandler,
+    Format7zHandler, Format7zExtHandler, FormatRarHandler, FormatAceHandler, FormatKgbHandler,
     FormatUharcHandler, FormatZpaqHandler, FormatAlzipHandler, FormatEggHandler,
     FormatBcmHandler, FormatArcHandler, FormatPeaHandler, FormatInnoSetupHandler,
     FormatMsiHandler, FormatBitrockHandler, FormatCicdecHandler, FormatDgcaHandler,

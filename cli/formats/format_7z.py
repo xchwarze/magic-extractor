@@ -41,7 +41,6 @@ class Format7zHandler(BaseExtractor):
             'microsoft cabinet file', 'ar archive', 'debian linux package', 'rpm package',
             'xar', 'bzip2 compressed archive', 'cpio archive (binary)',
             'debian software package (.deb)', 'zstandard compressed data',
-            'asar archive (electron)', 'pyinstaller',
         ]
 
     @classmethod
@@ -67,34 +66,8 @@ class Format7zHandler(BaseExtractor):
             {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
             {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
             {'name': 'uefi', 'patterns': [{'pos': 40, 'hex': '5f465648'}]},        # '_FVH' @0x28 (UEFI firmware volume)
-            {'name': 'exfat', 'patterns': [{'pos': 3, 'hex': '4558464154202020'}]}, # 'EXFAT   ' @3 (needs ExFat7z plugin)
             {'name': 'ntfs', 'patterns': [{'pos': 3, 'hex': '4e544653'}]},         # 'NTFS' OEM id @3 (redundant w/ binwalk)
             {'name': 'efigpt', 'patterns': [{'pos': 512, 'hex': '4546492050415254'}]},  # 'EFI PART' @0x200 (GPT header)
-            # Forensic disk images (extracted by 7-Zip with the forensic7z plugin).
-            {'name': 'encase e01/s01', 'patterns': [{'pos': 0, 'hex': '455646090d0aff00'}]},  # 'EVF\x09\r\n\xff\x00' (EnCase E01 / ASR SMART S01)
-            {'name': 'encase ex01', 'patterns': [{'pos': 0, 'hex': '455646320d0a8100'}]},     # 'EVF2\r\n\x81\x00'
-            {'name': 'encase l01', 'patterns': [{'pos': 0, 'hex': '4c5646090d0aff00'}]},      # 'LVF\x09\r\n\xff\x00'
-            {'name': 'encase lx01', 'patterns': [{'pos': 0, 'hex': '4c5646320d0a8100'}]},     # 'LVF2\r\n\x81\x00'
-            {'name': 'ftk ad1', 'patterns': [{'pos': 0, 'hex': '41445345474d454e54454446494c4500'}]},  # 'ADSEGMENTEDFILE\x00'
-            {'name': 'aff', 'patterns': [{'pos': 0, 'hex': '41464631300d0a00'}]},             # 'AFF10\r\n\x00' (AFFLIB)
-            # Disc images (extracted by 7-Zip with the Iso7z plugin).
-            {'name': 'ciso/cso', 'patterns': [{'pos': 0, 'hex': '4349534f'}]},                # 'CISO' (Compact/Compressed ISO)
-            {'name': 'chd', 'patterns': [{'pos': 0, 'hex': '4d436f6d70724844'}]},             # 'MComprHD' (MAME CHD)
-            {'name': 'ecm', 'patterns': [{'pos': 0, 'hex': '45434d00'}]},                     # 'ECM\x00'
-            {'name': 'isz', 'patterns': [{'pos': 0, 'hex': '49735a21'}]},                     # 'IsZ!' (UltraISO)
-            {'name': 'alcohol mds', 'patterns': [{'pos': 0, 'hex': '4d454449412044455343524950544f52'}]},  # 'MEDIA DESCRIPTOR'
-            {'name': 'clonecd ccd', 'patterns': [{'pos': 0, 'hex': '5b436c6f6e6543445d'}]},   # '[CloneCD]'
-            {'name': 'zisofs', 'patterns': [{'pos': 0, 'hex': '37e45396c9dbd607'}]},          # zisofs block magic
-            # Mail / encoding formats (extracted by 7-Zip with the eDecoder plugin).
-            {'name': 'tnef', 'patterns': [{'pos': 0, 'hex': '789f3e22'}]},                    # winmail.dat (TNEF, 0x223E9F78 LE)
-            {'name': 'dbx', 'patterns': [{'pos': 0, 'hex': 'cfad12fe'}]},                     # Outlook Express DBX
-            {'name': 'warc', 'patterns': [{'pos': 0, 'hex': '574152432f'}]},                  # 'WARC/' web archive
-            {'name': 'binhex', 'patterns': [{'pos': 0, 'hex': '28546869732066696c65206d75737420626520636f6e766572746564'}]},  # '(This file must be converted' (BinHex .hqx)
-            {'name': 'yenc', 'patterns': [{'pos': 0, 'hex': '3d79626567696e'}]},              # '=ybegin' (yEnc .ntx)
-            # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
-            # Both conditions (AND) keep the generic 04000000 from false-matching.
-            {'name': 'asar archive (electron)', 'patterns': [
-                {'pos': 0, 'hex': '04000000'}, {'pos': 16, 'hex': '7b2266696c657322'}]},
         ]
 
     def list_contents(self):
