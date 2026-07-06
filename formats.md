@@ -121,6 +121,19 @@ Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
 > not auto-detected: MBOX, EML/NWS/MHT/MHTML/B64, EMLX, UUE/XXE, MGS, MBX, TBB,
 > PMM, and MacBinary (.bin). The plugin can still extract them if reached.
 
+## Modern Compression (Modern7z plugin)
+
+Detected and routed to 7-Zip; extraction requires the **Modern7z** plugin in the
+bundled 7-Zip's `Codecs/` folder.
+
+| Format                                | Extension(s)   | Handler              |
+|---------------------------------------|----------------|----------------------|
+| LZ4 frame                             | .lz4           | Format7zExtHandler † |
+| Firefox jsonlz4 / mozlz4              | .jsonlz4, .mozlz4 | Format7zExtHandler † |
+
+> Modern7z also adds Brotli, LZ5, Lizard, Fast-LZMA2 and Zstd-in-Zip, but these
+> are raw codec streams with no reliable magic, so they are not auto-detected.
+
 ## Other
 
 | Format                        | Extension(s) | Handler          |
@@ -141,6 +154,7 @@ Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
 > | **Iso7z**    | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs)   |
 > | **ExFat7z**  | ExFAT disk images                                        |
 > | **eDecoder** | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc)             |
+> | **Modern7z** | LZ4, Firefox jsonlz4/mozlz4 (Codecs/ folder)             |
 > | **Py7z**     | PyInstaller executables                                   |
 
 ## Notes
@@ -159,7 +173,7 @@ which is a pip dependency). Tool paths are relative to those directories.
 | Handler | Tool | URL |
 |---------|------|-----|
 | Format7zHandler | `7z/7z.exe` | http://www.7-zip.org/ |
-| Format7zExtHandler | `7z/7z.exe` + plugins in `7z/Formats/` (Asar, forensic7z, Iso7z, ExFat7z, eDecoder, Py7z) | https://www.tc4shell.com/en/7zip/ |
+| Format7zExtHandler | `7z/7z.exe` + plugins in `7z/Formats/` (Asar, forensic7z, Iso7z, ExFat7z, eDecoder, Py7z) and `7z/Codecs/` (Modern7z) | https://www.tc4shell.com/en/7zip/ |
 | FormatRarHandler | `rar/unrar.exe` | http://www.rarlab.com/rar_add.htm |
 | FormatAceHandler | `unace/unace.exe` | https://sourceforge.net/projects/peazip/files/Resources/PeaZip%20UNACE%20Plugin/ |
 | FormatAlzipHandler | `alzip/ALZipCon.exe` | https://www.altools.com/ |

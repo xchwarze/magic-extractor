@@ -69,6 +69,8 @@
     "warc": "Format7zExtHandler",
     "binhex": "Format7zExtHandler",
     "yenc": "Format7zExtHandler",
+    "lz4": "Format7zExtHandler",
+    "mozlz4": "Format7zExtHandler",
     "7zip": "Format7zHandler",
     "xz": "Format7zHandler",
     "bzip2": "Format7zHandler",

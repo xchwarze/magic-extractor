@@ -209,6 +209,28 @@
     ]
   },
   {
+    "name": "lz4",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "04224d18"
+        }
+      ]
+    ]
+  },
+  {
+    "name": "mozlz4",
+    "patterns": [
+      [
+        {
+          "pos": 0,
+          "hex": "6d6f7a4c7a343000"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [

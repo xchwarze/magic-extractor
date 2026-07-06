@@ -47,6 +47,9 @@ class Format7zExtHandler(Format7zHandler):
             {'name': 'warc', 'patterns': [{'pos': 0, 'hex': '574152432f'}]},                  # 'WARC/'
             {'name': 'binhex', 'patterns': [{'pos': 0, 'hex': '28546869732066696c65206d75737420626520636f6e766572746564'}]},  # BinHex .hqx
             {'name': 'yenc', 'patterns': [{'pos': 0, 'hex': '3d79626567696e'}]},              # '=ybegin' (yEnc)
+            # Modern7z (Codecs/): LZ4 frame + Firefox jsonlz4/mozlz4.
+            {'name': 'lz4', 'patterns': [{'pos': 0, 'hex': '04224d18'}]},                     # LZ4 frame magic
+            {'name': 'mozlz4', 'patterns': [{'pos': 0, 'hex': '6d6f7a4c7a343000'}]},          # 'mozLz40\x00' (Firefox jsonlz4)
             # Asar (Electron): 04 00 00 00 @0 AND '{"files"' @16 (AND avoids false matches).
             {'name': 'asar archive (electron)', 'patterns': [
                 {'pos': 0, 'hex': '04000000'}, {'pos': 16, 'hex': '7b2266696c657322'}]},
