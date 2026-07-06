@@ -30,10 +30,15 @@ def file_path_type_check(path):
     return input_path
 
 def dir_path_type_check(path):
-    """Custom argparse type to check if a directory exists and is writable."""
+    """Custom argparse type for an output directory: create it if missing, then
+    check it is writable. Extracting into a fresh named folder is the norm, so a
+    non-existent output_dir is created (with parents) rather than rejected."""
     dir_path = pathlib.Path(path)
     if not dir_path.is_dir():
-        raise argparse.ArgumentTypeError(f"The directory {path} does not exist.")
+        try:
+            dir_path.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise argparse.ArgumentTypeError(f"Cannot create directory {path}: {exc}")
 
     if not os.access(dir_path, os.W_OK):
         raise argparse.ArgumentTypeError(f"The directory {path} is not writable.")
