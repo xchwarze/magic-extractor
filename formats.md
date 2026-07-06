@@ -61,8 +61,13 @@ dedicated handlers cover the rest.
 | VirtualBox                    | .vdi           | Format7zHandler |
 | Virtual Hard Disk             | .vhd, .vhdx    | Format7zHandler |
 | VMware                        | .vmdk          | Format7zHandler |
-| APFS / ext / FAT / HFS        | .img           | Format7zHandler |
+| APFS / ext / FAT / HFS / NTFS | .img           | Format7zHandler |
 | cramfs / squashfs             | .cramfs, .sqsh | Format7zHandler |
+| MBR / GPT partition table     | .img, .bin     | Format7zHandler |
+| UEFI firmware volume          | .fd, .rom, .bin| Format7zHandler |
+
+> Intel HEX (`.hex`) is supported by the underlying 7-Zip but is a plain-text
+> format with no reliable signature, so it is not auto-detected/routed.
 
 ## Other
 

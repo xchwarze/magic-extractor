@@ -66,6 +66,7 @@ class Format7zHandler(BaseExtractor):
             {'name': 'wim', 'patterns': [{'pos': 0, 'hex': '4d5357494d000000'}]},  # 'MSWIM\0\0\0'
             {'name': 'apfs', 'patterns': [{'pos': 32, 'hex': '4e585342'}]},        # 'NXSB' @0x20
             {'name': 'xar', 'patterns': [{'pos': 0, 'hex': '78617221'}]},          # 'xar!'
+            {'name': 'uefi', 'patterns': [{'pos': 40, 'hex': '5f465648'}]},        # '_FVH' @0x28 (UEFI firmware volume)
             # asar (Electron): pickle header 04 00 00 00 @0 AND JSON '{"files"' @16.
             # Both conditions (AND) keep the generic 04000000 from false-matching.
             {'name': 'asar archive (electron)', 'patterns': [

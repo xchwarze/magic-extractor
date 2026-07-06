@@ -156,6 +156,17 @@
     ]
   },
   {
+    "name": "uefi",
+    "patterns": [
+      [
+        {
+          "pos": 40,
+          "hex": "5f465648"
+        }
+      ]
+    ]
+  },
+  {
     "name": "asar archive (electron)",
     "patterns": [
       [

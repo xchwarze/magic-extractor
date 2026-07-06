@@ -94,6 +94,7 @@
     "vmdk": "Format7zHandler",
     "vdi": "Format7zHandler",
     "wim": "Format7zHandler",
+    "uefi": "Format7zHandler",
     "winace": "FormatAceHandler",
     "ace": "FormatAceHandler",
     "ace compressed archive": "FormatAceHandler",
