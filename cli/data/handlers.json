@@ -76,6 +76,7 @@
     "lz5": "Format7zExtHandler",
     "lizard": "Format7zExtHandler",
     "mozlz4": "Format7zExtHandler",
+    "chrome pak": "Format7zExtHandler",
     "7zip": "Format7zHandler",
     "xz": "Format7zHandler",
     "bzip2": "Format7zHandler",

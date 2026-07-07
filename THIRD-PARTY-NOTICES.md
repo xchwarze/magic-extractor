@@ -24,6 +24,24 @@ to supply them):
 | `unace` | ACE | Proprietary freeware; redistribution terms unclear. |
 | `dgca` | DGCA | Japanese freeware, proprietary. |
 
+## 7-Zip plugins (tc4shell / Dec Software)
+
+Optional plugins in `extractors/7z/Formats/` and `extractors/7z/Codecs/` that let
+7-Zip open extra formats. Freeware from tc4shell (© Dec Software) — free to
+download/use, but **verify redistribution/bundling terms** before shipping them
+(some tc4shell products are donationware/paid). Each ships its own `*-ReadMe.txt`.
+
+| Plugin | Adds | Terms |
+|--------|------|-------|
+| `Formats/Asar` | Electron .asar | freeware — verify redistribution |
+| `Formats/Forensic7z` | EWF (E01/S01/Ex01/L01/Lx01), AD1, AFF, WHX | freeware — verify |
+| `Formats/Iso7z` | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs, NRG, …) | freeware — verify |
+| `Formats/ExFat7z` | ExFAT images | freeware — verify |
+| `Formats/eDecoder` | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc, TBB, MacBinary, …) | freeware — verify |
+| `Formats/Py7z` | PyInstaller executables | freeware — verify |
+| `Formats/Grit7z` | Chromium resource pak (.pak) | freeware — verify |
+| `Codecs/Modern7z` | Zstd, Brotli, LZ4, LZ5, Lizard, Fast-LZMA2 | freeware — verify |
+
 ## Permissive / open (low risk)
 
 | Tool | Role | License |
@@ -35,7 +53,6 @@ to supply them):
 | `extractors/cicdec` | Clickteam | BSD-3-Clause |
 | `extractors/lessmsi` | MSI | MIT |
 | `extractors/unshield` | InstallShield | MIT (© 2003 David Eriksson) |
-| `extractors/pyinstxtractor-ng` | PyInstaller | GPL |
 | `extractors/peazip` | PEA | LGPL |
 | `extractors/unarc` (FreeArc) | ARC | FreeArc license (GPL-based) |
 | `extractors/kgb` | KGB | GPL |

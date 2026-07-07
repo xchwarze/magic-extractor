@@ -10,6 +10,10 @@ with several detectors and routes it to the right bundled extractor. It aims to
 cover mainstream compression formats, the installers you actually see today, and a
 range of less common archivers.
 
+It auto-detects **80+ formats** — archives, installers, disk images, forensic
+images (EWF/AFF/AD1), disc images, mail stores and modern codecs. See
+[`formats.md`](formats.md) for the full list.
+
 ## Quick Start
 Download the [latest release](../../releases/latest), unzip it, and run:
 ```text

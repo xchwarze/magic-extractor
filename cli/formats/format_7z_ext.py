@@ -55,6 +55,11 @@ class Format7zExtHandler(Format7zHandler):
             {'name': 'lz5', 'patterns': [{'pos': 0, 'hex': '05224d18'}]},                     # LZ5 frame (LZ4 family, ver 05)
             {'name': 'lizard', 'patterns': [{'pos': 0, 'hex': '06224d18'}]},                  # Lizard frame (LZ4 family, ver 06)
             {'name': 'mozlz4', 'patterns': [{'pos': 0, 'hex': '6d6f7a4c7a343000'}]},          # 'mozLz40\x00' (Firefox jsonlz4)
+            # Grit7z (Chromium resource pak v5): version 5 + encoding byte + 3 pad zeros.
+            # Specific 8-byte header (not the generic 'pak' name) to avoid game-pak misroutes.
+            {'name': 'chrome pak', 'patterns': [{'pos': 0, 'hex': '0500000000000000'}]},       # v5 binary
+            {'name': 'chrome pak', 'patterns': [{'pos': 0, 'hex': '0500000001000000'}]},       # v5 utf8
+            {'name': 'chrome pak', 'patterns': [{'pos': 0, 'hex': '0500000002000000'}]},       # v5 utf16
             # Asar (Electron): 04 00 00 00 @0 AND '{"files"' @16 (AND avoids false matches).
             {'name': 'asar archive (electron)', 'patterns': [
                 {'pos': 0, 'hex': '04000000'}, {'pos': 16, 'hex': '7b2266696c657322'}]},
