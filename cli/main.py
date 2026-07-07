@@ -188,9 +188,15 @@ def _candidates_from_outputs(outputs):
 # PE as an "archive" (dumping its sections), which would short-circuit the
 # format-specific handlers.
 PE_INSTALLER_FALLBACK = (
-    'FormatInnoSetupHandler', 'FormatRarHandler', 'FormatAceHandler',
-    'FormatArcHandler', 'FormatKgbHandler', 'FormatUharcHandler',
-    'FormatBitrockHandler', 'FormatCicdecHandler',
+    # Strict, magic-validated archiver SFX first: unrar/unace/unarc/kgb/uharc only
+    # succeed on their own archive magic, so a genuine RAR/ACE/ARC/KGB/UHARC
+    # self-extractor reaches a format-specific handler instead of being claimed by
+    # a more permissive installer unpacker (innounp in particular accepts more
+    # than it should and must not pre-empt these).
+    'FormatRarHandler', 'FormatAceHandler', 'FormatArcHandler',
+    'FormatKgbHandler', 'FormatUharcHandler',
+    # Generic installer unpackers last.
+    'FormatInnoSetupHandler', 'FormatBitrockHandler', 'FormatCicdecHandler',
 )
 
 def _is_pe(file_path):
