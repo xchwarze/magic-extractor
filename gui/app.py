@@ -29,6 +29,7 @@ GUI_LABELS = {
     "keep_open": "Keep the window open after a run finishes",
     "always_on_top": "Keep the window always on top",
     "debug": "Verbose debug logging (adds --debug to every command)",
+    "history_enabled": "Remember the last 10 source/destination paths",
 }
 
 LOG_FILENAME = "magic-extractor.log"
@@ -100,10 +101,10 @@ class ExtractorApp:
         self.opt_debug = tk.BooleanVar(value=s.get_bool("defaults", "debug", False))
 
         # History (recent sources/dests).
-        self.history_enabled = s.get_bool("history", "enabled", False)
+        self.history_enabled = tk.BooleanVar(value=s.get_bool("history", "enabled", False))
         self.history_max = s.get_int("history", "max_entries", 10)
-        self._src_hist = history.parse(s.get("history", "sources", "")) if self.history_enabled else []
-        self._dst_hist = history.parse(s.get("history", "dests", "")) if self.history_enabled else []
+        self._src_hist = history.parse(s.get("history", "sources", "")) if self.history_enabled.get() else []
+        self._dst_hist = history.parse(s.get("history", "dests", "")) if self.history_enabled.get() else []
 
     def _apply_window_prefs(self):
         self.root.attributes("-topmost", self.always_on_top.get())
@@ -132,6 +133,7 @@ class ExtractorApp:
             s.set("gui", "theme", self.theme_mode)
         s.set("gui", "keep_open", self.keep_open.get())
         s.set("gui", "always_on_top", self.always_on_top.get())
+        s.set("history", "enabled", self.history_enabled.get())
         s.set("defaults", "mode", self.mode.get())
         s.set("defaults", "auto_fill_destination", self.auto_fill.get())
         s.set("defaults", "lock_destination", self.lock_dest.get())
@@ -328,7 +330,7 @@ class ExtractorApp:
             messagebox.showerror("Error", str(exc), parent=self.root)
 
     def _push_history(self, src, dest):
-        if not self.history_enabled:
+        if not self.history_enabled.get():
             return
         if src:
             self._src_hist = history.push(self._src_hist, src, self.history_max)
@@ -577,6 +579,7 @@ class ExtractorApp:
         ttk.Checkbutton(interface, text=GUI_LABELS["keep_open"], variable=self.keep_open).pack(anchor="w", pady=1)
         ttk.Checkbutton(interface, text=GUI_LABELS["always_on_top"], variable=self.always_on_top).pack(anchor="w", pady=1)
         ttk.Checkbutton(interface, text=GUI_LABELS["debug"], variable=self.opt_debug).pack(anchor="w", pady=1)
+        ttk.Checkbutton(interface, text=GUI_LABELS["history_enabled"], variable=self.history_enabled).pack(anchor="w", pady=1)
 
         def save():
             config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
