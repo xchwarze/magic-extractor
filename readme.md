@@ -75,6 +75,12 @@ loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist
 ## Supported Formats
 See [formats.md](formats.md) for the full list of formats and their handlers.
 
+## Adding a format
+To add support for a new format, see
+[docs/adding-a-handler.md](docs/adding-a-handler.md) — the end-to-end guide
+(handler class, detection declaration, DIE/TrID lookup, magic signatures,
+regenerating the routing data, bundling the tool, and testing).
+
 ## Installation (from source)
 Most users just download the release (see [Quick Start](#quick-start)). To run from source:
 ```bash
