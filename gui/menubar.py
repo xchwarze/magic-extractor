@@ -65,6 +65,9 @@ class MenuBar(tk.Frame):
     def _open(self, btn, items):
         top = tk.Toplevel(self)
         top.wm_overrideredirect(True)
+        # Stay above the main window even when it is set always-on-top; an
+        # overrideredirect popup is otherwise drawn behind a -topmost root.
+        top.attributes("-topmost", True)
         top.config(bg=self._hover)  # 1px border color
         inner = tk.Frame(top, bg=self._bg)
         inner.pack(padx=1, pady=1)

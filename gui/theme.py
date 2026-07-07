@@ -74,6 +74,12 @@ def restyle_toplevel(win, mode):
     win.config(bg=palette(mode)["bg"])
 
 
+def titlebar(win, mode):
+    """Darken/lighten a window's title bar (Windows). Call once the window is
+    mapped. No-op elsewhere and on any failure."""
+    _title_bar(win, mode)
+
+
 def restyle_menu(menu, mode):
     """Recolor a tk.Menu dropdown (sv-ttk does not skin menus)."""
     colors = palette(mode)

@@ -4,6 +4,7 @@ import queue
 import subprocess
 import sys
 import threading
+import webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
@@ -516,6 +517,8 @@ class ExtractorApp:
         win.withdraw()
         win.transient(self.root)
         win.resizable(False, False)
+        if self.always_on_top.get():
+            win.attributes("-topmost", True)  # else it hides behind an always-on-top main window
         theme.restyle_toplevel(win, self.theme_mode)
         win.title(title)
         body = ttk.Frame(win, padding=14)
@@ -530,6 +533,7 @@ class ExtractorApp:
         w, h = win.winfo_width(), win.winfo_height()
         win.geometry(f"+{px + (pw - w) // 2}+{py + (ph - h) // 2}")
         win.deiconify()
+        theme.titlebar(win, self.theme_mode)  # dark title bar once the dialog is mapped
 
     def _open_run_options(self):
         win, body = self._make_dialog("Run options")
@@ -586,10 +590,13 @@ class ExtractorApp:
         self._center_on_parent(win)
 
     def _about(self):
-        messagebox.showinfo(
-            "About",
-            "Magic Extractor\n"
-            "Universal extraction tool.\n\n"
-            "Author: DSR! (xchwarze)\n"
-            "https://github.com/xchwarze/magic-extractor",
-            parent=self.root)
+        win, body = self._make_dialog("About")
+        ttk.Label(body, text="Magic Extractor", font=("", 12, "bold")).pack(anchor="w")
+        ttk.Label(body, text="Universal extraction tool.").pack(anchor="w", pady=(2, 10))
+        ttk.Label(body, text="Author: DSR! (xchwarze)").pack(anchor="w")
+        url = "https://github.com/xchwarze/magic-extractor"
+        link = ttk.Label(body, text=url, foreground="#4da3ff", cursor="hand2")
+        link.pack(anchor="w", pady=(2, 0))
+        link.bind("<Button-1>", lambda e: webbrowser.open(url))
+        ttk.Button(body, text="Close", command=win.destroy).pack(pady=(14, 0))
+        self._center_on_parent(win)
