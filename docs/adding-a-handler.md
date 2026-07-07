@@ -63,19 +63,66 @@ class FormatFooHandler(BaseExtractor):
   (= `cli/bin/extractors/`), `self.cli_args.password` are provided by the base.
 - Any of the three `detection_*` methods may be omitted (base returns `[]`).
 
-## 2. Find the RIGHT detection strings (don't guess)
+## 2. Which detection method? (mime vs name vs signature)
 
-- **DIE names** — the real string DIE emits lives in its signature DB:
-  `cli/bin/detectors/die/db/**/**.sg`, as `meta("<type>", "<name>")`. Grep for
-  your format; use the lowercased `<name>` in `detection_names`.
-  - **Gotcha:** `file_type.determine_file_type_with_die` only keeps values whose
-    `type` ∈ `{sfx, archive, installer, packer}`. If DIE tags your format as
-    something else (Library, Format, Partition, tool…), DIE's name is dropped —
-    add a magic signature instead, or widen `relevant_types`.
-- **Magic bytes** — cross-check against the **TrID defs** (`triddefs_xml/defs/`,
-  `<Pattern><Bytes>HEX</Bytes><Pos>N</Pos>`) for exact offset+bytes. TrID is the
-  most reliable source; it caught a wrong EnCase Lx01 magic here.
-- **binwalk / Magika** — short keys / labels; run `identify --debug` on a sample.
+A file reaches your handler when ANY detector's output matches something your
+handler declares. You have three levers — use whichever the format actually
+gives you (often more than one, for redundancy):
+
+| Method | Declares | Fill it when… | Source of truth |
+|--------|----------|---------------|-----------------|
+| `detection_mimes` | MIME strings | puremagic or Magika already recognizes the format and emits a real MIME (e.g. `application/x-rar`). Cheapest path — no magic needed. | run `identify` and read the `[puremagic] MIME` / `[Magika] MIME` lines |
+| `detection_names` | detector name strings | DIE / binwalk / Magika name the format but there's no clean MIME (installers, SFX, packers, exotic archivers) | DIE signature DB + `identify --debug` |
+| `detection_signatures` | your own magic bytes | nothing above catches it, but the file has a reliable fixed-offset magic (most niche/older formats). This is the fallback that makes detection self-contained. | TrID defs + the format spec |
+
+So: **mime = "an engine already knows it"; name = "an engine names it but no
+MIME"; signature = "I teach it the magic myself."** All three are lowercased and
+compared case-insensitively.
+
+### Finding the DIE name
+
+DIE's real output string lives in its signature DB as `meta("<type>", "<name>")`.
+Grep for your format:
+
+```bash
+grep -rl -i "yourformat" cli/bin/detectors/die/db/
+grep -rhoE 'meta\("[^"]*", ?"[^"]*"\)' cli/bin/detectors/die/db/**/*yourformat*.sg
+```
+
+Use the lowercased `<name>` in `detection_names`.
+
+- **Gotcha:** `file_type.determine_file_type_with_die` only keeps values whose
+  `type` ∈ `{sfx, archive, installer, packer}`. If DIE tags your format as
+  anything else (Library, Format, Partition, tool…) its name is **dropped** — so
+  either add a magic signature, or widen `relevant_types` in `file_type.py`.
+
+### Finding the magic in TrID
+
+TrID has ~21k defs, one XML per format under `triddefs_xml/defs/<letter>/`, with
+`<Pattern><Bytes>HEX</Bytes><Pos>N</Pos></Pattern>` (`<Pos>` = decimal offset,
+`<Bytes>` = uppercase hex). It's the most reliable magic source — it caught a
+wrong EnCase Lx01 magic here. Search by extension/name and read the pattern:
+
+```bash
+ls triddefs_xml/defs/*/ | grep -i yourext
+grep -oE '<Bytes>[0-9A-Fa-f]+</Bytes>|<Pos>[0-9]+</Pos>|<Ext>[^<]+</Ext>' \
+    triddefs_xml/defs/y/yourformat.trid.xml
+```
+
+Convert bytes to lowercase for the handler. Reject weak patterns (1–2 bytes,
+all-zero, or a generic value like `04000000` alone — anchor it with a second
+`{pos,hex}`).
+
+### binwalk / Magika
+
+Short keys / labels — the surest way is to run the CLI on a real sample and read
+what each detector prints:
+
+```bash
+python cli/main.py identify --debug path/to/sample.foo
+```
+Copy the exact `[binwalk] detect` / `[Magika] detect|MIME` strings into
+`detection_names` / `detection_mimes`.
 
 ### Writing reliable magic signatures
 
