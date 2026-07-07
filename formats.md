@@ -83,9 +83,7 @@ the bundled 7-Zip's `Formats/` folder.
 | EnCase v7 Logical                     | .Lx01          | Format7zExtHandler † |
 | AccessData FTK Imager Logical         | .AD1           | Format7zExtHandler † |
 | Advanced Forensics Format             | .AFF           | Format7zExtHandler † |
-
-> WinHex WHX (`.whx`) is a forensic7z target too, but its magic could not be
-> confirmed, so it is not auto-detected yet.
+| WinHex evidence                       | .whx           | Format7zExtHandler † |
 
 ## Disc Images (Iso7z plugin)
 
@@ -116,10 +114,13 @@ Detected and routed to 7-Zip; extraction requires the **eDecoder** plugin.
 | Web ARChive                           | .warc          | Format7zExtHandler † |
 | BinHex                                | .hqx           | Format7zExtHandler † |
 | yEnc                                  | .ntx           | Format7zExtHandler † |
+| The Bat! message base                 | .tbb           | Format7zExtHandler † |
+| MacBinary III                         | .bin           | Format7zExtHandler † |
 
 > Other eDecoder targets are plain text with no reliable signature, so they are
-> not auto-detected: MBOX, EML/NWS/MHT/MHTML/B64, EMLX, UUE/XXE, MGS, MBX, TBB,
-> PMM, and MacBinary (.bin). The plugin can still extract them if reached.
+> not auto-detected: MBOX, EML/NWS/MHT/MHTML/B64, EMLX, UUE/XXE, MGS, MBX, PMM,
+> and MacBinary I/II (only v3 has a magic). The plugin can still extract them if
+> reached.
 
 ## Modern Compression (Modern7z plugin)
 
@@ -129,11 +130,13 @@ bundled 7-Zip's `Codecs/` folder.
 | Format                                | Extension(s)   | Handler              |
 |---------------------------------------|----------------|----------------------|
 | LZ4 frame                             | .lz4           | Format7zExtHandler † |
+| LZ5 frame                             | .lz5           | Format7zExtHandler † |
+| Lizard frame                          | .liz           | Format7zExtHandler † |
 | Firefox jsonlz4                        | .jsonlz4, .mozlz4 | Format7zExtHandler † |
 
-> Modern7z also adds Brotli, LZ5, Lizard, Fast-LZMA2 and Zstd/Brotli-in-Zip, but
-> these are single-file raw codec streams with no reliable magic, so they are not
-> auto-detected. Plain Zstd (`.zst`) is already handled natively.
+> Modern7z also adds Brotli, Fast-LZMA2 and Zstd/Brotli-in-Zip, but those are raw
+> streams with no reliable magic, so they are not auto-detected. Plain Zstd
+> (`.zst`) is already handled natively.
 
 ## Other
 
