@@ -358,7 +358,7 @@ def process_carve(args):
     carved_any = False
     for index, entry in selected:
         name = (entry.get('name') or '').lower()
-        offset = entry.get('offset', 0)
+        offset = entry.get('offset', 0) or 0
         size = entry.get('size') or 0
         if size <= 0:
             continue
@@ -392,6 +392,7 @@ def run_extract(args):
     use_recycle_bin = getattr(args, 'delete_to_recycle_bin', True)
 
     if args.file_path.is_dir():
+        any_failed = False
         for item in args.file_path.iterdir():
             if item.is_file():
                 logging.info(f"Processing file: {item}")
@@ -403,9 +404,11 @@ def run_extract(args):
                     if delete_after:
                         delete_source(item, use_recycle_bin)
                 else:
+                    any_failed = True
                     logging.error(f"Extraction failed for file: {item}")
 
-        return True
+        # Non-zero exit if any file in the batch failed.
+        return not any_failed
 
     result = process_extraction(args)
     if result and delete_after:

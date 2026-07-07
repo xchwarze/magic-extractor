@@ -154,7 +154,7 @@ def determine_file_type_with_die(file_path, bin_path):
         #logging.error(f"DIE complete analysis: {die_output}")
         logging.debug(f"DIE analysis: {names}")
         return names if names else None
-    except subprocess.CalledProcessError as exc:
+    except (subprocess.CalledProcessError, OSError) as exc:
         logging.error(f"DIE analysis failed for {file_path}: {exc}")
         return None
     except json.JSONDecodeError as exc:
@@ -189,7 +189,7 @@ def determine_file_type_with_binwalk(file_path, bin_path):
 
         logging.debug(f"Binwalk analysis: {names}")
         return names if names else None
-    except subprocess.CalledProcessError as exc:
+    except (subprocess.CalledProcessError, OSError) as exc:
         logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
         return None
     except json.JSONDecodeError as exc:
@@ -212,7 +212,7 @@ def binwalk_file_map(file_path, bin_path):
         for item in binwalk_data:
             entries.extend(item.get("Analysis", {}).get("file_map", []))
         return entries
-    except subprocess.CalledProcessError as exc:
+    except (subprocess.CalledProcessError, OSError) as exc:
         logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
         return []
     except json.JSONDecodeError as exc:
@@ -258,7 +258,7 @@ def determine_file_type_with_magika(file_path, bin_path):
             return None
 
         return {"mime_types": mime_types, "labels": labels}
-    except subprocess.CalledProcessError as exc:
+    except (subprocess.CalledProcessError, OSError) as exc:
         logging.error(f"Magika analysis failed for {file_path}: {exc}")
         return None
     except json.JSONDecodeError as exc:

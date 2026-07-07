@@ -28,7 +28,7 @@ class Config:
         value = self.settings.get(section, {}).get(key, fallback)
         if type is not None and value is not None:
             if type == bool:
-                return value.lower() in ('true', '1', 't', 'y', 'yes', 'on')
+                return str(value).lower() in ('true', '1', 't', 'y', 'yes', 'on')
             return type(value)
         return value
 
