@@ -1,6 +1,6 @@
 Py7z
 
-http://www.tc4shell.com/en/7zip/py7z/
+https://www.tc4shell.com/en/7zip/py7z/
 Copyright (C) 2022 Dec Software.
 
 Py7z is a small plugin for the popular 7-Zip archiver. You can use Py7z with

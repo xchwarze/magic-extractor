@@ -1,6 +1,6 @@
 ExFat7z
 
-http://www.tc4shell.com/en/7zip/ExFat7z/
+https://www.tc4shell.com/en/7zip/exfat7z/
 Copyright (C) 2019 Dec Software.
 
 ExFat7z is a small plugin for the popular 7-Zip archiver. You can use ExFat7z

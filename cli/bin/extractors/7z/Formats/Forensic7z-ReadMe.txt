@@ -1,6 +1,6 @@
 Forensic7z
 
-http://www.tc4shell.com/en/7zip/forensic7z/
+https://www.tc4shell.com/en/7zip/forensic7z/
 Copyright (c) 2018-22 Dec Software.
 
 Forensic7z is a plugin for the popular 7-Zip archiver. You can use Forensic7z to

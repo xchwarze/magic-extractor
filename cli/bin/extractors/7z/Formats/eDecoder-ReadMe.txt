@@ -1,6 +1,6 @@
 eDecoder
 
-http://www.tc4shell.com/en/7zip/edecoder/
+https://www.tc4shell.com/en/7zip/edecoder/
 Copyright (C) 2017-2023 Dec Software.
 
 eDecoder is a plugin for the popular archiver 7-Zip. It enables 7-Zip to handle

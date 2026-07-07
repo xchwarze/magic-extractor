@@ -1,6 +1,6 @@
 Asar7z
 
-http://www.tc4shell.com/en/7zip/asar/
+https://www.tc4shell.com/en/7zip/asar/
 Copyright (C) 2017-2023 Dec Software.
 
 Asar7z is a small plugin for the popular 7-Zip archiver. You can use Asar7z with

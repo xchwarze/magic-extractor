@@ -1,6 +1,6 @@
 Iso7z
 
-http://www.tc4shell.com/en/7zip/iso7z/
+https://www.tc4shell.com/en/7zip/iso7z/
 Copyright (C) 2018-2023 Dec Software.
 
 Iso7z is a small plugin for the popular 7-Zip archiver. 7-Zip with Iso7z can

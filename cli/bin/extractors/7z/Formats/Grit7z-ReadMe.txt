@@ -1,6 +1,6 @@
 Grit7z
 
-http://www.tc4shell.com/en/7zip/grit7z/
+https://www.tc4shell.com/en/7zip/grit7z/
 Copyright (C) 2019 Dec Software.
 
 Grit7z is a small plugin for the popular 7-Zip archiver. You can use Grit7z with
