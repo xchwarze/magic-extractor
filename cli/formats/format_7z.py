@@ -117,14 +117,10 @@ class Format7zHandler(BaseExtractor):
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list)
-            if output:
-                return True
-            else:
-                logging.error("Failed to extract .7z file with no output.")
-                return False
+            self.run_command(command_list)  # raises on non-zero
+            return True
         except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract 7z file with error code {exc.returncode}")
+            logging.error(f"Failed to extract 7z file with error code {exc.returncode}: {exc.stderr}")
             if exc.returncode == 3:
                 logging.error("Missing parts of the 7z file.")
 

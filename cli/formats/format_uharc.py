@@ -51,14 +51,9 @@ class FormatUharcHandler(BaseExtractor):
         ]
 
         try:
-            output = self.run_command(command_list)
-            if output:
-                logging.info(f"Successfully extracted using {uharc_version}")
-                return True
-            else:
-                logging.info(f"No output from extraction attempt using {uharc_version}")
-                return False
-
+            self.run_command(command_list)  # raises on non-zero
+            logging.info(f"Successfully extracted using {uharc_version}")
+            return True
         except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract with {uharc_version}: {exc}")
+            logging.error(f"Failed to extract with {uharc_version}: {exc.stderr}")
             return False

@@ -47,14 +47,10 @@ class FormatRarHandler(BaseExtractor):
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list)
-            if output:
-                return True    
-            else:
-                logging.error("Failed to extract .rar file with no output.")
-                return False
+            self.run_command(command_list)  # raises on non-zero
+            return True
         except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract RAR file with error: {exc.output}")
+            logging.error(f"Failed to extract RAR file with error: {exc.stderr}")
             return False
         except Exception as exc:
             logging.error(f"An error occurred during RAR extraction: {exc}")

@@ -38,14 +38,10 @@ class FormatAceHandler(BaseExtractor):
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list, workdir=self.extract_directory)
-            if output:
-                return True
-            else:
-                logging.error("Failed to extract ACE file with no output.")
-                return False
+            self.run_command(command_list, workdir=self.extract_directory)  # raises on non-zero
+            return True
         except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract ACE file with error code {exc.returncode}: {exc.output}")
+            logging.error(f"Failed to extract ACE file with error code {exc.returncode}: {exc.stderr}")
             return False
         except Exception as exc:
             logging.error(f"An error occurred during ACE extraction: {exc}")

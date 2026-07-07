@@ -27,26 +27,22 @@ class FormatZpaqHandler(BaseExtractor):
         # Construct the command to execute using the path to zpaq executable
         command_list = [
             os.path.join(self.extractors_path, 'zpaq', 'zpaq.exe'),
-            'x',                             # Command to extract
-            self.target_file,                # File to extract
-            f'-to{self.extract_directory}',  # Directory to extract files
-            '-f',                            # Force overwrite of existing files
+            'x',                            # Command to extract
+            self.target_file,               # File to extract
+            '-to', self.extract_directory,  # Directory to extract files (separate token)
+            '-f',                           # Force overwrite of existing files
         ]
 
-        # Include password if provided
+        # Include password if provided (flag and value are separate tokens)
         if self.cli_args.password:
-            command_list += [f'-key{self.cli_args.password}']
+            command_list += ['-key', self.cli_args.password]
 
         # Running the command using the base class utility method
         try:
-            output = self.run_command(command_list, workdir=self.extract_directory)
-            if output:
-                return True
-            else:
-                logging.error("Failed to extract ZPAQ file with no output.")
-                return False
+            self.run_command(command_list, workdir=self.extract_directory)  # raises on non-zero
+            return True
         except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract ZPAQ file with error code {exc.returncode}: {exc.output}")
+            logging.error(f"Failed to extract ZPAQ file with error code {exc.returncode}: {exc.stderr}")
             return False
         except Exception as exc:
             logging.error(f"An error occurred during ZPAQ extraction: {exc}")
