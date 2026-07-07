@@ -107,11 +107,15 @@ python cli/main.py <path> <output_dir> [options]
 - `--password <password>`: password for encrypted archives.
 - `-r`, `--recursive`: extract archives found inside the output (bounded by `--max-depth`, default 5).
 - `-b`, `--bruteforce`: try every handler detected instead of stopping at the first.
-- `--open-output-folder <bool>`: open the output folder when done.
-- `--check-free-space <bool>`: warn if the output volume may lack room.
-- `--check-unicode <bool>`: warn about non-ASCII extracted names.
-- `--fix-file-extensions <bool>`: rename extracted files whose content type disagrees with their extension.
-- `--create-log-files <bool>`: write a per-run log to the output dir.
+- `--open-output-folder <true|false>`: open the output folder when done.
+- `--check-free-space <true|false>`: warn if the output volume may lack room.
+- `--check-unicode <true|false>`: warn about non-ASCII extracted names.
+- `--fix-file-extensions <true|false>`: rename extracted files whose content type disagrees with their extension.
+- `--create-log-files <true|false>`: write a per-run log to the output dir.
+
+  (Each defaults to its `config.ini` value when omitted; combine with
+  `--update-defaults` to persist the given value — e.g. `--open-output-folder false
+  --update-defaults` turns a previously-saved default off.)
 - `--no-fast-check`: read the whole file for detection instead of the first 2048 bytes.
 - `--update-defaults`: persist the given settings as defaults in `config.ini`.
 

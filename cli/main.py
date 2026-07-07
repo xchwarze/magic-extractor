@@ -45,6 +45,17 @@ def dir_path_type_check(path):
 
     return dir_path
 
+def str2bool(value):
+    """argparse type for a real boolean flag value. Unlike type=bool (where
+    bool('false') is True), this accepts true/false synonyms and rejects anything
+    else, so `--open-output-folder false` is honored instead of silently True."""
+    lowered = value.strip().lower()
+    if lowered in ('true', '1', 'yes', 'y', 'on'):
+        return True
+    if lowered in ('false', '0', 'no', 'n', 'off'):
+        return False
+    raise argparse.ArgumentTypeError(f"expected a boolean (true/false), got {value!r}")
+
 SUBCOMMANDS = ("extract", "identify", "list", "carve")
 
 def configure_parser():
@@ -64,12 +75,16 @@ def configure_parser():
     extract_parser.add_argument("--password", help="Password for encrypted files, required by some extractors", type=str, default=None)
     extract_parser.add_argument("--update-defaults", help="Update default configuration values", action="store_true")
 
-    # Configurable settings as command-line options
-    extract_parser.add_argument("--open-output-folder", help="Open output folder after extraction", type=bool, default=None)
-    extract_parser.add_argument("--check-free-space", help="Check disk space before extraction", type=bool, default=None)
-    extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names", type=bool, default=None)
-    extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions", type=bool, default=None)
-    extract_parser.add_argument("--create-log-files", help="Create log files of the operations", type=bool, default=None)
+    # Configurable settings as command-line options. type=str2bool takes an
+    # explicit true/false; default=None means "not set on the CLI", so
+    # configure_settings falls back to config.ini (see there). str2bool avoids the
+    # type=bool footgun where bool("false") is True (which made it impossible to
+    # turn a persisted default off via --update-defaults).
+    extract_parser.add_argument("--open-output-folder", help="Open output folder after extraction (true/false)", type=str2bool, default=None)
+    extract_parser.add_argument("--check-free-space", help="Check disk space before extraction (true/false)", type=str2bool, default=None)
+    extract_parser.add_argument("--check-unicode", help="Check for unicode characters in file names (true/false)", type=str2bool, default=None)
+    extract_parser.add_argument("--fix-file-extensions", help="Automatically fix file extensions (true/false)", type=str2bool, default=None)
+    extract_parser.add_argument("--create-log-files", help="Create log files of the operations (true/false)", type=str2bool, default=None)
     extract_parser.add_argument("-r", "--recursive", help="Recursively extract archives found inside the output", action="store_true")
     extract_parser.add_argument("--max-depth", help="Maximum recursion depth for --recursive", type=int, default=5)
     extract_parser.add_argument("-b", "--bruteforce", help="Try every handler DIE and Magika detect (no early-exit)", action="store_true")
