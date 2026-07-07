@@ -20,15 +20,24 @@ class FormatInnoSetupHandler(BaseExtractor):
             bool: True if the extraction was successful, False otherwise.
         """
         # Construct the command to execute using the path to innounp executable
+        # (options per innounp 2.70.0 command-line reference / innounp-cl.txt)
         command_list = [
             os.path.join(self.extractors_path, 'innounp', 'innounp.exe'),
-            '-e',                           # extract files without paths
-            '-m',                           # extract internal embedded files
-            '-a',                           # extract all copies of duplicate files
-            '-y',                           # assume Yes on all queries
+            '-e',   # extract files without paths
+            '-m',   # extract internal embedded files (license, uninstall.exe)
+            '-a',   # extract all copies of duplicate files
+            '-b',   # batch / non-interactive: never prompt for password or disk change
+            '-y',   # assume Yes on all queries (e.g. overwrite)
+            '-o',   # no colored console output (keeps captured logs clean)
             f'-d{self.extract_directory}',  # directory to extract files
-            self.target_file,               # setup executable to unpack
         ]
+
+        # Password-protected installers: -b makes innounp fail instead of prompt,
+        # so pass the password explicitly when we have one.
+        if self.cli_args.password:
+            command_list.append(f'-p{self.cli_args.password}')
+
+        command_list.append(self.target_file)  # setup executable to unpack (last)
 
         if not self.run_extraction(command_list, label="Inno Setup"):
             return False
