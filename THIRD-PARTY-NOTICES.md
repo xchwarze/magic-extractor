@@ -10,19 +10,19 @@ license.**
 > change. Before redistributing the bundle, verify each tool's current terms
 > against its own `LICENSE`/`readme` in its `cli/bin/` folder.
 
-## ⚠ Restrictive — verify before redistributing
+## Tools with usage conditions
 
-These are proprietary / shareware / non-commercial and may **not** be freely
-bundled in a distributed product. Confirm terms (or drop them / require the user
-to supply them):
+A few bundled tools are freeware or shareware with conditions worth knowing
+before redistributing the bundle commercially. Short summaries below; the exact
+terms live in each tool's own license/readme.
 
 | Tool | Used for | Terms |
 |------|----------|-------|
-| `alzip/ALZipCon.exe` (ESTsoft) | ALZ, EGG | **Shareware.** Free for individuals; companies/for-profit/public orgs/Internet cafes must buy a license. Bundling in a product is a concern. |
-| `rar/UnRAR` (RARLAB) | RAR | UnRAR EULA: freely distributable, but must **not** be used to recreate the RAR compression algorithm / build a RAR-compatible archiver. |
-| `uharc` | UHARC | Freeware, typically **non-commercial** use only. |
-| `unace` | ACE | Proprietary freeware; redistribution terms unclear. |
-| `dgca` | DGCA | Japanese freeware, proprietary. |
+| `alzip/ALZipCon.exe` (ESTsoft) | ALZ, EGG | Shareware: free for personal use; commercial use needs a license. |
+| `rar/UnRAR` (RARLAB) | RAR | Freely distributable; the one restriction is that it can't be used to build a RAR-compatible *archiver*, which doesn't apply to extraction. |
+| `uharc` | UHARC | Freeware for non-commercial use. (The author's separate UnUHARC extractor is distributable without restrictions.) |
+| `unace` | ACE | Freeware; redistribution terms aren't spelled out. |
+| `dgca` | DGCA | Freeware; individuals may redistribute it unmodified — for commercial/media redistribution the author asks to be contacted. |
 
 ## 7-Zip plugins (tc4shell / Dec Software)
 
