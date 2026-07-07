@@ -110,7 +110,7 @@ python cli/main.py <path> <output_dir> [options]
 - `--open-output-folder <true|false>`: open the output folder when done.
 - `--check-free-space <true|false>`: warn if the output volume may lack room.
 - `--check-unicode <true|false>`: warn about non-ASCII extracted names.
-- `--fix-file-extensions <true|false>`: rename extracted files whose content type disagrees with their extension.
+- `--fix-file-extensions <true|false>`: give extensionless extracted files a content-based extension (never overwrites an existing one).
 - `--create-log-files <true|false>`: write a per-run log to the output dir.
 
   (Each defaults to its `config.ini` value when omitted; combine with

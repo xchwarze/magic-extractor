@@ -106,7 +106,13 @@ class BaseExtractor:
             self.open_output_folder()
 
     def fix_extensions(self):
-        """Rename extracted files whose detected content type disagrees with their extension."""
+        """Give extensionless extracted files a content-based extension.
+
+        Only files that have no extension are named (a carved/opaque blob whose
+        type puremagic recognizes). Files that already carry an extension are left
+        alone — overwriting one would break e.g. .docx/.jar/.tar.gz, which are
+        containers puremagic reports as .zip/.gz.
+        """
         try:
             import puremagic
         except ImportError:
@@ -123,11 +129,12 @@ class BaseExtractor:
 
                 if not guessed_ext:
                     continue
-                current_ext = os.path.splitext(name)[1].lower()
-                if guessed_ext.lower() == current_ext:
+                # only name files that LACK an extension; never overwrite a real
+                # one (renaming e.g. .docx/.jar -> .zip would break the file)
+                if os.path.splitext(name)[1]:
                     continue
 
-                new_path = os.path.splitext(path)[0] + guessed_ext
+                new_path = path + guessed_ext
                 if os.path.exists(new_path):
                     continue  # don't clobber an existing file
                 try:
