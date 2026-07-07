@@ -18,7 +18,7 @@ terms live in each tool's own license/readme.
 
 | Tool | Used for | Terms |
 |------|----------|-------|
-| `alzip/ALZipCon.exe` (ESTsoft) | ALZ, EGG | Shareware: free for personal use; commercial use needs a license. |
+| `alzip/ALZipCon.exe` (ESTsoft) | ALZ, EGG | Shareware: free for personal use and freely redistributable for non-commercial use; commercial/for-profit use (companies, orgs, Internet cafés) needs an ESTsoft license, and ESTsoft may withdraw redistribution rights if used for profit or against their policy. |
 | `rar/UnRAR` (RARLAB) | RAR | Freely distributable; the one restriction is that it can't be used to build a RAR-compatible *archiver*, which doesn't apply to extraction. |
 | `uharc` | UHARC | Freeware for non-commercial use. (The author's separate UnUHARC extractor is distributable without restrictions.) |
 | `unace` | ACE | Freeware; redistribution terms aren't spelled out. |
