@@ -146,3 +146,6 @@ UniExtract/
 cli/bin/extractors/dgca/dgca.ini
 # TrID XML defs (reference source for tools/convert_trid_defs.py)
 triddefs_xml/
+# Release-note drafts and internal TODO (kept local, not committed)
+RELEASE-*.md
+TODO.md
