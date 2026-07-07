@@ -42,7 +42,7 @@ dedicated handlers cover the rest.
 | Installer                       | Extension(s) | Handler                    |
 |---------------------------------|--------------|----------------------------|
 | Windows Installer (MSI)         | .msi         | FormatMsiHandler (lessmsi → 7z) |
-| WiX / wixout                    | .msi, .wixout| FormatWixHandler (dark)    |
+| WiX Toolset (MSI)               | .msi         | FormatWixHandler (dark)    |
 | Inno Setup                      | .exe         | FormatInnoSetupHandler     |
 | Nullsoft Scriptable Install (NSIS) | .exe      | Format7zHandler            |
 | InstallShield                   | .cab         | FormatInstallShieldHandler |
@@ -174,8 +174,9 @@ bundled 7-Zip's `Codecs/` folder.
 ## Tools
 
 Each handler shells out to a bundled helper binary under `cli/bin/extractors/`;
-the four content detectors live under `cli/bin/detectors/` (except `puremagic`,
-which is a pip dependency). Tool paths are relative to those directories.
+the content detectors DIE, binwalk and Magika live under `cli/bin/detectors/`
+(`puremagic` is a pip dependency, not a bundled binary). Tool paths are relative
+to those directories.
 
 | Handler | Tool | URL |
 |---------|------|-----|
@@ -189,7 +190,7 @@ which is a pip dependency). Tool paths are relative to those directories.
 | FormatUharcHandler | `uharc/uharc-v0.6b.exe` | http://en.wikipedia.org/wiki/UHarc |
 | FormatZpaqHandler | `zpaq/zpaq.exe` | http://mattmahoney.net/dc/zpaq.html |
 | FormatArcHandler | `unarc/unarc.exe` | http://freearc.org/ |
-| FormatBcmHandler | `bcm/bcm-v203x64.exe` | https://github.com/encode84/bcm |
+| FormatBcmHandler | `bcm/bcm-v203x64.exe`, `bcm/bcm-v160x32.exe` | https://github.com/encode84/bcm |
 | FormatPeaHandler | `peazip/pea.exe` | https://www.peazip.org/ |
 | FormatDgcaHandler | `dgca/dgcac.exe` | http://www.emit.jp/dgca/ |
 | FormatLzipHandler | `plzip/plzip.exe` | https://encode.su/threads/570-plzip-a-massively-parallel-compressor-based-on-LZMA |

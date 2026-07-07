@@ -22,12 +22,13 @@ magic-extractor.exe extract mystery.bin
 See [Examples](#examples) for `identify`, `list`, `carve`, `--recursive` and `--bruteforce`.
 
 ## Project Structure
-- `src`: source code.
+- `cli`: source code.
   - `bin`: bundled detector and extractor binaries.
     - `detectors`: DIE, Magika, binwalk (TrID's defs are converted to `data/signatures.json`).
     - `extractors`: 7z, unrar, unace, unshield, lessmsi, dark (WiX), and more.
   - `data`: runtime configuration, loaded dynamically (see below).
   - `formats`: one handler module per format family.
+- `gui`: optional tkinter front-end that wraps the CLI (see [GUI](#gui)).
 - `test`: sample files per format (fixtures for the extraction/detection tests).
 - `tools`: developer tooling (`generate_data.py` — builds the data files from handlers).
 
@@ -65,7 +66,7 @@ these into `data/handlers.json` and `data/signatures.json` (with an optional
 - `--bruteforce` disables early-exit: every detector runs and each detected handler
   is tried in turn (useful when the first guess is wrong).
 - Executables that no detector identifies fall back to the wrapped-exe installer
-  handlers (BitRock, Clickteam, PyInstaller, Inno, ...), which self-validate.
+  handlers (BitRock, Clickteam, Inno, ...), which self-validate.
 - The `carve` subcommand additionally uses binwalk's offset map to extract archives
   embedded at arbitrary offsets (e.g. inside firmware images).
 
@@ -167,9 +168,22 @@ magic-extractor carve router-firmware.bin              # carve + extract the kno
 magic-extractor carve router-firmware.bin --fragment 1 # carve only fragment #1
 ```
 
+## GUI
+An optional tkinter front-end (in `gui/`) wraps the CLI — a Universal-Extractor-style
+window with drag-and-drop, a batch queue, run history and a Preferences dialog. It
+shells out to the same `main.py`, so detection and extraction behave identically.
+```bash
+python gui/main.py                 # launch the window
+python gui/main.py <file> [outdir] # prefill the source (and destination)
+python gui/main.py <file> /scan    # prefill and start in identify mode
+```
+Drag-and-drop needs the optional `tkinterdnd2` package (`pip install -r gui/requirements.txt`);
+without it the window still works, minus drop support. It can also register an Explorer
+context-menu entry from its Preferences dialog.
+
 ## Building (Windows)
 ```bash
-cd src
+cd cli
 pyinstaller --onefile main.py --name magic-extractor --collect-data puremagic
 ```
 Then copy `bin/`, `data/` and `config.ini` next to `dist/magic-extractor.exe`.

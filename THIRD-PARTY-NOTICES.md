@@ -66,6 +66,21 @@ own `*-ReadMe.txt`.
 Licenses tagged **verify** were inferred (no bundled LICENSE file); confirm from
 the upstream project before relying on them.
 
+## Bundled Python dependencies (pip)
+
+Not under `cli/bin/`, but compiled into the frozen `.exe`, so their licenses
+apply to the distributed build. All permissive.
+
+| Package | Used by | License |
+|---------|---------|---------|
+| `puremagic` | CLI (MIME detector) | MIT |
+| `colorama` | CLI (colored console output) | BSD-3-Clause |
+| `send2trash` | CLI (`--delete-source` → Recycle Bin) | BSD-3-Clause |
+| `sv-ttk` | GUI theme (optional) | MIT |
+| `darkdetect` | GUI OS theme detection (optional) | BSD-3-Clause |
+| `pywinstyles` | GUI dark title bar (optional) | MIT |
+| `tkinterdnd2` | GUI drag-and-drop (optional) | MIT |
+
 ## GPL/LGPL note
 
 Several tools are GPL/LGPL. magic-extractor only **executes** them as separate
