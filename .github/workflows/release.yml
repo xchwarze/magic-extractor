@@ -90,11 +90,11 @@ jobs:
           path: ./magic-extractor
 
       - name: Compress the build
-        run: zip -r magic-extractor.zip magic-extractor/
+        run: zip -r magic-extractor-release.zip magic-extractor/
 
       - name: Upload as release download
         uses: softprops/action-gh-release@v2
         with:
-          files: magic-extractor.zip
+          files: magic-extractor-release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
