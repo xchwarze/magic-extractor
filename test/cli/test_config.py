@@ -72,6 +72,14 @@ class ConfigTest(unittest.TestCase):
         cfg.set("settings", "name", "world")
         self.assertEqual(cfg.get("settings", "name"), "world")
 
+    def test_set_creates_new_section(self):
+        # Regression: set() used to KeyError on a section absent at load time.
+        cfg = self._config()
+        cfg.set("brandnew", "k", "v")
+        cfg.save()
+        config.Config._instance = None
+        self.assertEqual(config.Config(self.path).get("brandnew", "k"), "v")
+
     def test_save_round_trip_persists_to_disk(self):
         cfg = self._config()
         cfg.set("settings", "count", 99)

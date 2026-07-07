@@ -38,7 +38,7 @@ class Config:
             self.config.add_section(section)
 
         self.config.set(section, key, str(value))
-        self.settings[section][key] = value
+        self.settings.setdefault(section, {})[key] = value
 
     def save(self):
         """Writes changes back to the .ini file."""
