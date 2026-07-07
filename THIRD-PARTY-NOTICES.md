@@ -27,20 +27,19 @@ to supply them):
 ## 7-Zip plugins (tc4shell / Dec Software)
 
 Optional plugins in `extractors/7z/Formats/` and `extractors/7z/Codecs/` that let
-7-Zip open extra formats. Freeware from tc4shell (© Dec Software) — free to
-download/use, but **verify redistribution/bundling terms** before shipping them
-(some tc4shell products are donationware/paid). Each ships its own `*-ReadMe.txt`.
+7-Zip open extra formats. Freeware from tc4shell (© Dec Software); each ships its
+own `*-ReadMe.txt`.
 
-| Plugin | Adds | Terms |
-|--------|------|-------|
-| `Formats/Asar` | Electron .asar | freeware — verify redistribution |
-| `Formats/Forensic7z` | EWF (E01/S01/Ex01/L01/Lx01), AD1, AFF, WHX | freeware — verify |
-| `Formats/Iso7z` | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs, NRG, …) | freeware — verify |
-| `Formats/ExFat7z` | ExFAT images | freeware — verify |
-| `Formats/eDecoder` | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc, TBB, MacBinary, …) | freeware — verify |
-| `Formats/Py7z` | PyInstaller executables | freeware — verify |
-| `Formats/Grit7z` | Chromium resource pak (.pak) | freeware — verify |
-| `Codecs/Modern7z` | Zstd, Brotli, LZ4, LZ5, Lizard, Fast-LZMA2 | freeware — verify |
+| Plugin | Adds |
+|--------|------|
+| `Formats/Asar` | Electron .asar |
+| `Formats/Forensic7z` | EWF (E01/S01/Ex01/L01/Lx01), AD1, AFF, WHX |
+| `Formats/Iso7z` | disc images (CISO/CSO, CHD, ECM, ISZ, MDS, CCD, zisofs, NRG, …) |
+| `Formats/ExFat7z` | ExFAT images |
+| `Formats/eDecoder` | mail/encoding (TNEF, DBX, WARC, BinHex, yEnc, TBB, MacBinary, …) |
+| `Formats/Py7z` | PyInstaller executables |
+| `Formats/Grit7z` | Chromium resource pak (.pak) |
+| `Codecs/Modern7z` | Zstd, Brotli, LZ4, LZ5, Lizard, Fast-LZMA2 |
 
 ## Permissive / open (low risk)
 
