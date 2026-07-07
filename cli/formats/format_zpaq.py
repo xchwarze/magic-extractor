@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatZpaqHandler(BaseExtractor):
@@ -37,13 +35,4 @@ class FormatZpaqHandler(BaseExtractor):
         if self.cli_args.password:
             command_list += ['-key', self.cli_args.password]
 
-        # Running the command using the base class utility method
-        try:
-            self.run_command(command_list, workdir=self.extract_directory)  # raises on non-zero
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract ZPAQ file with error code {exc.returncode}: {exc.stderr}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during ZPAQ extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, workdir=self.extract_directory, label="ZPAQ")

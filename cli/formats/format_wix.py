@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatWixHandler(BaseExtractor):
@@ -29,12 +27,4 @@ class FormatWixHandler(BaseExtractor):
             os.path.join(self.extract_directory, 'decompiled.wxs'),
         ]
 
-        try:
-            self.run_command(command_list)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract MSI/WiX package with error code {exc.returncode}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, label="WiX/MSI")

@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatRarHandler(BaseExtractor):
@@ -45,13 +43,4 @@ class FormatRarHandler(BaseExtractor):
             self.extract_directory
         ])
 
-        # Running the command using the base class utility method
-        try:
-            self.run_command(command_list)  # raises on non-zero
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract RAR file with error: {exc.stderr}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during RAR extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, label="RAR")

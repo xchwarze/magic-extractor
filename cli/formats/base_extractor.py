@@ -214,6 +214,43 @@ class BaseExtractor:
             logging.error(f"Command failed with {error.returncode}: {error.stderr}")
             raise  # Re-raise the exception to be handled by the caller
 
+    def run_extraction(self, command, workdir=None, label=None):
+        """
+        Run an extractor command and reduce its result to a bool.
+
+        Success is a zero exit code (run_command returns normally); a non-zero
+        exit raises CalledProcessError and a missing/unrunnable binary raises
+        OSError — both are reported and mapped to False. Handlers whose extract()
+        is a single command should `return self.run_extraction(cmd)` instead of
+        repeating the try/except boilerplate. Handlers that need to do more on
+        success (post-processing) or try several binaries keep their own logic.
+
+        Args:
+            command (list): The command to execute.
+            workdir (str): Directory in which to run it.
+            label (str): Human-readable tool/format name for the error log
+                         (defaults to the handler class name).
+
+        Returns:
+            bool: True on success, False on failure.
+        """
+        label = label or type(self).__name__
+        try:
+            self.run_command(command, workdir=workdir)
+            return True
+        except subprocess.CalledProcessError as exc:
+            logging.error(f"{label}: extraction failed (exit {exc.returncode}): {exc.stderr}")
+            return False
+        except OSError as exc:
+            logging.error(f"{label}: could not run extractor: {exc}")
+            return False
+        except Exception as exc:
+            # Parity with the old per-handler `except Exception` net: e.g. a tool
+            # emitting bytes the console codec can't decode makes subprocess.run
+            # raise UnicodeDecodeError (a ValueError). Don't crash the whole run.
+            logging.error(f"{label}: unexpected error running extractor: {exc}")
+            return False
+
     def clean_up_directory(self, path, remove_dir=False):
         """
         Remove all files and directories within the specified directory.

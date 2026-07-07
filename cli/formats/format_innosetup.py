@@ -1,6 +1,5 @@
 import os
 import fnmatch
-import subprocess
 import logging
 from .base_extractor import BaseExtractor
 
@@ -31,17 +30,16 @@ class FormatInnoSetupHandler(BaseExtractor):
             self.target_file,               # setup executable to unpack
         ]
 
-        # Running the command using the base class utility method
+        if not self.run_extraction(command_list, label="Inno Setup"):
+            return False
+
+        # Extraction succeeded; cleanup is cosmetic, so a hiccup there does not
+        # turn a good extraction into a failure.
         try:
-            self.run_command(command_list)   # run_command raises on non-zero exit
             self.post_extraction_cleanup(self.extract_directory)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract Inno Setup file with error code {exc.returncode}: {exc.stderr}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during extraction: {exc}")
-            return False
+        except OSError as exc:
+            logging.error(f"Inno Setup post-extraction cleanup failed: {exc}")
+        return True
 
     def post_extraction_cleanup(self, extract_directory):
         """

@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatArcHandler(BaseExtractor):
@@ -34,13 +32,4 @@ class FormatArcHandler(BaseExtractor):
             self.target_file,
         ]
 
-        # Running the command using the base class utility method
-        try:
-            output = self.run_command(command_list)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to decompress ARC file with error code {exc.returncode}: {exc.output}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during ARC decompression: {exc}")
-            return False
+        return self.run_extraction(command_list, label="ARC")

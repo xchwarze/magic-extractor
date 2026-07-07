@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatCicdecHandler(BaseExtractor):
@@ -26,12 +24,4 @@ class FormatCicdecHandler(BaseExtractor):
             self.extract_directory,
         ]
 
-        try:
-            self.run_command(command_list)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract Clickteam installer with error code {exc.returncode}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, label="Clickteam")

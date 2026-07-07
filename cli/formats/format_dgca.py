@@ -27,15 +27,7 @@ class FormatDgcaHandler(BaseExtractor):
             command_list.append(f'-p{self.cli_args.password}')
         command_list += [self.target_file, self.extract_directory]
 
-        try:
-            self.run_command(command_list)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract DGCA archive with error code {exc.returncode}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, label="DGCA")
 
     def list_contents(self):
         """List archive contents using 'dgcac l'. Returns the listing text, or None on error."""

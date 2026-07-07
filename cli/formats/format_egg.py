@@ -1,6 +1,4 @@
 import os
-import subprocess
-import logging
 from .base_extractor import BaseExtractor
 
 class FormatEggHandler(BaseExtractor):
@@ -37,13 +35,4 @@ class FormatEggHandler(BaseExtractor):
             self.extract_directory  # Directory to extract files to
         ])
 
-        # Running the command using the base class utility method
-        try:
-            self.run_command(command_list, workdir=self.extract_directory)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to extract EGG file with error code {exc.returncode}: {exc.output}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during EGG extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, workdir=self.extract_directory, label="EGG")

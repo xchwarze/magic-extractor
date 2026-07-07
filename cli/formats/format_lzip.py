@@ -41,15 +41,7 @@ class FormatLzipHandler(BaseExtractor):
             self.target_file,
         ]
 
-        try:
-            self.run_command(command_list)
-            return True
-        except subprocess.CalledProcessError as exc:
-            logging.error(f"Failed to decompress lzip file with error code {exc.returncode}")
-            return False
-        except Exception as exc:
-            logging.error(f"An error occurred during extraction: {exc}")
-            return False
+        return self.run_extraction(command_list, label="lzip")
 
     def list_contents(self):
         """Print the (un)compressed sizes using 'plzip -l'. Returns the text, or None on error."""
