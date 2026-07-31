@@ -193,7 +193,11 @@ class ExtractorApp:
         ttk.Radiobutton(row, text="extract", variable=self.mode, value="extract",
                         command=self._sync_mode).pack(side="left", padx=4)
         ttk.Radiobutton(row, text="scan", variable=self.mode, value="scan",
+                        command=self._sync_mode).pack(side="left", padx=4)
+        ttk.Radiobutton(row, text="bruteforce", variable=self.mode, value="bruteforce",
                         command=self._sync_mode).pack(side="left")
+        ttk.Radiobutton(row, text="carve", variable=self.mode, value="carve",
+                        command=self._sync_mode).pack(side="left", padx=4)
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
@@ -252,7 +256,10 @@ class ExtractorApp:
             return
         if self.dest.get().strip() and not force:
             return
-        self.dest.set(paths.default_output_dir(src))
+        if self.mode.get() == "carve":
+            self.dest.set(paths.default_carve_output_dir(src))
+        else:
+            self.dest.set(paths.default_output_dir(src))
 
     def _browse_source(self):
         path = filedialog.askopenfilename(title="Select archive/installer")
@@ -420,7 +427,7 @@ class ExtractorApp:
             messagebox.showerror("Backend not found", str(exc), parent=self.root)
             return
         opts = self._current_opts()
-        needs_extract = any(mode == "extract" for mode, _, _ in jobs)
+        needs_extract = any(mode in ("extract", "bruteforce") for mode, _, _ in jobs)
         # Resolve the Keep/Ask/Delete prompt once, on the main thread.
         delete_flag = self._resolve_delete() if needs_extract else False
         for _, src, dest in jobs:
@@ -431,7 +438,7 @@ class ExtractorApp:
         def work():
             for mode, src, dest in jobs:
                 job_opts = dict(opts)
-                if mode == "extract":
+                if mode in ("extract", "bruteforce"):
                     job_opts["delete_source"] = delete_flag
                 self.log_queue.put(f"=== {mode}: {src} ===")
                 argv = runner.build_command(prefix, mode, src, dest, job_opts)

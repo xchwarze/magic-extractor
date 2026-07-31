@@ -174,7 +174,8 @@ magic-extractor carve router-firmware.bin --fragment 1 # carve only fragment #1
 
 ## GUI
 An optional tkinter front-end (in `gui/`) wraps the CLI — a Universal-Extractor-style
-window with drag-and-drop, a batch queue, run history and a Preferences dialog. It
+window with `extract`, `scan`, `bruteforce` and `carve` modes, drag-and-drop, a batch
+queue, run history and a Preferences dialog. It
 shells out to the same `main.py`, so detection and extraction behave identically.
 ```bash
 python gui/main.py                 # launch the window

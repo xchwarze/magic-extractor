@@ -26,6 +26,22 @@ class BuildCommandTest(unittest.TestCase):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", "out", opts)
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "out", "-b"])
 
+    def test_bruteforce_mode(self):
+        cmd = runner.build_command(self.PREFIX, "bruteforce", "a.7z", "out", {})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "out", "-b"])
+
+    def test_carve_with_dest_and_options(self):
+        opts = {"password": "pw", "fast_check": False, "debug": True}
+        cmd = runner.build_command(self.PREFIX, "carve", "firmware.bin", "out", opts)
+        self.assertEqual(cmd, ["magic-extractor.exe", "carve", "firmware.bin", "out",
+                               "--password", "pw", "--no-fast-check", "--debug"])
+
+    def test_carve_ignores_extract_only_options(self):
+        opts = {"recursive": True, "max_depth": 9, "bruteforce": True,
+                "delete_source": True}
+        cmd = runner.build_command(self.PREFIX, "carve", "firmware.bin", None, opts)
+        self.assertEqual(cmd, ["magic-extractor.exe", "carve", "firmware.bin"])
+
     def test_password_included_when_set(self):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"password": "pw"})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--password", "pw"])

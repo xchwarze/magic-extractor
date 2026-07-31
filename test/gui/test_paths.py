@@ -36,6 +36,10 @@ class DefaultOutputDirTest(unittest.TestCase):
             result = paths.default_output_dir(os.path.join(d, "app.1.0.zip"))
             self.assertEqual(result, os.path.join(d, "app_1_0"))
 
+    def test_carve_output_matches_cli_default(self):
+        source = os.path.join("dl", "firmware.bin")
+        self.assertEqual(paths.default_carve_output_dir(source), source + "_carved")
+
 
 if __name__ == "__main__":
     unittest.main()

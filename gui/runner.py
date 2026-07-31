@@ -11,9 +11,9 @@ def build_command(prefix, mode, source, dest, opts):
     Build the full argv for one backend invocation.
 
     prefix : argv head (backend exe or ["python", main.py]).
-    mode   : "extract" or "scan".
+    mode   : "extract", "scan", "bruteforce", or "carve".
     source : input path.
-    dest   : output dir (extract only); falsy -> omitted so the CLI derives it.
+    dest   : output dir (extract/bruteforce/carve); falsy -> CLI-derived.
     opts   : recursive/max_depth/bruteforce/password/fast_check.
     """
     if mode == "scan":
@@ -22,6 +22,19 @@ def build_command(prefix, mode, source, dest, opts):
             cmd.append("--no-fast-check")  # common arg, valid on identify too
         if opts.get("debug"):
             cmd.append("--debug")  # --debug is a common arg on every subcommand
+        return cmd
+
+    if mode == "carve":
+        cmd = prefix + ["carve", source]
+        if dest:
+            cmd.append(dest)
+        password = opts.get("password")
+        if password:
+            cmd += ["--password", password]
+        if not opts.get("fast_check", True):
+            cmd.append("--no-fast-check")
+        if opts.get("debug"):
+            cmd.append("--debug")
         return cmd
 
     cmd = prefix + ["extract", source]
@@ -33,7 +46,7 @@ def build_command(prefix, mode, source, dest, opts):
         cmd += ["--password", password]
     if opts.get("recursive"):
         cmd += ["-r", "--max-depth", str(opts.get("max_depth", 5))]
-    if opts.get("bruteforce"):
+    if mode == "bruteforce" or opts.get("bruteforce"):
         cmd.append("-b")
     if opts.get("delete_source"):
         cmd.append("--delete-source")

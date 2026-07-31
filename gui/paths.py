@@ -21,3 +21,8 @@ def default_output_dir(source):
             candidate = os.path.join(directory, stem.replace(".", "_"))
         return candidate
     return os.path.join(directory, base + "_extracted")
+
+
+def default_carve_output_dir(source):
+    """Default used by the CLI's ``carve`` subcommand."""
+    return str(source) + "_carved"
