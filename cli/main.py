@@ -63,7 +63,7 @@ def configure_parser():
     # Options shared by every subcommand.
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--debug", help="Enable debug logging", action="store_true")
-    common.add_argument("--no-fast-check", help="Disable the 64 KiB fast type check", action='store_false', dest='fast_check')
+    common.add_argument("--fast-check", help="Check only the first 64 KiB with PureMagic", action='store_true', default=None)
 
     parser = argparse.ArgumentParser(description="Universal Extractor for various file formats")
     subparsers = parser.add_subparsers(dest="command", required=True)

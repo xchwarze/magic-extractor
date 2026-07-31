@@ -18,8 +18,8 @@ def build_command(prefix, mode, source, dest, opts):
     """
     if mode == "scan":
         cmd = prefix + ["identify", source]
-        if not opts.get("fast_check", True):
-            cmd.append("--no-fast-check")  # common arg, valid on identify too
+        if opts.get("fast_check", False):
+            cmd.append("--fast-check")  # common arg, valid on identify too
         if opts.get("debug"):
             cmd.append("--debug")  # --debug is a common arg on every subcommand
         return cmd
@@ -31,8 +31,8 @@ def build_command(prefix, mode, source, dest, opts):
         password = opts.get("password")
         if password:
             cmd += ["--password", password]
-        if not opts.get("fast_check", True):
-            cmd.append("--no-fast-check")
+        if opts.get("fast_check", False):
+            cmd.append("--fast-check")
         if opts.get("debug"):
             cmd.append("--debug")
         return cmd
@@ -50,8 +50,8 @@ def build_command(prefix, mode, source, dest, opts):
         cmd.append("-b")
     if opts.get("delete_source"):
         cmd.append("--delete-source")
-    if not opts.get("fast_check", True):
-        cmd.append("--no-fast-check")
+    if opts.get("fast_check", False):
+        cmd.append("--fast-check")
     if opts.get("debug"):
         cmd.append("--debug")
 

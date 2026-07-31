@@ -53,8 +53,8 @@ signature DB names archivers the engines miss, DIE handles installers/PE, binwal
 catches a few types the others miss, puremagic/Magika cover MIME.
 
 PureMagic 2.x also provides content-aware deep scanning when it receives the full
-file. Magic Extractor's fast check intentionally passes only the first 64 KiB;
-use `--no-fast-check` when full-file analysis is needed.
+file. Full-file analysis is the default; the optional `--fast-check` modifier
+passes only the first 64 KiB when startup speed matters more than deep inspection.
 
 Each handler declares its own indicators via `detection_mimes()` /
 `detection_names()` / `detection_signatures()`; `tools/generate_data.py` compiles
@@ -122,7 +122,7 @@ python cli/main.py <path> <output_dir> [options]
   (Each defaults to its `config.ini` value when omitted; combine with
   `--update-defaults` to persist the given value — e.g. `--open-output-folder false
   --update-defaults` turns a previously-saved default off.)
-- `--no-fast-check`: read the whole file for detection instead of the first 64 KiB.
+- `--fast-check`: check only the first 64 KiB instead of running full-file detection.
 - `--update-defaults`: persist the given settings as defaults in `config.ini`.
 
 `carve` options: `--list` (print the binwalk fragment table), `--fragment N` (carve one

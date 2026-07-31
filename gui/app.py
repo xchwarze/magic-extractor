@@ -102,7 +102,7 @@ class ExtractorApp:
         self.opt_max_depth = tk.IntVar(value=s.get_int("defaults", "max_depth", 5))
         self.opt_bruteforce = tk.BooleanVar(value=s.get_bool("defaults", "bruteforce", False))
         self.opt_password = tk.StringVar()
-        self.opt_fast_check = tk.BooleanVar(value=s.get_bool("defaults", "fast_check", True))
+        self.opt_fast_check = tk.BooleanVar(value=s.get_bool("defaults", "fast_check", False))
         self.opt_debug = tk.BooleanVar(value=s.get_bool("defaults", "debug", False))
 
         # History (recent sources/dests).

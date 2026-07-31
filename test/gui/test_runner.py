@@ -27,10 +27,10 @@ class BuildCommandTest(unittest.TestCase):
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "out", "-b"])
 
     def test_carve_with_dest_and_options(self):
-        opts = {"password": "pw", "fast_check": False, "debug": True}
+        opts = {"password": "pw", "fast_check": True, "debug": True}
         cmd = runner.build_command(self.PREFIX, "carve", "firmware.bin", "out", opts)
         self.assertEqual(cmd, ["magic-extractor.exe", "carve", "firmware.bin", "out",
-                               "--password", "pw", "--no-fast-check", "--debug"])
+                               "--password", "pw", "--fast-check", "--debug"])
 
     def test_carve_ignores_extract_only_options(self):
         opts = {"recursive": True, "max_depth": 9, "bruteforce": True,
@@ -51,13 +51,13 @@ class BuildCommandTest(unittest.TestCase):
                                    {"recursive": True, "max_depth": 3})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "-r", "--max-depth", "3"])
 
-    def test_fast_check_off_adds_flag(self):
+    def test_fast_check_off_adds_no_flag(self):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"fast_check": False})
-        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--no-fast-check"])
-
-    def test_fast_check_on_no_flag(self):
-        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"fast_check": True})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
+
+    def test_fast_check_on_adds_flag(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"fast_check": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--fast-check"])
 
     def test_scan_ignores_dest_and_extract_flags(self):
         opts = {"recursive": True, "max_depth": 9, "bruteforce": True, "password": "pw"}
@@ -88,13 +88,13 @@ class BuildCommandTest(unittest.TestCase):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"debug": False})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
 
-    def test_scan_no_fast_check(self):
+    def test_scan_without_fast_check(self):
         cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": False})
-        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z", "--no-fast-check"])
-
-    def test_scan_fast_check_on_no_flag(self):
-        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": True})
         self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z"])
+
+    def test_scan_fast_check_adds_flag(self):
+        cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z", "--fast-check"])
 
 
 if __name__ == "__main__":
