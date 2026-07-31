@@ -12,7 +12,7 @@ range of less common archivers.
 
 It auto-detects **80+ formats** — archives, installers, disk images, forensic
 images (EWF/AFF/AD1), disc images, mail stores and modern codecs. See
-[`formats.md`](formats.md) for the full list.
+[`formats.md`](docs/formats.md) for the full list.
 
 ## Quick Start
 Download the [latest release](../../releases/latest), unzip it, and run:
@@ -78,7 +78,7 @@ The detection → handler routing map lives in `data/handlers.json` (hand-curate
 loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist.json`.
 
 ## Supported Formats
-See [formats.md](formats.md) for the full list of formats and their handlers.
+See [formats.md](docs/formats.md) for the full list of formats and their handlers.
 
 ## Adding a format
 To add support for a new format, see
