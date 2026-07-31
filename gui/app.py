@@ -86,7 +86,12 @@ class ExtractorApp:
         self.keep_open = tk.BooleanVar(value=s.get_bool("gui", "keep_open", True))
         self.always_on_top = tk.BooleanVar(value=s.get_bool("gui", "always_on_top", False))
 
-        self.mode = tk.StringVar(value=s.get("defaults", "mode", "extract"))
+        saved_mode = s.get("defaults", "mode", "extract")
+        # Bruteforce used to be a main-window mode; it now lives exclusively in
+        # Run options. Migrate that old persisted value to regular extraction.
+        if saved_mode == "bruteforce":
+            saved_mode = "extract"
+        self.mode = tk.StringVar(value=saved_mode)
         self.auto_fill = tk.BooleanVar(value=s.get_bool("defaults", "auto_fill_destination", True))
         self.source = tk.StringVar()
         self.dest = tk.StringVar()
@@ -194,10 +199,8 @@ class ExtractorApp:
                         command=self._sync_mode).pack(side="left", padx=4)
         ttk.Radiobutton(row, text="scan", variable=self.mode, value="scan",
                         command=self._sync_mode).pack(side="left", padx=4)
-        ttk.Radiobutton(row, text="bruteforce", variable=self.mode, value="bruteforce",
-                        command=self._sync_mode).pack(side="left")
         ttk.Radiobutton(row, text="carve", variable=self.mode, value="carve",
-                        command=self._sync_mode).pack(side="left", padx=4)
+                        command=self._sync_mode).pack(side="left")
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
@@ -427,7 +430,7 @@ class ExtractorApp:
             messagebox.showerror("Backend not found", str(exc), parent=self.root)
             return
         opts = self._current_opts()
-        needs_extract = any(mode in ("extract", "bruteforce") for mode, _, _ in jobs)
+        needs_extract = any(mode == "extract" for mode, _, _ in jobs)
         # Resolve the Keep/Ask/Delete prompt once, on the main thread.
         delete_flag = self._resolve_delete() if needs_extract else False
         for _, src, dest in jobs:
@@ -438,7 +441,7 @@ class ExtractorApp:
         def work():
             for mode, src, dest in jobs:
                 job_opts = dict(opts)
-                if mode in ("extract", "bruteforce"):
+                if mode == "extract":
                     job_opts["delete_source"] = delete_flag
                 self.log_queue.put(f"=== {mode}: {src} ===")
                 argv = runner.build_command(prefix, mode, src, dest, job_opts)

@@ -11,9 +11,9 @@ def build_command(prefix, mode, source, dest, opts):
     Build the full argv for one backend invocation.
 
     prefix : argv head (backend exe or ["python", main.py]).
-    mode   : "extract", "scan", "bruteforce", or "carve".
+    mode   : "extract", "scan", or "carve".
     source : input path.
-    dest   : output dir (extract/bruteforce/carve); falsy -> CLI-derived.
+    dest   : output dir (extract/carve); falsy -> CLI-derived.
     opts   : recursive/max_depth/bruteforce/password/fast_check.
     """
     if mode == "scan":
@@ -46,7 +46,7 @@ def build_command(prefix, mode, source, dest, opts):
         cmd += ["--password", password]
     if opts.get("recursive"):
         cmd += ["-r", "--max-depth", str(opts.get("max_depth", 5))]
-    if mode == "bruteforce" or opts.get("bruteforce"):
+    if opts.get("bruteforce"):
         cmd.append("-b")
     if opts.get("delete_source"):
         cmd.append("--delete-source")
