@@ -84,6 +84,8 @@ regenerating the routing data, bundling the tool, and testing).
 
 ## Installation (from source)
 Most users just download the release (see [Quick Start](#quick-start)). To run from source:
+Python 3.12 or newer is required.
+
 ```bash
 git clone <repo-url>
 cd magic-extractor
@@ -116,7 +118,8 @@ python cli/main.py <path> <output_dir> [options]
   (Each defaults to its `config.ini` value when omitted; combine with
   `--update-defaults` to persist the given value — e.g. `--open-output-folder false
   --update-defaults` turns a previously-saved default off.)
-- `--no-fast-check`: read the whole file for detection instead of the first 2048 bytes.
+- `--no-fast-check`: let PureMagic read the whole file and run its content-aware
+  deep scan instead of checking only the first 2048 bytes.
 - `--update-defaults`: persist the given settings as defaults in `config.ini`.
 
 `carve` options: `--list` (print the binwalk fragment table), `--fragment N` (carve one
