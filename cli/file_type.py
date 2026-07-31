@@ -17,6 +17,7 @@ import json
 # tools/generate_data.py builds from each handler's detection_signatures().
 _SIGNATURES_CACHE = None
 _SIGNATURES_READ_LEN = 4096
+_FAST_MAGIC_READ_LEN = 64 * 1024
 
 def _load_signatures(data_path):
     """Load and cache the compiled signatures from data/signatures.json."""
@@ -95,20 +96,24 @@ def determine_file_type_with_magic(file_path, fast_check=False):
     Determines the MIME type of a file using content-based identification.
 
     Utilizes the puremagic library to analyze the content signatures of the file,
-    optionally performing a fast check by reading only the initial 2048 bytes,
+    optionally performing a fast check by reading only the initial 64 KiB,
     or a full check by reading the entire file.
     
     Args:
         file_path (str): The path to the file whose MIME type is to be determined.
-        fast_check (bool): If True, performs a quick check using only the first 2048 bytes of the file.
-                       If False, analyzes the entire file for a more comprehensive detection.
+        fast_check (bool): If True, performs a quick check using only the first
+            64 KiB of the file. If False, analyzes the entire file.
 
     Returns:
         list: A set of unique MIME types found in the file, if any.
     """
     try:
-        # Choose the method of analysis based on fast_check
-        possible_types = puremagic.magic_string(open(file_path, "rb").read(2048)) if fast_check else puremagic.magic_file(file_path)
+        # Choose the method of analysis based on fast_check.
+        if fast_check:
+            with open(file_path, "rb") as magic_fh:
+                possible_types = puremagic.magic_string(magic_fh.read(_FAST_MAGIC_READ_LEN))
+        else:
+            possible_types = puremagic.magic_file(file_path)
         
         # Create a set of MIME types, excluding empty strings and ensuring uniqueness
         #logging.debug(f"Puremagic all analysis: {possible_types}")

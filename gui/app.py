@@ -554,7 +554,7 @@ class ExtractorApp:
         ttk.Label(row, text="Max depth:").pack(side="left")
         ttk.Spinbox(row, from_=1, to=99, width=5, textvariable=self.opt_max_depth).pack(side="left", padx=6)
         ttk.Checkbutton(opts, text="Bruteforce (try every handler)", variable=self.opt_bruteforce).pack(anchor="w", pady=2)
-        ttk.Checkbutton(opts, text="Fast type check", variable=self.opt_fast_check).pack(anchor="w", pady=2)
+        ttk.Checkbutton(opts, text="Fast type check (first 64 KB only)", variable=self.opt_fast_check).pack(anchor="w", pady=2)
         row = ttk.Frame(opts); row.pack(anchor="w", pady=2, fill="x")
         ttk.Label(row, text="Password:").pack(side="left")
         ttk.Entry(row, textvariable=self.opt_password, show="*").pack(side="left", padx=6, fill="x", expand=True)
