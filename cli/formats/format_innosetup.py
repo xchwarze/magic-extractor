@@ -20,7 +20,7 @@ class FormatInnoSetupHandler(BaseExtractor):
             bool: True if the extraction was successful, False otherwise.
         """
         # Construct the command to execute using the path to innounp executable
-        # (options per innounp 2.70.0 command-line reference / innounp-cl.txt)
+        # (options per innounp 2.70.1 command-line reference / innounp-cl.txt)
         command_list = [
             os.path.join(self.extractors_path, 'innounp', 'innounp.exe'),
             '-e',   # extract files without paths
