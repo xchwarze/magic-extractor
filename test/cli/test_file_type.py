@@ -1,12 +1,9 @@
 import os
-import sys
 import tempfile
 import unittest
 from unittest import mock
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(REPO_ROOT, "cli"))
-import file_type
+from cli import file_type
 
 
 class FastMagicCheckTest(unittest.TestCase):
