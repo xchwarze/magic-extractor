@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import logging
+import warnings
 
 class BaseExtractor:
     """
@@ -123,7 +124,13 @@ class BaseExtractor:
             for name in files:
                 path = os.path.join(root, name)
                 try:
-                    guessed_ext = puremagic.from_file(path)
+                    # puremagic's python_scanner ast.parse()s candidate .py content to
+                    # confirm it's real Python; that surfaces SyntaxWarnings for whatever
+                    # the EXTRACTED (third-party) file itself does with backslashes, not
+                    # anything of ours — parsing still succeeds, so it's just noise here.
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", SyntaxWarning)
+                        guessed_ext = puremagic.from_file(path)
                 except Exception:
                     continue  # unknown / unreadable content, leave as is
 
