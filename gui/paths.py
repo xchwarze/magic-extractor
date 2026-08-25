@@ -11,7 +11,7 @@ def default_output_dir(source):
                        stem become underscores
     - no extension:    <dir>/<name>_extracted  (our CLI's suffix)
     """
-    source = str(source)
+    source = os.path.normpath(str(source))
     directory = os.path.dirname(source)
     base = os.path.basename(source)
     stem, ext = os.path.splitext(base)
