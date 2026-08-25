@@ -36,6 +36,10 @@ MANIFEST
 # VC90 runtime private-assembly manifests bundled with the extractors:
 !cli/bin/extractors/**/*.manifest
 *.spec
+cli/version_info.txt
+# Release build stamps this from the git tag; dev checkouts have none (falls
+# back to "dev" in the GUI's About dialog).
+/VERSION
 
 # Installer logs
 pip-log.txt
