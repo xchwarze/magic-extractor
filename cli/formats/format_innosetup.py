@@ -1,5 +1,5 @@
 import os
-import fnmatch
+import shutil
 import logging
 from .base_extractor import BaseExtractor
 
@@ -23,9 +23,7 @@ class FormatInnoSetupHandler(BaseExtractor):
         # (options per innounp 2.70.1 command-line reference / innounp-cl.txt)
         command_list = [
             os.path.join(self.extractors_path, 'innounp', 'innounp.exe'),
-            '-e',   # extract files without paths
-            '-m',   # extract internal embedded files (license, uninstall.exe)
-            '-a',   # extract all copies of duplicate files
+            '-x',   # extract the files from the installation 
             '-b',   # batch / non-interactive: never prompt for password or disk change
             '-y',   # assume Yes on all queries (e.g. overwrite)
             '-o',   # no colored console output (keeps captured logs clean)
@@ -52,32 +50,29 @@ class FormatInnoSetupHandler(BaseExtractor):
 
     def post_extraction_cleanup(self, extract_directory):
         """
-        Handles post-extraction cleanup including renaming and deleting specific files.
+        Flattens the "{app}" virtual directory -x extracts files under into
+        extract_directory.
 
         Args:
         extract_directory (str): The directory where files have been extracted.
         """
-        # Example logic for renaming files
         app_dir = os.path.join(extract_directory, '{app}')
-        self.rename_files(app_dir)
-        self.remove_files(app_dir)
+        if not os.path.isdir(app_dir):
+            return
 
-    def rename_files(self, directory):
-        """
-        Rename files with version suffixes in the directory.
-        """
-        for filename in os.listdir(directory):
-            if ',1' in filename:
-                new_name = filename.replace(',1', '')
-                os.rename(os.path.join(directory, filename), os.path.join(directory, new_name))
-                logging.info(f"Renamed {filename} to {new_name}")
+        self.flatten_directory(app_dir, extract_directory)
 
-    def remove_files(self, directory):
+    def flatten_directory(self, source_dir, target_dir):
         """
-        Remove files that are not needed after extraction.
+        Move every entry out of source_dir into target_dir, then remove the
+        now-empty source_dir. source_dir is a subdirectory of target_dir, so
+        each move is a same-volume rename (O(1) regardless of file size).
         """
-        cleanup_patterns = ['*,2.*', '*,3.*', 'install_script.iss']
-        for pattern in cleanup_patterns:
-            for filename in fnmatch.filter(os.listdir(directory), pattern):
-                os.remove(os.path.join(directory, filename))
-                logging.info(f"Removed {filename}")
+        for name in os.listdir(source_dir):
+            destination = os.path.join(target_dir, name)
+            if os.path.exists(destination):
+                logging.warning(f"Skipped flattening {name}: already exists in {target_dir}")
+                continue
+            shutil.move(os.path.join(source_dir, name), destination)
+
+        os.rmdir(source_dir)
