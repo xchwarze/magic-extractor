@@ -265,15 +265,18 @@ class ExtractorApp:
             self.dest.set(paths.default_output_dir(src))
 
     def _browse_source(self):
+        # Tk file dialogs return forward-slash paths on Windows even though it
+        # is a native Windows path; normalize so it displays and is passed
+        # around using the native separator.
         path = filedialog.askopenfilename(title="Select archive/installer")
         if path:
-            self.source.set(path)
+            self.source.set(os.path.normpath(path))
             self._autofill(force=True)
 
     def _browse_dest(self):
         path = filedialog.askdirectory(title="Select destination directory")
         if path:
-            self.dest.set(path)
+            self.dest.set(os.path.normpath(path))
 
     def _enable_dnd(self):
         """Register file drag-and-drop on the source entry + log (no-op without tkinterdnd2)."""
@@ -289,8 +292,12 @@ class ExtractorApp:
                 pass  # root is not a TkinterDnD.Tk() — DnD unavailable
 
     def _on_drop(self, event):
-        # tk.splitlist handles brace-wrapped, space-containing, multi-file payloads.
-        dropped = self.root.tk.splitlist(event.data)
+        # tkdnd only brace-wraps a dropped path when it needs Tcl list quoting
+        # (spaces, multiple files). An unbraced payload is a single raw native
+        # path: running it through tk.splitlist would treat its backslashes as
+        # Tcl backslash-escapes (e.g. "\temp" -> a literal tab) and corrupt it.
+        data = event.data
+        dropped = (data,) if "{" not in data else self.root.tk.splitlist(data)
         if not dropped:
             return
         self.source.set(dropped[0])
@@ -484,7 +491,7 @@ class ExtractorApp:
             return
         picked = filedialog.askopenfilenames(title="Select files to extract")
         for path in picked:
-            self.batch_queue.append(("extract", path, ""))
+            self.batch_queue.append(("extract", os.path.normpath(path), ""))
         if self.batch_queue:
             self._run_queue()
 
