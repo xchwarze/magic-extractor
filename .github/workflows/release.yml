@@ -33,6 +33,7 @@ jobs:
           VERSION="${VERSION:-0.0.0}" # fallback for workflow_dispatch / no tag
           echo "Detected VERSION: $VERSION"
           echo "PROJECT_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "$VERSION" > VERSION
 
       - name: Generate version file
         shell: bash
@@ -55,7 +56,7 @@ jobs:
 
       - name: Build the GUI .exe application
         working-directory: ./cli
-        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --hidden-import gui.paths --hidden-import gui.settings --hidden-import gui.history --hidden-import gui.context_menu --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
+        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --version-file=version_info.txt --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --hidden-import gui.paths --hidden-import gui.settings --hidden-import gui.history --hidden-import gui.context_menu --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash
@@ -64,6 +65,7 @@ jobs:
           cp -r cli/data cli/dist/data
           cp cli/config.ini cli/dist/config.ini
           cp gui/gui.ini cli/dist/gui.ini
+          cp VERSION cli/dist/VERSION
           cp LICENSE.txt readme.md docs/formats.md docs/THIRD-PARTY-NOTICES.md cli/dist/
           test -f cli/dist/magic-extractor-gui.exe
 

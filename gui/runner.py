@@ -91,6 +91,23 @@ def resolve_gui_config_path():
     return os.path.join(_repo_root(), "gui", "gui.ini")
 
 
+def read_version():
+    """
+    App version, stamped into the repo-root VERSION file by the release build
+    (dev checkouts keep whatever was last committed there).
+    """
+    path = (
+        os.path.join(os.path.dirname(sys.executable), "VERSION")
+        if getattr(sys, "frozen", False)
+        else os.path.join(_repo_root(), "VERSION")
+    )
+    try:
+        with open(path, encoding="utf-8") as version_fh:
+            return version_fh.read().strip()
+    except OSError:
+        return "dev"
+
+
 def run_streaming(argv, on_line, should_cancel):
     """
     Run argv, streaming merged stdout+stderr line-by-line to on_line(str).

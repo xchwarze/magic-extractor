@@ -1,6 +1,8 @@
 import os
 import sys
+import tempfile
 import unittest
+import unittest.mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from gui import runner
@@ -95,6 +97,24 @@ class BuildCommandTest(unittest.TestCase):
     def test_scan_fast_check_adds_flag(self):
         cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"fast_check": True})
         self.assertEqual(cmd, ["magic-extractor.exe", "identify", "a.7z", "--fast-check"])
+
+
+class ReadVersionTest(unittest.TestCase):
+    def test_reads_repo_root_version_file(self):
+        with unittest.mock.patch.object(runner, "_repo_root", return_value=tempfile.gettempdir()):
+            version_path = os.path.join(tempfile.gettempdir(), "VERSION")
+            with open(version_path, "w", encoding="utf-8") as version_fh:
+                version_fh.write("9.9.9\n")
+            try:
+                self.assertEqual(runner.read_version(), "9.9.9")
+            finally:
+                os.remove(version_path)
+
+    def test_falls_back_when_missing(self):
+        with unittest.mock.patch.object(runner, "_repo_root", return_value=tempfile.gettempdir()):
+            missing_path = os.path.join(tempfile.gettempdir(), "VERSION")
+            self.assertFalse(os.path.exists(missing_path))
+            self.assertEqual(runner.read_version(), "dev")
 
 
 if __name__ == "__main__":
