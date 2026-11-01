@@ -65,6 +65,35 @@ class FormatFooHandler(BaseExtractor):
 - `self.target_file`, `self.extract_directory`, `self.extractors_path`
   (= `cli/bin/extractors/`), `self.cli_args.password` are provided by the base.
 - Any of the three `detection_*` methods may be omitted (base returns `[]`).
+- For a single command, prefer `return self.run_extraction(cmd, label="FOO")`
+  (and `self.run_listing(cmd)` for `list_contents`): it maps exit codes and
+  unrunnable tools to `False` for you.
+
+### Extractor contract
+
+The CLI never calls `extract()` on the user's output folder directly:
+`BaseExtractor.extract_atomically()` gives each attempt a **fresh, empty
+staging folder** as `self.extract_directory`, moves the result into the output
+folder only if `extract()` returned `True`, and throws it away otherwise. So
+your handler must:
+
+1. **Write only inside `self.extract_directory`** — nothing next to it, nothing
+   next to the source. If the tool insists on a folder that does not exist yet
+   (pea.exe makes `"<folder> - 1"` instead), point it at a new subfolder and
+   move the content up (see `format_pea.py`).
+2. **Return `False` when the tool failed, even with exit code 0.** Tools such as
+   unace (`Is no ACE-archive`) and kgb2_console (`Archive is broken!`) exit 0
+   on a file they cannot open; pass that text as
+   `run_extraction(..., failure_markers=("...",))`. Otherwise the handler
+   "succeeds", the candidate chain stops, and the real handler never runs.
+   (A success that extracted nothing is already treated as a failure.)
+
+`test/run_engine_battery.py` checks this engine by engine, calling `extract()`
+directly (no detection, no fallback chain, no staging): into a fresh folder and
+into a folder that already has a file (both must succeed and write nothing
+outside it), on a plain text file (must return `False`), and, for the engines
+of the PE fallback chain, on a PE that is not theirs (must return `False`).
+List your engine's samples in its `ENGINE_SAMPLES` table.
 
 ## 2. Which detection method? (mime vs name vs signature)
 
@@ -177,10 +206,12 @@ self-validates and fails cleanly on a mismatch. (7-Zip is deliberately excluded.
 
 - Drop a real sample at `test/samples/<fmt>/test-file.<ext>` — the battery walks
   every file under `test/samples/` automatically, no registration needed.
+- Add the sample(s) to `ENGINE_SAMPLES` in `test/run_engine_battery.py`.
 - Run it:
   ```
-  python test/run_battery.py            # unit tests + extraction battery (Windows)
+  python test/run_battery.py            # unit tests + format battery (Windows)
   python test/run_battery.py --unit-only   # pure-python, runs anywhere
+  python test/run_engine_battery.py FormatFooHandler   # extractor contract (Windows)
   ```
 - Add pure-logic unit tests under `test/cli/` (see `test_formats_registry.py`).
 
@@ -197,5 +228,8 @@ self-validates and fails cleanly on a mismatch. (7-Zip is deliberately excluded.
 - [ ] Registered in `cli/formats/__init__.py`
 - [ ] `python tools/generate_data.py` run; `handlers.json`/`signatures.json` committed
 - [ ] Tool bundled under `cli/bin/extractors/` (+ runtime if needed)
-- [ ] Sample in `test/samples/<fmt>/`; battery green
+- [ ] Extractor contract kept: writes only in `self.extract_directory`, returns
+      `False` on failure even when the tool exits 0 (`failure_markers`)
+- [ ] Sample in `test/samples/<fmt>/` with real content, listed in `ENGINE_SAMPLES`;
+      format battery and engine battery green
 - [ ] `formats.md` + `THIRD-PARTY-NOTICES.md` updated
