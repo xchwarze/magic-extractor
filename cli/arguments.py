@@ -8,6 +8,38 @@ import pathlib
 SUBCOMMANDS = ("extract", "identify", "list", "carve")
 
 
+# Options that take a value (`--password pw`): the value is never a subcommand
+# or the file path. Kept in sync with configure_parser() by a unit test.
+VALUE_OPTIONS = frozenset((
+    "--password", "--max-depth", "--open-output-folder", "--check-free-space",
+    "--check-unicode", "--fix-file-extensions", "--create-log-files", "--fragment",
+))
+
+
+def normalize_argv(argv):
+    """
+    Default to the extract subcommand and let options come before it, so
+    `main.py file.zip`, `main.py --debug file.zip` and `main.py --password pw
+    list file.zip` all parse. The subcommand is only looked for before the
+    first positional argument (a file path never becomes a subcommand).
+    """
+    skip_value = False
+    for index, arg in enumerate(argv):
+        if skip_value:
+            skip_value = False
+            continue
+        if arg in SUBCOMMANDS:
+            return [arg] + argv[:index] + argv[index + 1:]
+        if arg in VALUE_OPTIONS:
+            skip_value = True
+            continue
+        if not arg.startswith("-"):
+            break
+    if argv and not set(argv) <= {"-h", "--help"}:
+        return ["extract"] + argv
+    return argv
+
+
 def file_path_type_check(path):
     """Check that an input file or directory exists."""
     input_path = pathlib.Path(path)
@@ -19,15 +51,14 @@ def file_path_type_check(path):
 
 
 def dir_path_type_check(path):
-    """Create an output directory if necessary and check that it is writable."""
+    """
+    Check an output directory without creating it: it is created when it is
+    actually used, so a run that extracts nothing leaves no empty folder.
+    """
     dir_path = pathlib.Path(path)
-    if not dir_path.is_dir():
-        try:
-            dir_path.mkdir(parents=True, exist_ok=True)
-        except OSError as exc:
-            raise argparse.ArgumentTypeError(f"Cannot create directory {path}: {exc}")
-
-    if not os.access(dir_path, os.W_OK):
+    if dir_path.exists() and not dir_path.is_dir():
+        raise argparse.ArgumentTypeError(f"{path} exists and is not a directory.")
+    if dir_path.is_dir() and not os.access(dir_path, os.W_OK):
         raise argparse.ArgumentTypeError(f"The directory {path} is not writable.")
     return dir_path
 
@@ -217,7 +248,11 @@ def configure_settings(args, config):
         "fast_check",
     ]
 
-    if args.update_defaults:
+    # Subcommands only carry some of these options (identify/list/carve just
+    # --fast-check); fill in the ones they have.
+    keys = [key for key in keys if hasattr(args, key)]
+
+    if getattr(args, "update_defaults", False):
         for key in keys:
             value = getattr(args, key)
             if value is not None:

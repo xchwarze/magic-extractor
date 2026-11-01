@@ -8,6 +8,7 @@ from arguments import (
     configure_settings,
     dir_path_type_check,
     file_path_type_check,
+    normalize_argv,
     str2bool,
 )
 from carving import process_carve
@@ -25,7 +26,6 @@ from detection import (
 )
 from detection_filter import init_blacklist
 from extraction import (
-    confirm_run_installer,
     extract_nested,
     process_extraction,
     run_extract,
@@ -34,18 +34,31 @@ from formats import init_handlers
 from logger import setup_logging
 
 
+def use_utf8_output():
+    """
+    Write stdout/stderr as UTF-8 (bad characters replaced). Piped output
+    otherwise uses the ANSI code page, so `identify` on a file named e.g.
+    "архив.zip" crashed with UnicodeEncodeError under the GUI, which reads
+    the CLI's output as UTF-8.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main():
     """Parse arguments, initialize runtime data, and dispatch a subcommand."""
-    argv = sys.argv[1:]
-    if argv and not argv[0].startswith("-") and argv[0] not in SUBCOMMANDS:
-        argv = ["extract"] + argv
-
+    use_utf8_output()
     parser = configure_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(normalize_argv(sys.argv[1:]))
     setup_logging(args.debug)
 
     init_handlers(DATA_PATH)
     init_blacklist(DATA_PATH)
+
+    # Every subcommand honors config.ini (e.g. fast_check), not only extract.
+    config = Config(CONFIG_PATH)
+    configure_settings(args, config)
 
     if args.command == "identify":
         return 0 if process_identify(args) else 1
@@ -54,8 +67,6 @@ def main():
     if args.command == "carve":
         return 0 if process_carve(args) else 1
 
-    config = Config(CONFIG_PATH)
-    configure_settings(args, config)
     args.delete_to_recycle_bin = config.get(
         "settings", "delete_to_recycle_bin", fallback=True, type=bool
     )
