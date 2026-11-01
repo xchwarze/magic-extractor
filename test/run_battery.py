@@ -146,9 +146,12 @@ def iter_samples():
 
 
 def extracted_something(output_dir):
-    """True if the output directory ended up with any file (any depth)."""
+    """True if the output directory ended up with any file (any depth).
+
+    The CLI's own magic-extractor.log does not count: it is written after any
+    handler that reports success, even one that extracted nothing."""
     for _root, _dirs, files in os.walk(output_dir):
-        if files:
+        if any(name != 'magic-extractor.log' for name in files):
             return True
     return False
 
