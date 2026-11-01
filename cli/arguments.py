@@ -162,7 +162,15 @@ def configure_parser():
     extract_parser.add_argument(
         "-b",
         "--bruteforce",
-        help="Try every handler DIE and Magika detect (no early-exit)",
+        help="Run every detector and try every handler they map (no early-exit)",
+        action="store_true",
+    )
+    extract_parser.add_argument(
+        "--merge-output",
+        help=(
+            "Extract into the output folder even if it already has files "
+            "(default: use a new <folder>_<YYYYmmdd-HHMMSS> folder instead)"
+        ),
         action="store_true",
     )
     extract_parser.add_argument(

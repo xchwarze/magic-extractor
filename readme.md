@@ -104,15 +104,31 @@ python cli/main.py identify <path>                          # report type + cand
 python cli/main.py list     <path>                          # list archive contents
 python cli/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
 ```
-A bare path with no subcommand defaults to `extract` (backward compatible):
+A bare path with no subcommand defaults to `extract` (backward compatible), and
+options may come before the path or the subcommand:
 ```bash
 python cli/main.py <path> <output_dir> [options]
+python cli/main.py --debug <path>
 ```
+
+`<path>` can be a folder for every subcommand: its files (not subfolders) are
+processed one by one. Each file gets its own output folder: `<stem>_extracted`
+(next to the file, or under `output_dir` when given), or `<name>_extracted` when
+two files share a stem.
+
+If the output folder already has files, `extract` writes to a new
+`<folder>_<YYYYmmdd-HHMMSS>` instead of mixing with or overwriting the earlier
+result; `--merge-output` extracts into the existing folder (the GUI does this
+when the destination is locked). Each handler attempt runs in its own temporary
+folder, so a failed attempt never leaves partial files behind.
 
 `extract` options:
 - `--password <password>`: password for encrypted archives.
 - `-r`, `--recursive`: extract archives found inside the output (bounded by `--max-depth`, default 5).
 - `-b`, `--bruteforce`: try every handler detected instead of stopping at the first.
+- `--merge-output`: extract into the output folder even if it already has files.
+- `--delete-source`: delete the source after a successful extraction (Recycle Bin
+  unless `delete_to_recycle_bin` is off in `config.ini`).
 - `--open-output-folder <true|false>`: open the output folder when done.
 - `--check-free-space <true|false>`: warn if the output volume may lack room.
 - `--check-unicode <true|false>`: warn about non-ASCII extracted names.

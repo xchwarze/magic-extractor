@@ -1,8 +1,50 @@
 import os
+import uuid
 import shutil
 import subprocess
 import logging
 import warnings
+
+# Prefix of the per-attempt staging folders extract_atomically() creates.
+STAGING_PREFIX = '.mx_staging_'
+
+
+def default_output_dir(file_path):
+    """<folder of the file>/<file name without extension>_extracted."""
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    return os.path.join(os.path.dirname(file_path), base_name + '_extracted')
+
+
+def _free_name(path):
+    """path, or "<stem> (n)<ext>" for the first n that does not exist yet."""
+    stem, ext = os.path.splitext(path)
+    counter = 1
+    while os.path.exists(path):
+        path = f"{stem} ({counter}){ext}"
+        counter += 1
+    return path
+
+
+def merge_move(source, destination):
+    """
+    Move source to destination and return the path it ended up at. Folders are
+    merged and a file replaces a file (like an extractor's overwrite-all), but
+    a file never replaces a folder or the other way round: the incoming one
+    gets a free "<name> (n)" instead, so nothing already there is deleted.
+    """
+    if os.path.isdir(source) and os.path.isdir(destination):
+        for name in os.listdir(source):
+            merge_move(os.path.join(source, name), os.path.join(destination, name))
+        os.rmdir(source)
+        return destination
+    if os.path.exists(destination):
+        if os.path.isdir(source) != os.path.isdir(destination):
+            destination = _free_name(destination)
+        else:
+            os.remove(destination)
+    shutil.move(source, destination)
+    return destination
+
 
 class BaseExtractor:
     """
@@ -51,12 +93,78 @@ class BaseExtractor:
         self.extractors_path = os.path.join(bin_path, self.TOOL_FOLDER)
         self.target_file = str(os.path.abspath(cli_args.file_path))
         self.extract_directory = None
+        # Top-level names the last extract_atomically() put in the output folder
+        # (None: unknown, e.g. extract() called directly). Post-processing and
+        # recursion only look at these, never at what was already there.
+        self.extracted_names = None
 
     def extract(self):
         """
         Method to extract files. Must be overridden by specific extractor implementations.
         """
         raise NotImplementedError("Each subclass must implement the 'extract' method.")
+
+    def extract_atomically(self):
+        """
+        Run extract() in a fresh, empty staging folder created for this attempt
+        inside the output folder, and move what it extracted into the output
+        folder only if it succeeded. A failed attempt is discarded whole, so it
+        never leaves partial output behind for the next candidate, and every
+        tool works in the same context (a new empty folder) whatever it does
+        with existing folders. A tool that reports success but extracted
+        nothing counts as a failure.
+
+        Returns:
+            bool: True if the extraction succeeded and was moved into place.
+        """
+        final_dir = self.extract_directory
+        staging = os.path.join(final_dir, f'{STAGING_PREFIX}{uuid.uuid4().hex}')
+        os.makedirs(staging)
+        self.extract_directory = staging
+        try:
+            if not self.extract():
+                return False
+            extracted = os.listdir(staging)
+            if not extracted:
+                logging.error(f"{type(self).__name__} reported success but extracted nothing")
+                return False
+            self.extracted_names = [
+                os.path.basename(merge_move(os.path.join(staging, name), os.path.join(final_dir, name)))
+                for name in extracted
+            ]
+            return True
+        except OSError as exc:
+            logging.error(f"{type(self).__name__}: could not move the extracted files into place: {exc}")
+            return False
+        finally:
+            self.extract_directory = final_dir
+            shutil.rmtree(staging, ignore_errors=True)
+
+    def iter_extracted(self):
+        """
+        Yield (path, is_dir) for every file and folder this extraction produced:
+        only the names extract_atomically() moved in, recursively, never other
+        content of a shared output folder (--merge-output).
+        """
+        names = self.extracted_names
+        if names is None:
+            names = os.listdir(self.extract_directory)
+        for name in names:
+            top = os.path.join(self.extract_directory, name)
+            if not os.path.isdir(top):
+                if os.path.exists(top):
+                    yield top, False
+                continue
+            yield top, True
+            for folder, dirs, files in os.walk(top):
+                for sub_name in dirs:
+                    yield os.path.join(folder, sub_name), True
+                for sub_name in files:
+                    yield os.path.join(folder, sub_name), False
+
+    def extracted_files(self):
+        """Paths of the files this extraction produced (see iter_extracted)."""
+        return [path for path, is_dir in self.iter_extracted() if not is_dir]
 
     def list_contents(self):
         """
@@ -120,44 +228,41 @@ class BaseExtractor:
             logging.error("puremagic not available; cannot fix file extensions")
             return
 
-        for root, _dirs, files in os.walk(self.extract_directory):
-            for name in files:
-                path = os.path.join(root, name)
-                try:
-                    # puremagic's python_scanner ast.parse()s candidate .py content to
-                    # confirm it's real Python; that surfaces SyntaxWarnings for whatever
-                    # the EXTRACTED (third-party) file itself does with backslashes, not
-                    # anything of ours — parsing still succeeds, so it's just noise here.
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore", SyntaxWarning)
-                        guessed_ext = puremagic.from_file(path)
-                except Exception:
-                    continue  # unknown / unreadable content, leave as is
+        for path in self.extracted_files():
+            name = os.path.basename(path)
+            # only name files that LACK an extension; never overwrite a real
+            # one (renaming e.g. .docx/.jar -> .zip would break the file)
+            if os.path.splitext(name)[1]:
+                continue
+            try:
+                # puremagic's python_scanner ast.parse()s candidate .py content to
+                # confirm it's real Python; that surfaces SyntaxWarnings for whatever
+                # the EXTRACTED (third-party) file itself does with backslashes, not
+                # anything of ours — parsing still succeeds, so it's just noise here.
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", SyntaxWarning)
+                    guessed_ext = puremagic.from_file(path)
+            except Exception:
+                continue  # unknown / unreadable content, leave as is
 
-                if not guessed_ext:
-                    continue
-                # only name files that LACK an extension; never overwrite a real
-                # one (renaming e.g. .docx/.jar -> .zip would break the file)
-                if os.path.splitext(name)[1]:
-                    continue
-
-                new_path = path + guessed_ext
-                if os.path.exists(new_path):
-                    continue  # don't clobber an existing file
-                try:
-                    os.rename(path, new_path)
-                    logging.info(f"Fixed extension: {name} -> {os.path.basename(new_path)}")
-                except OSError as exc:
-                    logging.error(f"Failed to rename {path}: {exc}")
+            if not guessed_ext:
+                continue
+            new_path = path + guessed_ext
+            if os.path.exists(new_path):
+                continue  # don't clobber an existing file
+            try:
+                os.rename(path, new_path)
+                logging.info(f"Fixed extension: {name} -> {os.path.basename(new_path)}")
+            except OSError as exc:
+                logging.error(f"Failed to rename {path}: {exc}")
 
     def warn_non_ascii_names(self):
         """Warn about extracted names that are not plain ASCII (portability hazard)."""
-        for root, dirs, files in os.walk(self.extract_directory):
-            for name in dirs + files:
-                try:
-                    name.encode('ascii')
-                except UnicodeEncodeError:
-                    logging.warning(f"Non-ASCII name in output: {os.path.join(root, name)}")
+        for path, _is_dir in self.iter_extracted():
+            try:
+                os.path.basename(path).encode('ascii')
+            except UnicodeEncodeError:
+                logging.warning(f"Non-ASCII name in output: {path}")
 
     def write_log_file(self):
         """Write a small per-run log of the extraction to the output directory."""
@@ -188,9 +293,7 @@ class BaseExtractor:
         output_dir = self.cli_args.output_dir
 
         if output_dir is None:
-            file_path = self.cli_args.file_path
-            base_name = os.path.splitext(os.path.basename(file_path))[0]
-            output_dir = os.path.join(os.path.dirname(file_path), base_name + '_extracted')
+            output_dir = default_output_dir(self.cli_args.file_path)
             logging.debug(f"No output directory provided. Using default: {output_dir}")
 
         if not os.path.exists(output_dir):
