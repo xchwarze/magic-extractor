@@ -132,7 +132,7 @@ folder, so a failed attempt never leaves partial files behind.
 - `--open-output-folder <true|false>`: open the output folder when done.
 - `--check-free-space <true|false>`: warn if the output volume may lack room.
 - `--check-unicode <true|false>`: warn about non-ASCII extracted names.
-- `--fix-file-extensions <true|false>`: give extensionless extracted files a content-based extension (never overwrites an existing one).
+- `--fix-file-extensions <true|false>`: give extensionless extracted files a content-based extension (never overwrites an existing one). Off by default: guesses can be wrong (`Makefile`, `LICENSE` or `configure` become `.txt`).
 - `--create-log-files <true|false>`: write a per-run log to the output dir.
 
   (Each defaults to its `config.ini` value when omitted; combine with
