@@ -100,13 +100,16 @@ def run_unit_tests():
 
     suite = build_unit_suite()
     stream = io.StringIO()
-    # The delete_source tests deliberately log ERROR/WARNING on their sad paths;
-    # silence logging so the report stays clean (restored afterwards).
-    logging.disable(logging.CRITICAL)
+    # Sad-path tests deliberately log ERROR/WARNING; a NullHandler on the root
+    # logger keeps those out of the report (no "last resort" printing to
+    # stderr) without disabling logging, so tests can still use assertLogs.
+    root_logger = logging.getLogger()
+    quiet = logging.NullHandler()
+    root_logger.addHandler(quiet)
     try:
         result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
     finally:
-        logging.disable(logging.NOTSET)
+        root_logger.removeHandler(quiet)
 
     total = result.testsRun
     failures = len(result.failures)
