@@ -8,6 +8,9 @@ class Format7zHandler(BaseExtractor):
     Handler class for .7z files that utilizes 7z for extraction.
     """
 
+    # Folder under extractors/ holding the 7z.exe to run (subclasses swap builds).
+    SEVEN_ZIP_FOLDER = '7z'
+
     @classmethod
     def detection_mimes(cls):
         # 7-Zip is the workhorse: it opens most mainstream archive / disk-image MIMEs.
@@ -73,7 +76,7 @@ class Format7zHandler(BaseExtractor):
     def list_contents(self):
         """List archive contents using '7z l'. Returns the listing text, or None on error."""
         command_list = [
-            os.path.join(self.extractors_path, '7z', '7z.exe'),
+            os.path.join(self.extractors_path, self.SEVEN_ZIP_FOLDER, '7z.exe'),
             'l',   # list contents
             '-y',  # assume Yes on all queries
         ]
@@ -100,7 +103,7 @@ class Format7zHandler(BaseExtractor):
         """
         # Construct the command to execute using the path to 7z executable
         command_list = [
-            os.path.join(self.extractors_path, '7z', '7z.exe'),
+            os.path.join(self.extractors_path, self.SEVEN_ZIP_FOLDER, '7z.exe'),
             'x',  # extract files with full paths
             '-y', # assume Yes on all queries
         ]
