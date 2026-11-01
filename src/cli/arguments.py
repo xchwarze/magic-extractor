@@ -4,6 +4,8 @@ import argparse
 import os
 import pathlib
 
+from cli_paths import read_version
+
 
 SUBCOMMANDS = ("extract", "identify", "list", "carve")
 
@@ -35,7 +37,7 @@ def normalize_argv(argv):
             continue
         if not arg.startswith("-"):
             break
-    if argv and not set(argv) <= {"-h", "--help"}:
+    if argv and not set(argv) <= {"-h", "--help", "--version"}:
         return ["extract"] + argv
     return argv
 
@@ -89,6 +91,7 @@ def configure_parser():
     parser = argparse.ArgumentParser(
         description="Universal Extractor for various file formats"
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {read_version()}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     extract_parser = subparsers.add_parser(

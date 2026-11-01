@@ -79,6 +79,7 @@ class Format7zHandler(BaseExtractor):
             os.path.join(self.extractors_path, self.SEVEN_ZIP_FOLDER, '7z.exe'),
             'l',   # list contents
             '-y',  # assume Yes on all queries
+            '-sccUTF-8',  # console output in UTF-8, not the OEM code page
         ]
         if self.cli_args.password:
             command_list += [f'-p{self.cli_args.password}']
@@ -86,7 +87,7 @@ class Format7zHandler(BaseExtractor):
         command_list.append(self.target_file)
 
         try:
-            return self.run_command(command_list)
+            return self.run_command(command_list, encoding='utf-8')
         except subprocess.CalledProcessError as exc:
             logging.error(f"Failed to list 7z file with error code {exc.returncode}")
             return None

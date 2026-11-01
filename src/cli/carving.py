@@ -13,6 +13,23 @@ from formats import get_handlers_from_detection
 from helpers import run_per_file
 
 
+_COPY_CHUNK = 1 << 20
+
+
+def _copy_range(source_fh, offset, size, destination):
+    """Copy size bytes from offset of an open file to destination, in chunks
+    (never the whole input in memory)."""
+    source_fh.seek(offset)
+    remaining = size
+    with open(destination, "wb") as carved_fh:
+        while remaining > 0:
+            chunk = source_fh.read(min(_COPY_CHUNK, remaining))
+            if not chunk:
+                break
+            carved_fh.write(chunk)
+            remaining -= len(chunk)
+
+
 def process_carve(args):
     """Carve a file, or each file of a directory (one at a time)."""
     return run_per_file(args, _carve_file, output_name=lambda item, _items: f"{item.name}_carved")
@@ -52,10 +69,18 @@ def _carve_file(args):
 
     carve_all = args.raw or args.fragment is not None
     output_dir = str(args.output_dir) if args.output_dir else f"{args.file_path}_carved"
-    os.makedirs(output_dir, exist_ok=True)
-    with open(args.file_path, "rb") as source_fh:
-        data = source_fh.read()
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+        source_fh = open(args.file_path, "rb")
+    except OSError as exc:
+        logging.error(f"Cannot carve {args.file_path} into {output_dir}: {exc}")
+        return False
+    with source_fh:
+        return _carve_entries(args, source_fh, selected, carve_all, output_dir)
 
+
+def _carve_entries(args, source_fh, selected, carve_all, output_dir):
+    """Carve the selected binwalk entries out of source_fh and extract the ones with a handler."""
     carved_any = False
     extractions_ok = True
     for index, entry in selected:
@@ -74,8 +99,12 @@ def _carve_file(args):
         carved_path = os.path.join(
             output_dir, f"carved_{index}_{offset}_{name}.bin"
         )
-        with open(carved_path, "wb") as carved_fh:
-            carved_fh.write(data[offset : offset + size])
+        try:
+            _copy_range(source_fh, offset, size, carved_path)
+        except OSError as exc:
+            logging.error(f"Could not write carved [{index}] {name} to {carved_path}: {exc}")
+            extractions_ok = False
+            continue
         logging.info(
             f"Carved [{index}] {name} at offset {offset} ({size} bytes) -> "
             f"{carved_path}"

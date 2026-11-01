@@ -441,7 +441,15 @@ class BaseExtractor:
         logging.debug(f"Output directory {output_dir} is validated and ready.")
         return str(os.path.abspath(output_dir))
 
-    def run_command(self, command, workdir=None, timeout=None):
+    def shown_command(self, command):
+        """The command for the log, with the password masked wherever it appears
+        (e.g. 7z -p<pw>, uharc -pw<pw>, pea's positional password)."""
+        password = getattr(self.cli_args, 'password', None)
+        if not password:
+            return ' '.join(command)
+        return ' '.join(str(arg).replace(password, '***') for arg in command)
+
+    def run_command(self, command, workdir=None, timeout=None, encoding=None):
         """
         Execute a system command in a subprocess and return the output.
         Raises an exception if the command fails.
@@ -457,12 +465,12 @@ class BaseExtractor:
         subprocess.CalledProcessError: If the command fails.
         """
         try:
-            logging.debug(f"Executing command: {' '.join(command)} in {workdir}")
+            logging.debug(f"Executing command: {self.shown_command(command)} in {workdir}")
             # errors='replace': a tool printing bytes the console code page can't
             # decode must not turn a successful extraction into a failure.
             # stdin closed: a tool that prompts (e.g. for a missing password)
             # fails at once instead of waiting forever on a hidden prompt.
-            result = subprocess.run(command, cwd=workdir, text=True, errors='replace',
+            result = subprocess.run(command, cwd=workdir, text=True, errors='replace', encoding=encoding,
                                     capture_output=True, check=True, env=os.environ,
                                     stdin=subprocess.DEVNULL, timeout=timeout)
 
