@@ -127,6 +127,38 @@ def determine_file_type_with_magic(file_path, fast_check=False):
 
         return None
 
+def run_json_detector(command, label, file_path):
+    """
+    Run a detector that prints JSON and return the parsed value, or None.
+
+    Output is decoded as UTF-8 (not the console code page, which can crash on
+    bytes it does not map) and only the first JSON document is parsed: DIE
+    appends its own script errors after the JSON for some files, e.g.
+    "audio.1.sg: ... ReferenceError: Can't find variable: CPPETSCIIshifted".
+    """
+    try:
+        result = subprocess.run(command, capture_output=True, check=True,
+                                encoding='utf-8', errors='replace')
+    except (subprocess.CalledProcessError, OSError) as exc:
+        logging.error(f"{label} analysis failed for {file_path}: {exc}")
+        return None
+
+    output = result.stdout or ''
+    starts = [index for index in (output.find('{'), output.find('[')) if index != -1]
+    if not starts:
+        logging.error(f"{label} printed no JSON for {file_path}")
+        return None
+    try:
+        data, end = json.JSONDecoder().raw_decode(output, min(starts))
+    except json.JSONDecodeError as exc:
+        logging.error(f"Failed to parse {label} JSON output for {file_path}: {exc}")
+        return None
+
+    trailing = output[end:].strip()
+    if trailing:
+        logging.debug(f"{label} output after the JSON ignored for {file_path}: {trailing[:300]}")
+    return data
+
 def determine_file_type_with_die(file_path, bin_path):
     """
     Uses DIE (Detect It Easy) to analyze a file and extracts detailed information about the file type.
@@ -138,33 +170,23 @@ def determine_file_type_with_die(file_path, bin_path):
     Returns:
         list: A dictionary containing detailed information about the file, or None if an error occurs.
     """
-    command = [os.path.join(bin_path, 'detectors', 'die', 'diec.exe'), '-j', file_path]
-    
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, check=True)
-
-        # Parse the JSON output
-        die_output = json.loads(result.stdout)
-        
-        # Extract names for extraction-relevant categories. 'Packer' is included so
-        # wrapped-exe formats DIE tags as packers (e.g. PyInstaller) are surfaced,
-        # not dropped. Compared case-insensitively (DIE capitalizes the JSON type).
-        relevant_types = {'sfx', 'archive', 'installer', 'packer'}
-        names = []
-        for detect in die_output.get('detects', []):
-            for value in detect.get('values', []):
-                if (value.get('type') or '').lower() in relevant_types:
-                    names.append(value.get('name'))
-
-        #logging.error(f"DIE complete analysis: {die_output}")
-        logging.debug(f"DIE analysis: {names}")
-        return names if names else None
-    except (subprocess.CalledProcessError, OSError) as exc:
-        logging.error(f"DIE analysis failed for {file_path}: {exc}")
+    command = [os.path.join(bin_path, 'detectors', 'die', 'diec.exe'), '-j', str(file_path)]
+    die_output = run_json_detector(command, 'DIE', file_path)
+    if not isinstance(die_output, dict):
         return None
-    except json.JSONDecodeError as exc:
-        logging.error(f"Failed to parse DIE output as JSON for {file_path}: {exc}")
-        return None
+
+    # Extract names for extraction-relevant categories. 'Packer' is included so
+    # wrapped-exe formats DIE tags as packers (e.g. PyInstaller) are surfaced,
+    # not dropped. Compared case-insensitively (DIE capitalizes the JSON type).
+    relevant_types = {'sfx', 'archive', 'installer', 'packer'}
+    names = []
+    for detect in die_output.get('detects', []):
+        for value in detect.get('values', []):
+            if (value.get('type') or '').lower() in relevant_types:
+                names.append(value.get('name'))
+
+    logging.debug(f"DIE analysis: {names}")
+    return names if names else None
 
 def determine_file_type_with_binwalk(file_path, bin_path):
     """
@@ -177,29 +199,14 @@ def determine_file_type_with_binwalk(file_path, bin_path):
     Returns:
         list: A list of dictionaries from Binwalk's JSON output, or None if an error occurs.
     """
-    binwalk_exe = os.path.join(bin_path, 'detectors', 'binwalk', 'binwalk.exe')
-    command = [binwalk_exe, '-q', '-l', '-', file_path]
-    
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, check=True)
-        binwalk_data = json.loads(result.stdout)
+    names = []
+    for entry in binwalk_file_map(file_path, bin_path):
+        name = entry.get("name")
+        if name and name not in names:
+            names.append(name)
 
-        names = []
-        for item in binwalk_data:
-            analysis = item.get("Analysis", {})
-            for entry in analysis.get("file_map", []):
-                name = entry.get("name")
-                if name and name not in names:
-                    names.append(name)
-
-        logging.debug(f"Binwalk analysis: {names}")
-        return names if names else None
-    except (subprocess.CalledProcessError, OSError) as exc:
-        logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
-        return None
-    except json.JSONDecodeError as exc:
-        logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
-        return None
+    logging.debug(f"Binwalk analysis: {names}")
+    return names if names else None
 
 def binwalk_file_map(file_path, bin_path):
     """
@@ -208,21 +215,14 @@ def binwalk_file_map(file_path, bin_path):
     """
     binwalk_exe = os.path.join(bin_path, 'detectors', 'binwalk', 'binwalk.exe')
     command = [binwalk_exe, '-q', '-l', '-', str(file_path)]
-
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, check=True)
-        binwalk_data = json.loads(result.stdout)
-
-        entries = []
-        for item in binwalk_data:
-            entries.extend(item.get("Analysis", {}).get("file_map", []))
-        return entries
-    except (subprocess.CalledProcessError, OSError) as exc:
-        logging.error(f"Binwalk analysis failed for {file_path}: {exc}")
+    binwalk_data = run_json_detector(command, 'Binwalk', file_path)
+    if not isinstance(binwalk_data, list):
         return []
-    except json.JSONDecodeError as exc:
-        logging.error(f"Failed to parse Binwalk JSON output for {file_path}: {exc}")
-        return []
+
+    entries = []
+    for item in binwalk_data:
+        entries.extend(item.get("Analysis", {}).get("file_map", []))
+    return entries
 
 def determine_file_type_with_magika(file_path, bin_path):
     """
@@ -237,35 +237,28 @@ def determine_file_type_with_magika(file_path, bin_path):
               or None if an error occurs or nothing is identified.
     """
     magika_exe = os.path.join(bin_path, 'detectors', 'magika', 'magika.exe')
-    command = [magika_exe, '--json', file_path]
-
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, check=True)
-        magika_data = json.loads(result.stdout)
-
-        mime_types = []
-        labels = []
-        for item in magika_data:
-            entry = item.get("result", {})
-            if entry.get("status") != "ok":
-                continue
-
-            output = entry.get("value", {}).get("output", {})
-            mime_type = output.get("mime_type")
-            label = output.get("label")
-            if mime_type and mime_type not in mime_types:
-                mime_types.append(mime_type)
-            if label and label not in labels:
-                labels.append(label)
-
-        logging.debug(f"Magika analysis: mime={mime_types} labels={labels}")
-        if not mime_types and not labels:
-            return None
-
-        return {"mime_types": mime_types, "labels": labels}
-    except (subprocess.CalledProcessError, OSError) as exc:
-        logging.error(f"Magika analysis failed for {file_path}: {exc}")
+    command = [magika_exe, '--json', str(file_path)]
+    magika_data = run_json_detector(command, 'Magika', file_path)
+    if not isinstance(magika_data, list):
         return None
-    except json.JSONDecodeError as exc:
-        logging.error(f"Failed to parse Magika JSON output for {file_path}: {exc}")
+
+    mime_types = []
+    labels = []
+    for item in magika_data:
+        entry = item.get("result", {})
+        if entry.get("status") != "ok":
+            continue
+
+        output = entry.get("value", {}).get("output", {})
+        mime_type = output.get("mime_type")
+        label = output.get("label")
+        if mime_type and mime_type not in mime_types:
+            mime_types.append(mime_type)
+        if label and label not in labels:
+            labels.append(label)
+
+    logging.debug(f"Magika analysis: mime={mime_types} labels={labels}")
+    if not mime_types and not labels:
         return None
+
+    return {"mime_types": mime_types, "labels": labels}
