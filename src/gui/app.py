@@ -5,6 +5,7 @@ import queue
 import subprocess
 import sys
 import threading
+import time
 import webbrowser
 import tkinter as tk
 import tkinter.font as tkfont
@@ -52,6 +53,8 @@ class ExtractorApp:
         # its final result here; _drain_log (main thread) picks both up.
         self.done_queue = queue.Queue()
         self._running = False
+        self._closing = False       # a close was accepted; the window goes once the worker stops
+        self._close_prompt = False  # the "extraction running" question is open
         self.worker = None
         self.cancel_flag = threading.Event()
         self.batch_queue = []  # list of (mode, source, dest)
@@ -554,6 +557,8 @@ class ExtractorApp:
             self._on_close()
 
     def _on_ok(self):
+        if self._closing:
+            return  # the window is going away: start nothing new
         src = self.source.get().strip()
         if not src:
             self._message("No source", "Select a source file first.")
@@ -563,6 +568,8 @@ class ExtractorApp:
     def _on_batch(self):
         """UniExtract semantics: with a source, enqueue it; empty source runs the
         queue; empty source + empty queue opens a multi-file picker and runs."""
+        if self._closing:
+            return
         src = self.source.get().strip()
         if src:
             self.batch_queue.append((self.mode.get(), src, self.dest.get()))
@@ -604,21 +611,45 @@ class ExtractorApp:
         else:
             self._on_close()
 
+    CLOSE_POLL_MS = 20   # how often a closing window checks whether the worker has stopped
+    CLOSE_TIMEOUT = 10   # seconds to wait for it before closing anyway (it is a daemon thread)
+
     def _on_close(self):
         """Close the window. A running job is cancelled first (after asking), so no
-        extractor keeps running (or deletes a source) with nobody watching; a
-        failing settings save never keeps the window open."""
+        extractor keeps running (or deletes a source) with nobody watching; the UI
+        thread never blocks on the worker (see _finish_close); a failing settings
+        save never keeps the window open."""
+        if self._closing or self._close_prompt:
+            return
         if self._running:
-            if not self._confirm(
+            self._close_prompt = True  # the prompt runs a nested event loop: ignore a second request
+            try:
+                stop_and_close = self._confirm(
                     "Extraction running",
                     "An extraction is still running.",
                     detail="Stop it and close the window?",
                     confirm_label="Stop and close", confirm_icon="stop",
-                    cancel_label="Keep running"):
+                    cancel_label="Keep running")
+            finally:
+                self._close_prompt = False
+            if not stop_and_close:
                 return
             self.cancel_flag.set()
-            if self.worker is not None:
-                self.worker.join(timeout=10)  # the worker never waits on Tk
+        self._closing = True
+        self._close_deadline = time.monotonic() + self.CLOSE_TIMEOUT
+        self._finish_close()
+
+    def _finish_close(self):
+        """Destroy the window once the cancelled worker has stopped, polling with after()
+        so the window stays responsive (a join here froze it for seconds). A worker that
+        outlives CLOSE_TIMEOUT is a daemon thread: it dies with the process."""
+        worker = self.worker
+        if worker is not None and worker.is_alive() and time.monotonic() < self._close_deadline:
+            try:
+                self.root.after(self.CLOSE_POLL_MS, self._finish_close)
+                return
+            except tk.TclError:
+                pass  # the window is already gone
         try:
             self._save_settings()
         except Exception as exc:

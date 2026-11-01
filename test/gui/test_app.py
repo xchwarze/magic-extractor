@@ -96,11 +96,12 @@ class RunLifecycleTest(AppTestCase):
     def test_closing_during_a_run_cancels_it_first(self):
         self.app._set_running(True)
         worker = mock.Mock()
+        worker.is_alive.return_value = False  # already stopped: the window closes at once
         self.app.worker = worker
         with mock.patch.object(app_module.dialogs, "confirm", return_value=True):
             self.app._on_close()
         self.assertTrue(self.app.cancel_flag.is_set())
-        worker.join.assert_called_once()
+        worker.join.assert_not_called()  # the UI thread never waits on the worker (test_app_close.py)
 
     def test_closing_during_a_run_can_be_refused(self):
         self.app._set_running(True)
