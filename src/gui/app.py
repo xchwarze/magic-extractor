@@ -11,8 +11,9 @@ import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons
-from gui.icons.catalog import COMPACT
-from gui.log_pane import LogPane
+from gui.icons.catalog import COMPACT, DISABLED, NORMAL
+from gui.log_pane import LogPane, copy_to_clipboard, save_text
+from gui.menu_popup import ICON_GAP, Item, show_context_menu
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
@@ -272,6 +273,7 @@ class ExtractorApp:
         self.log_pane = LogPane(frm, LOG_PLACEHOLDER, self.theme_mode)
         self.log_pane.frame.pack(fill="both", expand=True, **pad)
         self.log = self.log_pane.text
+        self.log_pane.bind_context_menu(self._show_log_menu)
         self._sync_mode()
 
     # ---- helpers ---------------------------------------------------------
@@ -420,6 +422,48 @@ class ExtractorApp:
 
     def _clear_log(self):
         self.log_pane.clear()
+
+    # ---- log menu (right-click, Shift+F10, Menu key) ----------------------
+    def _popup_icon(self, semantic, mode, disabled):
+        """16 px icon for a popup row, its gap to the text padded into the image."""
+        return self.icons.photo(mode, semantic, icons.icon_size(self.root, COMPACT),
+                                DISABLED if disabled else NORMAL,
+                                gap=round(ICON_GAP * icons.dpi_scale(self.root)))
+
+    def _show_log_menu(self, x, y):
+        pane = self.log_pane
+        has_output = not pane.is_empty
+        show_context_menu(self.root, self.theme_mode, x, y, [
+            Item("Copy selection\tCtrl+C", self._copy_log_selection, "copy", bool(pane.selected_text())),
+            Item("Copy all", self._copy_log_all, "copy", has_output),
+            Item("Save as...", self._save_log_as, "save", has_output),
+            None,
+            Item("Clear\tCtrl+L", self._clear_log, "clear", has_output),
+        ], icon=self._popup_icon)
+
+    def _copy_log_selection(self):
+        self._copy_log(self.log_pane.selected_text())
+
+    def _copy_log_all(self):
+        self._copy_log(self.log_pane.get_all())
+
+    def _copy_log(self, text):
+        if text and not copy_to_clipboard(self.root, text):
+            self._append("[log] could not copy: the clipboard is in use by another program")
+
+    def _save_log_as(self):
+        path = filedialog.asksaveasfilename(
+            parent=self.root, title="Save the log", defaultextension=".log",
+            initialfile="magic-extractor-gui.log",
+            filetypes=(("Log files", "*.log"), ("Text files", "*.txt"), ("All files", "*.*")))
+        if not path:
+            return  # cancelled
+        path = os.path.normpath(path)
+        try:
+            save_text(path, self.log_pane.get_all())
+        except OSError as exc:
+            logging.error(f"Could not save the log to {path}: {exc}")
+            self._append(f"[log] could not save {path}: {exc}")
 
     def _open_log_folder(self):
         self._open_path(self._current_output_dir())

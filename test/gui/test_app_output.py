@@ -1,11 +1,13 @@
 """The main window's output surfaces: log pane, status line, error reporting (headless Tk)."""
 import os
 import sys
+import tkinter as tk
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from test_app import AppTestCase  # noqa: E402
+from gui import app as app_module  # noqa: E402
 
 
 def line_count(text):
@@ -65,6 +67,97 @@ class LogPaneTest(AppTestCase):
         self.app._toggle_theme()
         self.assertNotEqual(str(self.app.log.cget("bg")), before)
         self.assertNotEqual(str(self.app.log.cget("inactiveselectbackground")), "")
+
+
+class LogMenuTest(AppTestCase):
+    def setUp(self):
+        super().setUp()
+        # A test must not steal keyboard focus from whatever the developer is typing in.
+        patch = mock.patch.object(tk.Misc, "focus_force")
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def open_menu(self):
+        self.app._show_log_menu(50, 50)
+        return self.dialogs()[-1].rows
+
+    def labels(self, rows):
+        return [(row.widgets[1].cget("text"), row.enabled) for row in rows.rows]
+
+    def test_every_row_is_disabled_while_the_log_only_shows_the_placeholder(self):
+        rows = self.open_menu()
+        self.assertEqual(self.labels(rows), [("Copy selection", False), ("Copy all", False),
+                                             ("Save as...", False), ("Clear", False)])
+
+    def test_rows_enable_with_output_and_with_a_selection(self):
+        self.app._append("alpha\nbeta")
+        self.assertEqual([enabled for _, enabled in self.labels(self.open_menu())],
+                         [False, True, True, True])  # nothing selected yet
+        self.dialogs()[-1].destroy()
+        self.app.log.tag_add("sel", "1.0", "1.5")
+        self.assertTrue(self.labels(self.open_menu())[0][1])
+
+    def test_every_row_carries_an_icon(self):
+        rows = self.open_menu()
+        for row in rows.rows:
+            self.assertNotEqual(str(row.widgets[1].cget("image")), "")
+
+    def test_right_click_and_the_keyboard_keys_are_bound(self):
+        bound = self.app.log.bind()
+        for sequence in ("<Button-3>", "<Shift-Key-F10>", "<Key-App>"):
+            self.assertIn(sequence, bound)
+
+    def test_right_click_opens_the_menu(self):
+        self.app.log.event_generate("<Button-3>", x=5, y=5)
+        self.assertEqual(len(self.dialogs()), 1)
+
+    def test_copy_all_puts_the_output_on_the_clipboard_without_the_placeholder(self):
+        self.app._append("alpha")
+        with mock.patch.object(self.root, "clipboard_clear"), \
+                mock.patch.object(self.root, "clipboard_append") as append:
+            self.app._copy_log_all()
+        append.assert_called_once_with("alpha\n")
+
+    def test_copy_selection_copies_only_the_selection(self):
+        self.app._append("alpha beta")
+        self.app.log.tag_add("sel", "1.6", "1.10")
+        with mock.patch.object(self.root, "clipboard_clear"), \
+                mock.patch.object(self.root, "clipboard_append") as append:
+            self.app._copy_log_selection()
+        append.assert_called_once_with("beta")
+
+    def test_a_locked_clipboard_is_reported_not_raised(self):
+        self.app._append("alpha")
+        with mock.patch.object(self.root, "clipboard_clear", side_effect=tk.TclError("locked")):
+            self.app._copy_log_all()
+        self.assertIn("could not copy", self.app.log.get("1.0", "end"))
+
+    def test_save_as_writes_the_output_as_utf8(self):
+        line = "extracting архив.zip"
+        self.app._append(line)
+        target = os.path.join(self.tmp, "saved.log")
+        with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=target):
+            self.app._save_log_as()
+        with open(target, encoding="utf-8") as handle:
+            self.assertIn(line, handle.read())
+
+    def test_cancelling_save_as_writes_nothing(self):
+        self.app._append("alpha")
+        with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=""), \
+                mock.patch.object(app_module, "save_text") as save:
+            self.app._save_log_as()
+        save.assert_not_called()
+
+    def test_a_save_that_fails_is_reported_in_the_log(self):
+        self.app._append("alpha")
+        with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=self.tmp):  # a folder
+            self.app._save_log_as()
+        self.assertIn("could not save", self.app.log.get("1.0", "end"))
+
+    def test_clear_from_the_menu_empties_the_log(self):
+        self.app._append("alpha")
+        self.open_menu().activate(3)
+        self.assertTrue(self.app.log_pane.is_empty)
 
 
 if __name__ == "__main__":

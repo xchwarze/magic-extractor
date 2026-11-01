@@ -20,6 +20,8 @@ GLYPHS = {
     "browse_file": "document",     # pick the source file
     "browse": "folder-open",       # pick the destination folder
     "save": "save",                # Preferences: Save
+    "copy": "copy",                # log menu: Copy selection / Copy all
+    "clear": "broom",              # log menu: Clear (it empties, it deletes nothing)
     # menu bar titles
     "menu_file": "folder",
     "menu_edit": "edit",

@@ -4,10 +4,12 @@ Why not a ``state="disabled"`` Text: a disabled Text is skipped by Tab, cannot t
 focus on click and shows no caret, so the output could not be selected with the
 keyboard. It stays ``normal`` and only the keys that edit are swallowed.
 """
+import logging
 import tkinter as tk
 
 from gui import theme
 from gui.autoscroll import AutoScrollbar
+from gui.menu_popup import keyboard_anchor
 from gui.surfaces import surface
 
 MAX_LINES = 5000  # oldest lines beyond this are dropped, so a long session stays light
@@ -78,6 +80,26 @@ def make_readonly(text):
     return text
 
 
+def copy_to_clipboard(widget, text):
+    """Put ``text`` on the clipboard; False (never an exception) when there is nothing to copy
+    or another process holds the clipboard locked."""
+    if not text:
+        return False
+    try:
+        widget.clipboard_clear()
+        widget.clipboard_append(text)
+    except tk.TclError:
+        logging.warning("Could not write to the clipboard", exc_info=True)
+        return False
+    return True
+
+
+def save_text(path, text):
+    """Write ``text`` to ``path`` as UTF-8 (line ends native, so Notepad shows them)."""
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 class LogPane:
     """A read-only monospace text with an auto-hiding scrollbar and a placeholder.
 
@@ -98,6 +120,9 @@ class LogPane:
                             font="TkFixedFont", padx=8, pady=6)
         self.text.grid(row=0, column=0, sticky="nsew")
         make_readonly(self.text)
+        # a scroll still queued when the pane dies would run against a deleted command
+        self.text.bind("<Destroy>", lambda event: self._cancel_scroll() if event.widget is self.text else None,
+                       add="+")
         scrollbar = AutoScrollbar(self.frame, orient="vertical", command=self.text.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.text.configure(yscrollcommand=scrollbar.set)
@@ -167,6 +192,25 @@ class LogPane:
             return self.text.get("sel.first", "sel.last")
         except tk.TclError:
             return ""
+
+    # ---- context menu ----------------------------------------------------
+    def bind_context_menu(self, show):
+        """Call ``show(x_root, y_root)`` on right-click, and on Shift+F10 or the Menu key (anchored
+        under the caret). ``show`` builds the menu (see menu_popup.show_context_menu)."""
+        text = self.text
+
+        def by_mouse(event):
+            text.focus_set()
+            show(event.x_root, event.y_root)
+            return "break"
+
+        def by_keyboard(_event):
+            show(*keyboard_anchor(text))
+            return "break"
+
+        text.bind("<Button-3>", by_mouse)
+        for sequence in ("<Shift-F10>", "<App>"):
+            text.bind(sequence, by_keyboard)
 
     # ---- look ------------------------------------------------------------
     def restyle(self, mode):
