@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
+from gui import app_icon
 from gui.app import ExtractorApp
 
 
@@ -28,7 +29,9 @@ def _parse_args(argv):
 
 
 def main():
+    app_icon.set_app_user_model_id()  # before the first window, so the taskbar uses our icon
     root = _make_root()
+    app_icon.apply(root)
     source, dest, mode = _parse_args(sys.argv[1:])
     ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
     root.minsize(460, 360)
