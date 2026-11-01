@@ -1,9 +1,11 @@
 """The main window's output surfaces: log pane, status line, error reporting (headless Tk)."""
+import contextlib
 import os
 import sys
 import threading
 import time
 import tkinter as tk
+import types
 import unittest
 from unittest import mock
 
@@ -356,6 +358,92 @@ class RunLockTest(AppTestCase):
 
     def test_f10_is_bound_for_the_menu_bar(self):
         self.assertIn("<Key-F10>", self.root.bind())
+
+
+class DropTest(AppTestCase):
+    def drop(self, data):
+        self.app._on_drop(types.SimpleNamespace(data=data))
+
+    def test_one_dropped_file_becomes_the_source(self):
+        self.drop(os.path.join(self.tmp, "one.zip"))
+        self.assertEqual(self.app.source.get(), os.path.join(self.tmp, "one.zip"))
+        self.assertEqual(self.app.batch_queue, [])
+
+    def test_extra_dropped_files_go_to_the_batch_queue(self):
+        first, second, third = (os.path.join(self.tmp, name) for name in ("one.zip", "two.zip", "three.zip"))
+        self.drop(f"{first} {second} {third}")  # tkdnd: several paths without spaces are not braced
+        self.assertEqual(self.app.source.get(), first)
+        self.assertEqual(self.app.batch_queue, [("extract", second, ""), ("extract", third, "")])
+        self.assertIn("2 more files queued", self.app.status.full)
+        self.assertIn("[queued]", self.app.log.get("1.0", "end"))
+
+    def test_braced_paths_with_spaces_are_split_as_tcl_lists(self):
+        self.drop("{C:/my files/a.zip} {C:/my files/b.zip}")
+        self.assertEqual(self.app.source.get(), "C:/my files/a.zip")
+        self.assertEqual(self.app.batch_queue, [("extract", os.path.normpath("C:/my files/b.zip"), "")])
+        self.assertIn("1 more file queued", self.app.status.full)
+
+    def test_queued_files_use_the_current_mode(self):
+        self.app.mode.set("scan")
+        self.drop("C:/a.zip C:/b.zip")
+        self.assertEqual(self.app.batch_queue[0][0], "scan")
+
+    def test_an_empty_drop_changes_nothing(self):
+        self.drop("")
+        self.assertEqual(self.app.source.get(), "")
+        self.assertEqual(self.app.batch_queue, [])
+
+    def test_the_whole_window_the_source_box_and_the_log_are_drop_targets(self):
+        targets = (self.root, self.app.source_entry, self.app.log)
+        with contextlib.ExitStack() as stack:
+            for target in targets:
+                stack.enter_context(mock.patch.object(target, "drop_target_register", create=True))
+                stack.enter_context(mock.patch.object(target, "dnd_bind", create=True))
+            self.app._enable_dnd()
+            for target in targets:
+                target.drop_target_register.assert_called_once()
+                target.dnd_bind.assert_called_once()
+
+    def test_a_root_without_dnd_support_is_not_an_error(self):
+        self.app._enable_dnd()  # the test root is a plain tk.Tk(): nothing to register, nothing raised
+
+
+class TooltipWiringTest(AppTestCase):
+    def tip_text(self, widget):
+        """The text of the Tooltip bound to ``widget``: found through the bindings it added."""
+        for tip in self.tips:
+            if tip.widget is widget:
+                return tip.text
+        return None
+
+    def setUp(self):
+        self.tips = []
+        real_init = app_module.Tooltip.__init__
+
+        def spy(tip, *args, **kwargs):
+            real_init(tip, *args, **kwargs)
+            self.tips.append(tip)
+
+        patch = mock.patch.object(app_module.Tooltip, "__init__", spy)
+        patch.start()
+        self.addCleanup(patch.stop)
+        super().setUp()
+
+    def test_the_icon_only_buttons_say_what_they_do(self):
+        self.assertIn("Browse for the archive", self.tip_text(self.app.source_btn))
+        self.assertIn("Browse for the destination", self.tip_text(self.app.dest_btn))
+
+    def test_lock_explains_what_it_changes_including_the_overwriting(self):
+        text = self.tip_text(self.app.lock_chk)
+        self.assertIn("not filled in from the source", text)
+        self.assertIn("overwritten", text)
+
+    def test_batch_explains_its_three_behaviours(self):
+        lines = self.tip_text(self.app.batch_btn).splitlines()
+        self.assertEqual(len(lines), 3)
+        self.assertIn("source filled in", lines[0])
+        self.assertIn("runs the queued", lines[1])
+        self.assertIn("nothing queued", lines[2])
 
 
 class StatusLayoutTest(AppTestCase):

@@ -18,6 +18,7 @@ from gui.menu_popup import ICON_GAP, Item, show_context_menu
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 from gui.status import StatusLine, job_status, run_summary, source_name
+from gui.tooltip import Tooltip
 
 # CLI config.ini flags surfaced in Preferences, with human-readable labels.
 CONFIG_LABELS = {
@@ -42,6 +43,11 @@ GUI_LABELS = {
 LOG_FILENAME = "magic-extractor.log"
 WARNING_SIGN = "\u26a0"  # shown at the start of an option's warning alert
 LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
+LOCK_TIP = ("Lock the destination: it is not filled in from the source, and files are extracted into it "
+            "even when it already has content (files with the same name are overwritten).")
+BATCH_TIP = ("With a source filled in: adds it to the batch queue.\n"
+             "With the source empty: runs the queued files.\n"
+             "With the source empty and nothing queued: asks for several files and runs them. (Ctrl+B)")
 
 
 class ExtractorApp:
@@ -260,14 +266,17 @@ class ExtractorApp:
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
         self.source_entry.pack(side="left", fill="x", expand=True)
-        self._icon(ttk.Button(row, text="...", width=3, command=self._browse_source),
-                   "browse_file", with_text=False).pack(side="left", padx=4)
+        self.source_btn = self._icon(ttk.Button(row, text="...", width=3, command=self._browse_source),
+                                     "browse_file", with_text=False)
+        self.source_btn.pack(side="left", padx=4)
+        Tooltip(self.source_btn, "Browse for the archive or installer (Ctrl+O)")
 
         # Destination row
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         ttk.Label(row, text="Destination directory:").pack(side="left")
         self.lock_chk = ttk.Checkbutton(row, text="lock", variable=self.lock_dest)
         self.lock_chk.pack(side="left", padx=4)
+        Tooltip(self.lock_chk, LOCK_TIP)
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.dest_entry = ttk.Combobox(row, textvariable=self.dest, values=self._dst_hist)
@@ -275,6 +284,7 @@ class ExtractorApp:
         self.dest_btn = self._icon(ttk.Button(row, text="...", width=3, command=self._browse_dest),
                                    "browse", with_text=False)
         self.dest_btn.pack(side="left", padx=4)
+        Tooltip(self.dest_btn, "Browse for the destination folder (Ctrl+D)")
 
         # Buttons
         row = ttk.Frame(frm); row.pack(fill="x", padx=10, pady=(8, 4))
@@ -284,6 +294,7 @@ class ExtractorApp:
                    "dismiss").pack(side="left", padx=8)
         self.batch_btn = self._icon(ttk.Button(row, text="Batch", width=10, command=self._on_batch), "batch")
         self.batch_btn.pack(side="left", padx=8)
+        Tooltip(self.batch_btn, BATCH_TIP)
 
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
 
@@ -344,12 +355,13 @@ class ExtractorApp:
             self.dest.set(os.path.normpath(path))
 
     def _enable_dnd(self):
-        """Register file drag-and-drop on the source entry + log (no-op without tkinterdnd2)."""
+        """Register file drag-and-drop on the whole window, the source entry and the log
+        (no-op without tkinterdnd2)."""
         try:
             from tkinterdnd2 import DND_FILES
         except Exception:
             return
-        for target in (self.source_entry, self.log):
+        for target in (self.root, self.source_entry, self.log):
             try:
                 target.drop_target_register(DND_FILES)
                 target.dnd_bind("<<Drop>>", self._on_drop)
@@ -373,6 +385,14 @@ class ExtractorApp:
             return
         self.source.set(dropped[0])
         self._autofill(force=True)
+        # Only one file fits the source box: the others wait in the batch queue.
+        extra = dropped[1:]
+        for path in extra:
+            self.batch_queue.append((self.mode.get(), os.path.normpath(path), ""))
+            self._append(f"[queued] {path}")
+        if extra:
+            count = len(extra)
+            self._set_status(f"{count} more file{'s' if count > 1 else ''} queued. Press Batch to run them.")
 
     def _max_depth(self, default=5):
         """The Max depth box as an int; an empty/non-numeric box makes IntVar.get()

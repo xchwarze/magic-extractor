@@ -1,6 +1,8 @@
 """gui/main.py start-up, without opening a real window (everything that makes one is mocked)."""
 import os
 import sys
+import tkinter as tk
+import types
 import unittest
 from unittest import mock
 
@@ -45,6 +47,67 @@ class StartupFailureTest(unittest.TestCase):
         self.assertEqual(code, 0)
         root.mainloop.assert_called_once()
         fatal.assert_not_called()
+
+
+class MakeRootTest(unittest.TestCase):
+    """A tkdnd that fails to load must not leave a second, blank window behind."""
+
+    def setUp(self):
+        self.roots = []
+        self.addCleanup(self.destroy_roots)
+        self.created = []
+
+    def destroy_roots(self):
+        for root in self.roots + self.created:
+            try:
+                root.destroy()
+            except tk.TclError:
+                pass
+
+    def fake_dnd(self, fail):
+        created = self.created
+
+        class FakeDndTk(tk.Tk):
+            def __init__(self):
+                tk.Tk.__init__(self)
+                created.append(self)
+                self.withdraw()
+                if fail:
+                    raise RuntimeError("Unable to load tkdnd library.")
+
+        module = types.ModuleType("tkinterdnd2")
+        module.TkinterDnD = types.SimpleNamespace(Tk=FakeDndTk)
+        return mock.patch.dict(sys.modules, {"tkinterdnd2": module})
+
+    def make_root(self):
+        try:
+            root = gui_main._make_root()
+        except tk.TclError as exc:
+            self.skipTest(f"no display for Tk: {exc}")
+        self.roots.append(root)
+        root.withdraw()
+        return root
+
+    def test_a_failing_tkdnd_leaves_exactly_one_window(self):
+        with self.fake_dnd(fail=True):
+            root = self.make_root()
+        self.assertEqual(len(self.created), 1)
+        with self.assertRaises(tk.TclError):
+            self.created[0].winfo_exists()  # the half-built root was destroyed
+        self.assertTrue(root.winfo_exists())
+        self.assertNotIsInstance(root, type(self.created[0]))  # a plain Tk took over
+        self.assertIs(tk._default_root, root)
+
+    def test_a_working_tkdnd_gives_the_dnd_root(self):
+        with self.fake_dnd(fail=False):
+            root = self.make_root()
+        self.assertEqual(len(self.created), 1)
+        self.assertIs(root, self.created[0])
+
+    def test_a_missing_tkdnd_gives_a_plain_root(self):
+        with mock.patch.dict(sys.modules, {"tkinterdnd2": None}):  # makes the import fail
+            root = self.make_root()
+        self.assertIs(type(root), tk.Tk)
 
 
 if __name__ == "__main__":

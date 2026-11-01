@@ -12,11 +12,31 @@ from gui.app import ExtractorApp
 
 
 def _make_root():
-    """A DnD-capable root when tkinterdnd2 is installed; a plain Tk otherwise."""
+    """A DnD-capable root when tkinterdnd2 works; a plain Tk otherwise (never both)."""
     try:
         from tkinterdnd2 import TkinterDnD
-        return TkinterDnD.Tk()
-    except Exception:
+    except Exception:  # not installed, or broken
+        return tk.Tk()
+
+    class DndRoot(TkinterDnD.Tk):
+        """TkinterDnD.Tk creates the Tk interpreter first and loads tkdnd last. When that
+        load fails, the interpreter would stay behind as a second, blank window next to
+        the plain Tk used instead, so it is destroyed before the error goes on."""
+
+        def __init__(self):
+            try:
+                super().__init__()
+            except (RuntimeError, tk.TclError):
+                try:
+                    self.destroy()
+                except (tk.TclError, AttributeError):  # Tk itself never started
+                    pass
+                raise
+
+    try:
+        return DndRoot()
+    except Exception:  # tkdnd could not be loaded: no drag and drop, but a window
+        logging.info("tkinterdnd2 unavailable; using plain Tk (no drag and drop)", exc_info=True)
         return tk.Tk()
 
 
