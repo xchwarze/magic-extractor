@@ -203,7 +203,7 @@ class BaseExtractor:
         logging.debug(f"Output directory {output_dir} is validated and ready.")
         return str(os.path.abspath(output_dir))
 
-    def run_command(self, command, workdir=None):
+    def run_command(self, command, workdir=None, timeout=None):
         """
         Execute a system command in a subprocess and return the output.
         Raises an exception if the command fails.
@@ -220,7 +220,13 @@ class BaseExtractor:
         """
         try:
             logging.debug(f"Executing command: {' '.join(command)} in {workdir}")
-            result = subprocess.run(command, cwd=workdir, text=True, capture_output=True, check=True, env=os.environ)
+            # errors='replace': a tool printing bytes the console code page can't
+            # decode must not turn a successful extraction into a failure.
+            # stdin closed: a tool that prompts (e.g. for a missing password)
+            # fails at once instead of waiting forever on a hidden prompt.
+            result = subprocess.run(command, cwd=workdir, text=True, errors='replace',
+                                    capture_output=True, check=True, env=os.environ,
+                                    stdin=subprocess.DEVNULL, timeout=timeout)
 
             logging.debug(f"Command executed successfully with output: {result.stdout}")
             return result.stdout
@@ -228,7 +234,7 @@ class BaseExtractor:
             logging.error(f"Command failed with {error.returncode}: {error.stderr}")
             raise  # Re-raise the exception to be handled by the caller
 
-    def run_extraction(self, command, workdir=None, label=None):
+    def run_extraction(self, command, workdir=None, label=None, failure_markers=(), timeout=None):
         """
         Run an extractor command and reduce its result to a bool.
 
@@ -244,16 +250,30 @@ class BaseExtractor:
             workdir (str): Directory in which to run it.
             label (str): Human-readable tool/format name for the error log
                          (defaults to the handler class name).
+            timeout (float): seconds before the tool is killed (None: no limit),
+                         for tools that can block on a modal error dialog.
+            failure_markers (iterable): stdout texts that mean failure even with
+                         exit code 0. Some tools (unace, kgb2_console) exit 0
+                         on a file they cannot open; without this the handler
+                         reports success with nothing extracted and the next
+                         candidate never runs.
 
         Returns:
             bool: True on success, False on failure.
         """
         label = label or type(self).__name__
         try:
-            self.run_command(command, workdir=workdir)
+            output = self.run_command(command, workdir=workdir, timeout=timeout) or ''
+            for marker in failure_markers:
+                if marker in output:
+                    logging.error(f"{label}: extraction failed: {marker}")
+                    return False
             return True
         except subprocess.CalledProcessError as exc:
             logging.error(f"{label}: extraction failed (exit {exc.returncode}): {exc.stderr}")
+            return False
+        except subprocess.TimeoutExpired:
+            logging.error(f"{label}: killed after {timeout:.0f}s without finishing")
             return False
         except OSError as exc:
             logging.error(f"{label}: could not run extractor: {exc}")
@@ -264,6 +284,29 @@ class BaseExtractor:
             # raise UnicodeDecodeError (a ValueError). Don't crash the whole run.
             logging.error(f"{label}: unexpected error running extractor: {exc}")
             return False
+
+    def run_listing(self, command, label=None, failure_markers=()):
+        """
+        Run a listing command and return its stdout, or None on failure.
+
+        Same failure rules as run_extraction (non-zero exit, unrunnable tool,
+        or a failure marker in stdout), for handlers whose list_contents() is
+        a single command.
+        """
+        label = label or type(self).__name__
+        try:
+            output = self.run_command(command) or ''
+        except subprocess.CalledProcessError as exc:
+            logging.error(f"{label}: listing failed (exit {exc.returncode}): {exc.stderr}")
+            return None
+        except Exception as exc:
+            logging.error(f"{label}: could not run lister: {exc}")
+            return None
+        for marker in failure_markers:
+            if marker in output:
+                logging.error(f"{label}: listing failed: {marker}")
+                return None
+        return output
 
     def clean_up_directory(self, path, remove_dir=False):
         """

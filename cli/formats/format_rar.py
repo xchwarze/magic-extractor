@@ -33,9 +33,9 @@ class FormatRarHandler(BaseExtractor):
             '-y', # Assume Yes on all queries
         ]
 
-        # Include password if provided
-        if self.cli_args.password:
-            command_list += [f'-p{self.cli_args.password}']
+        # Password if provided; otherwise -p- so an encrypted archive fails
+        # instead of prompting.
+        command_list.append(f'-p{self.cli_args.password}' if self.cli_args.password else '-p-')
 
         # Set output directory
         command_list.extend([
@@ -44,3 +44,11 @@ class FormatRarHandler(BaseExtractor):
         ])
 
         return self.run_extraction(command_list, label="RAR")
+
+    def list_contents(self):
+        """List the archive with 'unrar l'. Returns the listing text, or None on error."""
+        command_list = [os.path.join(self.extractors_path, 'rar', 'unrar.exe'), 'l']
+        # -p- : never prompt for a password (an encrypted header would block)
+        command_list.append(f'-p{self.cli_args.password}' if self.cli_args.password else '-p-')
+        command_list.append(self.target_file)
+        return self.run_listing(command_list, label="RAR")

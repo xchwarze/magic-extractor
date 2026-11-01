@@ -11,19 +11,34 @@ class FormatMsiHandler(BaseExtractor):
     """
 
     @classmethod
+    def detection_mimes(cls):
+        # puremagic only knows an MSI as generic OLE2 storage (also .doc/.xls),
+        # and binwalk's embedded "cab" would send it to plain 7z before Magika
+        # (application/x-msi) runs. Claiming OLE2 is safe: a non-MSI OLE2 file
+        # makes lessmsi fail and this handler falls back to 7z, as 7z would.
+        return ['application/x-ole-storage', 'application/x-msi']  # puremagic / Magika
+
+    @classmethod
     def detection_names(cls):
         # OLE2 magic is ambiguous (also .doc/.xls), so no custom signature here.
-        return ['microsoft windows installer', 'advanced installer']  # DIE
+        return ['microsoft windows installer', 'advanced installer',  # DIE
+                'msi']  # Magika
 
     def _extract_lessmsi(self):
         command_list = [
             os.path.join(self.extractors_path, 'lessmsi', 'lessmsi.exe'),
             'x',                    # extract all files
             self.target_file,       # MSI file to unpack
-            self.extract_directory  # directory to extract files
+            # lessmsi only reads the last argument as the output folder when it
+            # ends with a backslash; without it, it is taken as a file filter and
+            # everything goes to <cwd>\<msi name>\SourceDir (exit 0, output empty).
+            os.path.join(self.extract_directory, ''),
         ]
         try:
-            self.run_command(command_list)
+            self.run_command(command_list, workdir=self.extract_directory)
+            if not os.listdir(self.extract_directory):
+                logging.info("lessmsi extracted nothing; trying 7z fallback.")
+                return False
             return True
         except subprocess.CalledProcessError as exc:
             logging.info(f"lessmsi failed (code {exc.returncode}); trying 7z fallback.")

@@ -1,6 +1,9 @@
 import os
 from .base_extractor import BaseExtractor
 
+# unace exits 0 even when the input is not an ACE archive; this is what it prints.
+NOT_ACE_MARKER = 'Is no ACE-archive'
+
 class FormatAceHandler(BaseExtractor):
     """
     Handler class for ACE archive files that utilizes unace for extraction.
@@ -34,4 +37,10 @@ class FormatAceHandler(BaseExtractor):
             self.target_file  # File to extract
         ]
 
-        return self.run_extraction(command_list, workdir=self.extract_directory, label="ACE")
+        return self.run_extraction(command_list, workdir=self.extract_directory, label="ACE",
+                                   failure_markers=(NOT_ACE_MARKER,))
+
+    def list_contents(self):
+        """List the archive with 'unace l'. Returns the listing text, or None on error."""
+        command_list = [os.path.join(self.extractors_path, 'unace', 'unace.exe'), 'l', self.target_file]
+        return self.run_listing(command_list, label="ACE", failure_markers=(NOT_ACE_MARKER,))

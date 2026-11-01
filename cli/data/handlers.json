@@ -67,6 +67,8 @@
     "application/x-ace": "FormatAceHandler",
     "application/x-ace-compressed": "FormatAceHandler",
     "application/x-alz": "FormatAlzipHandler",
+    "application/x-ole-storage": "FormatMsiHandler",
+    "application/x-msi": "FormatMsiHandler",
     "application/vnd.rar": "FormatRarHandler",
     "application/x-rar": "FormatRarHandler",
     "application/x-rar-compressed": "FormatRarHandler"
@@ -205,6 +207,7 @@
     "kgb archiver compressed archive": "FormatKgbHandler",
     "microsoft windows installer": "FormatMsiHandler",
     "advanced installer": "FormatMsiHandler",
+    "msi": "FormatMsiHandler",
     "peazip (.pea)": "FormatPeaHandler",
     "pea compressed archive (v1.x)": "FormatPeaHandler",
     "winrar": "FormatRarHandler",

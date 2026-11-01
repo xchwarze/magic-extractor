@@ -1,6 +1,8 @@
 import os
+import shutil
 import subprocess
 import logging
+import tempfile
 from .base_extractor import BaseExtractor
 
 class FormatInstallShieldHandler(BaseExtractor):
@@ -44,14 +46,18 @@ class FormatInstallShieldHandler(BaseExtractor):
 
         # Retry via deobfuscation for obfuscated InstallShield cabs.
         logging.info("unshield extraction failed; trying deobfuscation.")
-        deobfuscated = os.path.join(self.extract_directory, 'deobfuscated.cab')
+        # The deobfuscated copy is a work file: keep it out of the output folder.
+        work_dir = tempfile.mkdtemp(prefix='mx_unshield_')
         try:
-            self.run_command([self._deobfuscate_exe(), self.target_file, deobfuscated])
-        except Exception as exc:
-            logging.error(f"unshield-deobfuscate failed: {exc}")
-            return False
-
-        return self._extract_cab(deobfuscated)
+            deobfuscated = os.path.join(work_dir, 'deobfuscated.cab')
+            try:
+                self.run_command([self._deobfuscate_exe(), self.target_file, deobfuscated])
+            except Exception as exc:
+                logging.error(f"unshield-deobfuscate failed: {exc}")
+                return False
+            return self._extract_cab(deobfuscated)
+        finally:
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     def list_contents(self):
         """List CAB contents using 'unshield l'. Returns the listing text, or None on error."""

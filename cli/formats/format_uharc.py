@@ -47,8 +47,11 @@ class FormatUharcHandler(BaseExtractor):
             'x',                        # Extract files
             '-o+',                      # Overwrite existing files (- = never, + = always, p = prompt)
             f'-t{extract_directory}',   # Target directory
-            file_path                   # File to extract
         ]
+        # -pw<password> exists from v0.4 on (v0.2 has no encryption switch).
+        if self.cli_args.password and uharc_version != 'uharc-v0.2.exe':
+            command_list.append(f'-pw{self.cli_args.password}')
+        command_list.append(file_path)  # File to extract
 
         try:
             self.run_command(command_list)  # raises on non-zero
