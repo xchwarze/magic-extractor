@@ -3,6 +3,7 @@ import json
 import logging
 from .format_7z import Format7zHandler
 from .format_7z_ext import Format7zExtHandler
+from .format_7z_zs import Format7zZsHandler
 from .format_rar import FormatRarHandler
 from .format_ace import FormatAceHandler
 from .format_kgb import FormatKgbHandler
@@ -28,8 +29,8 @@ from .format_lzip import FormatLzipHandler
 # MIME/detection key: they become candidates in this order, and the next one is
 # only tried if the previous one fails.
 _HANDLER_CLASSES = (
-    Format7zHandler, Format7zExtHandler, FormatRarHandler, FormatAceHandler, FormatKgbHandler,
-    FormatUharcHandler, FormatZpaqHandler, FormatAlzipHandler, FormatEggHandler,
+    Format7zHandler, Format7zExtHandler, Format7zZsHandler, FormatRarHandler, FormatAceHandler,
+    FormatKgbHandler, FormatUharcHandler, FormatZpaqHandler, FormatAlzipHandler, FormatEggHandler,
     FormatBcmHandler, FormatArcHandler, FormatPeaHandler, FormatInnoSetupHandler,
     FormatMsiHandler, FormatBitrockHandler, FormatCicdecHandler, FormatDgcaHandler,
     FormatWixHandler, FormatInstallShieldHandler,

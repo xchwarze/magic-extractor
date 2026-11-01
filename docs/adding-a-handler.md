@@ -13,8 +13,11 @@ extraction "just work".
    `data/detection_blacklist.json` (e.g. `application/octet-stream`, `pe`).
 3. **Routing** (`cli/formats/__init__.py`): a MIME or detection string is looked
    up (lowercased) in `data/handlers.json` (`mime_handlers` / `detection_handlers`)
-   to find the handler class. First detector with a mapped handler wins
-   (early-exit; `--bruteforce` tries all).
+   to find the handler class(es). A key claimed by several handlers maps to a
+   list, ordered by `_HANDLER_CLASSES` in `cli/formats/__init__.py`; all of them
+   become candidates and each is tried only if the previous one failed (e.g.
+   `Format7zHandler` then the `Format7zZsHandler` fallback).
+   First detector with a mapped handler wins (early-exit; `--bruteforce` tries all).
 4. **The handler** shells out to a bundled tool and extracts.
 
 Key point: **`handlers.json` and `signatures.json` are generated**, not

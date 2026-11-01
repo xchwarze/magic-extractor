@@ -9,6 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 import formats
 from formats.format_7z import Format7zHandler
 from formats.format_7z_ext import Format7zExtHandler
+from formats.format_7z_zs import Format7zZsHandler
+from formats.format_lzip import FormatLzipHandler
 from formats.format_rar import FormatRarHandler
 
 # Absolute path to cli/data (holds the real handlers.json).
@@ -25,8 +27,8 @@ class FormatsRegistryTest(unittest.TestCase):
         formats.init_handlers(DATA_PATH)
 
     # --- static registry ------------------------------------------------- #
-    def test_registry_has_twenty_handlers(self):
-        self.assertEqual(len(formats.HANDLER_REGISTRY), 20)
+    def test_registry_has_twenty_one_handlers(self):
+        self.assertEqual(len(formats.HANDLER_REGISTRY), 21)
 
     def test_registry_keyed_by_class_name(self):
         self.assertIs(
@@ -72,7 +74,24 @@ class FormatsRegistryTest(unittest.TestCase):
     def test_unknown_mime_returns_empty(self):
         self.assertEqual(formats.get_handlers_from_mime("application/x-no-such-mime"), ())
 
-    # --- several handlers per key, in registry (priority) order ----------- #
+    # --- shared keys: several handlers, in registry (priority) order ------ #
+    def test_shared_mime_lists_fallback_after_primary(self):
+        self.assertEqual(
+            formats.get_handlers_from_mime("application/x-7z-compressed"),
+            (Format7zHandler, Format7zZsHandler),
+        )
+
+    def test_shared_detection_follows_registry_order(self):
+        # Format7zZsHandler is registered before FormatLzipHandler.
+        self.assertEqual(
+            formats.get_handlers_from_detection("lzip compressed archive"),
+            (Format7zZsHandler, FormatLzipHandler),
+        )
+        self.assertEqual(
+            formats.get_handlers_from_detection("nullsoft scriptable install system"),
+            (Format7zHandler, Format7zZsHandler),
+        )
+
     def test_init_handlers_accepts_string_or_list(self):
         data_dir = tempfile.mkdtemp()
         try:

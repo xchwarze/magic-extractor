@@ -49,6 +49,7 @@ own `*-ReadMe.txt`.
 | `detectors/die` (Detect It Easy) | detector | MIT |
 | `detectors/magika` (Google) | detector | Apache-2.0 |
 | `extractors/7z` (7-Zip) | many formats | LGPL-2.1+ (with an unRAR-code restriction) |
+| `extractors/7zzstd` (7-Zip ZS) | fallback for 7z/ZIP/SquashFS/NSIS/XZ/ZSTD/lzip/LZ4 | LGPL-2.1+ like 7-Zip, plus BSD/MIT for the bundled zstd, brotli, lz4, lz5 and lizard libraries — verify |
 | `extractors/cicdec` | Clickteam | BSD-3-Clause |
 | `extractors/lessmsi` | MSI | MIT |
 | `extractors/unshield` | InstallShield | MIT (© 2003 David Eriksson) |

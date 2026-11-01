@@ -1,13 +1,22 @@
 {
   "mime_handlers": {
-    "application/x-7z-compressed": "Format7zHandler",
-    "application/x-xz": "Format7zHandler",
+    "application/x-7z-compressed": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
+    "application/x-xz": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "application/x-bzip2": "Format7zHandler",
     "application/gzip": "Format7zHandler",
     "application/x-gzip": "Format7zHandler",
     "application/x-tar": "Format7zHandler",
     "application/x-gtar": "Format7zHandler",
-    "application/zip": "Format7zHandler",
+    "application/zip": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "application/x-ms-wim": "Format7zHandler",
     "application/x-apfs-image": "Format7zHandler",
     "application/x-archive": "Format7zHandler",
@@ -25,7 +34,10 @@
     "application/x-lzma": "Format7zHandler",
     "application/x-qemu-disk": "Format7zHandler",
     "application/x-rpm": "Format7zHandler",
-    "application/x-squashfs": "Format7zHandler",
+    "application/x-squashfs": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "application/x-udf": "Format7zHandler",
     "application/x-virtualbox-vdi": "Format7zHandler",
     "application/x-vhd": "Format7zHandler",
@@ -33,16 +45,28 @@
     "application/x-vmdk": "Format7zHandler",
     "application/x-xar": "Format7zHandler",
     "application/x-compress": "Format7zHandler",
-    "application/zstd": "Format7zHandler",
-    "application/vnd.squashfs": "Format7zHandler",
+    "application/zstd": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
+    "application/vnd.squashfs": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "application/vnd.debian.binary-package": "Format7zHandler",
-    "application/x-zstd-compressed-tar": "Format7zHandler",
+    "application/x-zstd-compressed-tar": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "application/arj": "Format7zHandler",
     "application/x-lha": "Format7zHandler",
+    "application/x-lzip": [
+      "Format7zZsHandler",
+      "FormatLzipHandler"
+    ],
     "application/x-ace": "FormatAceHandler",
     "application/x-ace-compressed": "FormatAceHandler",
     "application/x-alz": "FormatAlzipHandler",
-    "application/x-lzip": "FormatLzipHandler",
     "application/vnd.rar": "FormatRarHandler",
     "application/x-rar": "FormatRarHandler",
     "application/x-rar-compressed": "FormatRarHandler"
@@ -72,13 +96,28 @@
     "yenc": "Format7zExtHandler",
     "tbb": "Format7zExtHandler",
     "macbinary": "Format7zExtHandler",
-    "lz4": "Format7zExtHandler",
-    "lz5": "Format7zExtHandler",
-    "lizard": "Format7zExtHandler",
+    "lz4": [
+      "Format7zExtHandler",
+      "Format7zZsHandler"
+    ],
+    "lz5": [
+      "Format7zExtHandler",
+      "Format7zZsHandler"
+    ],
+    "lizard": [
+      "Format7zExtHandler",
+      "Format7zZsHandler"
+    ],
     "mozlz4": "Format7zExtHandler",
     "chrome pak": "Format7zExtHandler",
-    "7zip": "Format7zHandler",
-    "xz": "Format7zHandler",
+    "7zip": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
+    "xz": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "bzip2": "Format7zHandler",
     "gzip": "Format7zHandler",
     "tar": "Format7zHandler",
@@ -95,16 +134,34 @@
     "lzma": "Format7zHandler",
     "mbr": "Format7zHandler",
     "ntfs": "Format7zHandler",
-    "squashfs": "Format7zHandler",
-    "zip": "Format7zHandler",
+    "squashfs": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
+    "zip": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "zlib": "Format7zHandler",
-    "zstd": "Format7zHandler",
+    "zstd": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "compressd": "Format7zHandler",
-    "sevenzip": "Format7zHandler",
+    "sevenzip": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "gzipped data": "Format7zHandler",
-    "7-zip": "Format7zHandler",
+    "7-zip": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "gzip (.gz)": "Format7zHandler",
-    "nullsoft scriptable install system": "Format7zHandler",
+    "nullsoft scriptable install system": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "microsoft cabinet file": "Format7zHandler",
     "ar archive": "Format7zHandler",
     "debian linux package": "Format7zHandler",
@@ -113,7 +170,10 @@
     "bzip2 compressed archive": "Format7zHandler",
     "cpio archive (binary)": "Format7zHandler",
     "debian software package (.deb)": "Format7zHandler",
-    "zstandard compressed data": "Format7zHandler",
+    "zstandard compressed data": [
+      "Format7zHandler",
+      "Format7zZsHandler"
+    ],
     "arj": "Format7zHandler",
     "lzh": "Format7zHandler",
     "qcow2": "Format7zHandler",
@@ -122,6 +182,10 @@
     "vdi": "Format7zHandler",
     "wim": "Format7zHandler",
     "uefi": "Format7zHandler",
+    "lzip compressed archive": [
+      "Format7zZsHandler",
+      "FormatLzipHandler"
+    ],
     "winace": "FormatAceHandler",
     "ace": "FormatAceHandler",
     "ace compressed archive": "FormatAceHandler",
@@ -139,7 +203,6 @@
     "installshield": "FormatInstallShieldHandler",
     "installshield setup": "FormatInstallShieldHandler",
     "kgb archiver compressed archive": "FormatKgbHandler",
-    "lzip compressed archive": "FormatLzipHandler",
     "microsoft windows installer": "FormatMsiHandler",
     "advanced installer": "FormatMsiHandler",
     "peazip (.pea)": "FormatPeaHandler",

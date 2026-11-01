@@ -3,7 +3,9 @@
 **80+ formats** grouped by family, with the handler that extracts each. Most
 mainstream compression and disk-image formats are handled by `Format7zHandler`
 (7-Zip); plugin-dependent 7-Zip formats (marked †) use `Format7zExtHandler`; and
-dedicated handlers cover the rest.
+dedicated handlers cover the rest. `Format7zZsHandler` (7-Zip ZS) is a fallback
+tried after 7-Zip for several formats (see
+[7-Zip ZS fallback](#7-zip-zs-fallback)).
 
 ## Compressed Archives
 
@@ -164,6 +166,24 @@ bundled 7-Zip's `Codecs/` folder.
 > | **Py7z**     | PyInstaller executables                                   |
 > | **Grit7z**   | Chromium resource pak (.pak v5)                          |
 
+## 7-Zip ZS fallback
+
+`Format7zZsHandler` runs [7-Zip ZS](https://github.com/mcmilk/7-Zip-zstd)
+(`7zzstd/7z.exe`), a 7-Zip build with Zstandard, Brotli, LZ4, LZ5, Lizard and
+Fast-LZMA2 inside the format handlers themselves. It claims the same detection
+keys as the handlers below; candidates sharing a key are tried in registry order
+(`_HANDLER_CLASSES`), each only if the previous one failed:
+
+| Format                    | Order                                     | What ZS adds                          |
+|---------------------------|-------------------------------------------|---------------------------------------|
+| SquashFS                  | Format7zHandler → Format7zZsHandler       | LZ4-compressed images (mainline: "Not implemented") |
+| NSIS                      | Format7zHandler → Format7zZsHandler       | ZSTD-compressed installers            |
+| 7-Zip, ZIP, XZ, Zstandard | Format7zHandler → Format7zZsHandler       | second opinion with the ZS codecs     |
+| LZ4 / LZ5 / Lizard frame  | Format7zExtHandler † → Format7zZsHandler  | works without the Modern7z plugin     |
+| lzip                      | Format7zZsHandler → FormatLzipHandler     | native lzip; plzip as second opinion  |
+
+Brotli (`.br`) has no magic bytes, so it cannot be routed by detection.
+
 ## Notes
 - Self-extracting `.exe` archives (7-Zip, RAR, Inno) are detected and routed to
   their handler; other wrapped-exe installers are tried via the PE fallback.
@@ -181,6 +201,7 @@ to those directories.
 | Handler | Tool | URL |
 |---------|------|-----|
 | Format7zHandler | `7z/7z.exe` | http://www.7-zip.org/ |
+| Format7zZsHandler | `7zzstd/7z.exe` (7-Zip ZS, fallback) | https://github.com/mcmilk/7-Zip-zstd |
 | Format7zExtHandler | `7z/7z.exe` + plugins in `7z/Formats/` (Asar, forensic7z, Iso7z, ExFat7z, eDecoder, Py7z, Grit7z) and `7z/Codecs/` (Modern7z) | https://www.tc4shell.com/en/7zip/ |
 | FormatRarHandler | `rar/unrar.exe` | http://www.rarlab.com/rar_add.htm |
 | FormatAceHandler | `unace/unace.exe` | https://sourceforge.net/projects/peazip/files/Resources/PeaZip%20UNACE%20Plugin/ |
