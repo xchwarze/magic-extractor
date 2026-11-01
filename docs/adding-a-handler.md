@@ -199,8 +199,12 @@ standalone tool, don't write a new handler — add the detection to
 ### PE installers
 
 Wrapped-exe installers can't be told apart by content. Add the class name to
-`PE_INSTALLER_FALLBACK` in `src/cli/detection.py` — it's tried on any `MZ` file; the tool
-self-validates and fails cleanly on a mismatch. (7-Zip is deliberately excluded.)
+`PE_INSTALLER_FALLBACK` in `src/cli/detection.py` — it's tried on any `MZ` file, so
+the handler **must** return `False` on a PE that is not its own. Check what the tool
+does with a foreign `.exe`: if it exits 0 anyway (unace, kgb2_console do), use
+`failure_markers`; if it shows a modal error dialog instead of exiting (pea.exe
+does), validate the header before running it. The engine battery's `FOREIGN-PE`
+check covers this. (7-Zip is deliberately excluded.)
 
 ## 5. Test
 

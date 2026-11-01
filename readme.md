@@ -22,19 +22,24 @@ magic-extractor.exe extract mystery.bin
 See [Examples](#examples) for `identify`, `list`, `carve`, `--recursive` and `--bruteforce`.
 
 ## Project Structure
-- `cli`: source code.
+- `src/cli`: the command-line tool.
   - `bin`: bundled detector and extractor binaries.
     - `detectors`: DIE, Magika, binwalk (TrID's defs are converted to `data/signatures.json`).
-    - `extractors`: 7z, unrar, unace, unshield, lessmsi, dark (WiX), and more.
-  - `data`: runtime configuration, loaded dynamically (see below).
+    - `extractors`: 7-Zip (plus 7-Zip ZS as a fallback), unrar, unace, unshield, lessmsi,
+      dark (WiX), and more.
+  - `data`: routing data generated from the handlers (see below).
   - `formats`: one handler module per format family.
-- `gui`: optional tkinter front-end that wraps the CLI (see [GUI](#gui)).
-- `test`: sample files per format (fixtures for the extraction/detection tests).
-- `tools`: developer tooling (`generate_data.py` — builds the data files from handlers).
+- `src/gui`: optional tkinter front-end that wraps the CLI (see [GUI](#gui)).
+  - `icons`: Fluent icons baked into PNGs for light and dark mode.
+- `test`: unit tests, the format and engine batteries, and sample files per format.
+- `tools`: developer tooling — `generate_data.py` (builds the routing data from the
+  handlers) and `generate_icons.py` (bakes the GUI icons).
+- `update`: the updater config and scripts that refresh the bundled binaries.
+- `docs`: supported formats, how to add a handler, third-party notices.
 
 The compiled build keeps `bin/`, `data/` and `config.ini` external to the exe so
-they can be updated with a file swap; the path resolver in `main.py` finds them
-beside the executable (frozen) or under `src/cli/` (dev).
+they can be updated with a file swap; `cli_paths.py` finds them beside the
+executable (frozen) or under `src/cli/` (dev).
 
 ## How detection works
 For normal extraction, detectors run in this order with **early-exit** — the first
@@ -69,13 +74,16 @@ these into `data/handlers.json` and `data/signatures.json` (with an optional
 
 - `--bruteforce` disables early-exit: every detector runs and each detected handler
   is tried in turn (useful when the first guess is wrong).
-- Executables that no detector identifies fall back to the wrapped-exe installer
-  handlers (BitRock, Clickteam, Inno, ...), which self-validate.
+- Executables also get the SFX and installer handlers (RAR, ACE, ARC, KGB, UHARC,
+  Inno Setup, BitRock, Clickteam) as fallback candidates; each one rejects files
+  that are not its own, so the chain moves on to the next.
 - The `carve` subcommand additionally uses binwalk's offset map to extract archives
   embedded at arbitrary offsets (e.g. inside firmware images).
 
-The detection → handler routing map lives in `data/handlers.json` (hand-curated,
-loaded at runtime); a generic-token blacklist lives in `data/detection_blacklist.json`.
+The detection → handler routing map lives in `data/handlers.json` (generated, loaded
+at runtime). A key can map to several handlers, tried in order until one succeeds:
+e.g. 7-Zip first, then 7-Zip ZS for what mainline 7-Zip cannot open (SquashFS with
+LZ4, NSIS with ZSTD). A generic-token blacklist lives in `data/detection_blacklist.json`.
 
 ## Supported Formats
 See [formats.md](docs/formats.md) for the full list of formats and their handlers.
@@ -109,7 +117,10 @@ options may come before the path or the subcommand:
 ```bash
 python src/cli/main.py <path> <output_dir> [options]
 python src/cli/main.py --debug <path>
+python src/cli/main.py --version
 ```
+`--debug` and `--fast-check` work with every subcommand; `--password` with
+`extract`, `list` and `carve`.
 
 `<path>` can be a folder for every subcommand: its files (not subfolders) are
 processed one by one. Each file gets its own output folder: `<stem>_extracted`
@@ -118,22 +129,31 @@ two files share a stem.
 
 If the output folder already has files, `extract` writes to a new
 `<folder>_<YYYYmmdd-HHMMSS>` instead of mixing with or overwriting the earlier
-result; `--merge-output` extracts into the existing folder (the GUI does this
-when the destination is locked). Each handler attempt runs in its own temporary
-folder, so a failed attempt never leaves partial files behind.
+result; `--merge-output` extracts into the existing folder instead, overwriting
+files and folders with the same names (the GUI does this when the destination is
+locked). The archive being extracted is never overwritten. Each handler attempt
+runs in its own temporary folder, so a failed attempt never leaves partial files
+behind.
+
+Exit codes: `0` success; `1` failure — nothing could be extracted, a file of a
+folder run failed, a folder had no files, or `--delete-source` could not delete
+the source; `2` invalid arguments. With `--recursive`, nested archives that cannot
+be extracted are reported as warnings and do not change the exit code (many
+extracted files, e.g. every DLL of an installer, look like candidates).
 
 `extract` options:
 - `--password <password>`: password for encrypted archives.
 - `-r`, `--recursive`: extract archives found inside the output (bounded by `--max-depth`, default 5).
 - `-b`, `--bruteforce`: try every handler detected instead of stopping at the first.
-- `--merge-output`: extract into the output folder even if it already has files.
+- `--merge-output`: extract into the output folder even if it already has files,
+  overwriting what has the same name.
 - `--delete-source`: delete the source after a successful extraction (Recycle Bin
   unless `delete_to_recycle_bin` is off in `config.ini`).
 - `--open-output-folder <true|false>`: open the output folder when done.
 - `--check-free-space <true|false>`: warn if the output volume may lack room.
 - `--check-unicode <true|false>`: warn about non-ASCII extracted names.
 - `--fix-file-extensions <true|false>`: give extensionless extracted files a content-based extension (never overwrites an existing one). Off by default: guesses can be wrong (`Makefile`, `LICENSE` or `configure` become `.txt`).
-- `--create-log-files <true|false>`: write a per-run log to the output dir.
+- `--create-log-files <true|false>`: write a `magic-extractor.log` to the output folder.
 
   (Each defaults to its `config.ini` value when omitted; combine with
   `--update-defaults` to persist the given value — e.g. `--open-output-folder false
@@ -206,15 +226,36 @@ python src/gui/main.py <file> /scan    # prefill and start in identify mode
 ```
 Drag-and-drop needs the optional `tkinterdnd2` package (`pip install -r src/gui/requirements.txt`);
 without it the window still works, minus drop support. It can also register an Explorer
-context-menu entry from its Preferences dialog.
+context-menu entry (Edit → Add to Explorer menu).
+
+- Lock the destination to keep one shared output folder: runs then extract into it
+  (`--merge-output`); unlocked, an existing non-empty folder gets a dated sibling.
+- Options with side effects (deleting the source, Recursive, fixing extensions,
+  ...) show a warning under them in Run options and Preferences while they are on.
+- Keyboard: Enter runs OK; Ctrl+O / Ctrl+D pick the source / destination; Ctrl+R
+  Run options; Ctrl+, Preferences; Ctrl+B Batch; Ctrl+L clear the log; Ctrl+T dark
+  mode; F1 About; Ctrl+Q exit; Escape closes a dialog.
+- Closing the window during a run asks first, then cancels it and stops every
+  extractor it started.
 
 ## Building (Windows)
+The release workflow (`.github/workflows/release.yml`) builds both executables from
+`src/cli` with PyInstaller, then copies `bin/`, `data/`, `config.ini`, `gui.ini`,
+`VERSION` and the docs beside them. The version comes from the GitHub release tag
+(e.g. `1.4.0`). To build locally, run the two `pyinstaller` commands of that
+workflow from `src/cli` and copy the same files into `src/cli/dist/`.
+
+## Development
 ```bash
-cd cli
-pyinstaller --onefile main.py --name magic-extractor --collect-data puremagic
+python test/run_battery.py --unit-only   # unit tests (any OS)
+python test/run_battery.py               # + format battery: every sample through the CLI (Windows)
+python test/run_engine_battery.py        # extractor contract, engine by engine (Windows)
+python tools/generate_data.py            # after changing a handler's detection_* methods
+python tools/generate_icons.py           # after changing src/gui/icons/catalog.py
 ```
-Then copy `bin/`, `data/` and `config.ini` next to `dist/magic-extractor.exe`.
-CI does this automatically — see `.github/workflows/release.yml`.
+`generate_icons.py` needs `pip install "tkinter-icons[fluent]>=5.1" "pillow>=10"`; the
+GUI itself only loads the committed PNGs. Project skills for coding agents live in
+`.claude/skills/` (CLI design, Tkinter UI quality, Windows tooling, change discipline).
 
 ## License
 MIT — see `LICENSE.txt`. Note: the bundled third-party extractor/detector

@@ -28,13 +28,13 @@ tried after 7-Zip for several formats (see
 | RPM package           | .rpm                             | Format7zHandler     |
 | XAR                   | .xar                             | Format7zHandler     |
 | RAR                   | .rar, .exe (SFX)                 | FormatRarHandler    |
-| ACE                   | .ace                             | FormatAceHandler    |
+| ACE                   | .ace, .exe (SFX)                 | FormatAceHandler    |
 | AlZip                 | .alz                             | FormatAlzipHandler  |
 | EGG                   | .egg                             | FormatEggHandler    |
-| KGB                   | .kgb                             | FormatKgbHandler    |
-| UHARC                 | .uha                             | FormatUharcHandler  |
+| KGB                   | .kgb, .exe (SFX)                 | FormatKgbHandler    |
+| UHARC                 | .uha, .exe (SFX)                 | FormatUharcHandler  |
 | ZPAQ                  | .zpaq                            | FormatZpaqHandler   |
-| FreeArc               | .arc                             | FormatArcHandler    |
+| FreeArc               | .arc, .exe (SFX)                 | FormatArcHandler    |
 | BCM (v1 + v2)         | .bcm                             | FormatBcmHandler    |
 | PeaZip                | .pea                             | FormatPeaHandler    |
 | DGCA                  | .dgc                             | FormatDgcaHandler   |
@@ -186,7 +186,9 @@ Brotli (`.br`) has no magic bytes, so it cannot be routed by detection.
 
 ## Notes
 - Self-extracting `.exe` archives (7-Zip, RAR, Inno) are detected and routed to
-  their handler; other wrapped-exe installers are tried via the PE fallback.
+  their handler; other SFX and wrapped-exe installers (ACE, FreeArc, KGB, UHARC,
+  BitRock, Clickteam) are tried via the PE fallback, where each handler rejects
+  files that are not its own.
 - The detection → handler routing is data-driven (`data/handlers.json`).
 - `carve` mode uses binwalk to extract archives embedded at arbitrary offsets
   (e.g. inside firmware images).
