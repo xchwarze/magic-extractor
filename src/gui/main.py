@@ -49,9 +49,7 @@ def main():
     root = _make_root()
     app_icon.apply(root)
     source, dest, mode = _parse_args(sys.argv[1:])
-    ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
-    scale = root.winfo_fpixels("1i") / 96.0  # 1.0 at 100%, 2.0 at 200%
-    root.minsize(int(460 * scale), int(360 * scale))
+    ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)  # also sets the minimum size
     root.mainloop()
 
 

@@ -4,11 +4,19 @@ Tk positions the outer frame of a toplevel but sizes only its client area, so ev
 placement here budgets for the frame (borders and title bar) as well. Nothing in this
 module opens a window, so the pure helpers are testable without a display.
 """
+import re
 import sys
 import tkinter as tk
 
 # Never open a dialog larger than this share of the screen.
 MAX_SCREEN_SHARE = 0.9
+
+# Tk reports WIDTHxHEIGHT+X+Y where X and Y may be negative (a monitor left of or above the
+# primary one), written "+-1800".
+_GEOMETRY = re.compile(r"^(\d+)x(\d+)([+-]-?\d+)([+-]-?\d+)$")
+# How much of a window must stay reachable on screen so its title bar can still be grabbed.
+_VISIBLE_WIDTH = 120
+_VISIBLE_HEIGHT = 40
 
 
 def dpi_scale(widget):
@@ -100,3 +108,35 @@ def fit_size(width, height, area, extras=(0, 0)):
     max_width = min(int((right - left) * MAX_SCREEN_SHARE), right - left - 2 * border)
     max_height = min(int((bottom - top) * MAX_SCREEN_SHARE), bottom - top - title - border)
     return min(width, max_width), min(height, max_height)
+
+
+def parse_geometry(text):
+    """``(width, height, x, y)`` from a Tk ``WxH+X+Y`` string, or None when it is not one."""
+    match = _GEOMETRY.match(text.strip()) if isinstance(text, str) else None
+    if match is None:
+        return None
+    return (int(match.group(1)), int(match.group(2)),
+            _coordinate(match.group(3)), _coordinate(match.group(4)))
+
+
+def _coordinate(text):
+    """One coordinate of a geometry string: ``+120``, ``+-1800`` (left of the primary) or ``-5``."""
+    number = int(text[1:])
+    return number if text[0] == "+" else -number
+
+
+def visible_position(position, size, screen):
+    """The saved position kept on screen, or None when it lies outside every monitor.
+
+    ``screen`` is the virtual desktop (left, top, right, bottom). A monitor unplugged since
+    the last run leaves the saved point outside it, and opening there would hide the window.
+    Inside the desktop the position is nudged so the title bar stays reachable.
+    """
+    left, top, right, bottom = screen
+    x, y = position
+    width, height = size
+    if not (left - width < x < right and top <= y < bottom):
+        return None
+    x = min(max(x, left - width + _VISIBLE_WIDTH), right - _VISIBLE_WIDTH)
+    y = min(max(y, top), bottom - _VISIBLE_HEIGHT)
+    return x, y

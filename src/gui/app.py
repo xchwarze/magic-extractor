@@ -11,7 +11,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, ttk
 
-from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs
+from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs, geometry
 from gui.icons.catalog import COMPACT
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
@@ -127,26 +127,72 @@ class ExtractorApp:
         self._src_hist = history.parse(s.get("history", "sources", "")) if self.history_enabled.get() else []
         self._dst_hist = history.parse(s.get("history", "dests", "")) if self.history_enabled.get() else []
 
-    def _apply_window_prefs(self):
-        self.root.attributes("-topmost", self.always_on_top.get())
-        geometry = ""
-        if self.settings.get_bool("window", "remember_geometry", True):
-            geometry = self.settings.get("window", "geometry", "")
-        if geometry:
-            try:
-                self.root.geometry(geometry)
-                return
-            except tk.TclError:
-                pass
-        self._center_on_screen()
+    LOG_MIN_ROWS = 5  # log rows that must stay visible at the minimum window size
 
-    def _center_on_screen(self):
-        self.root.update_idletasks()
-        w = max(self.root.winfo_reqwidth(), 460)
-        h = max(self.root.winfo_reqheight(), 360)
-        sw = self.root.winfo_screenwidth()
-        sh = self.root.winfo_screenheight()
-        self.root.geometry(f"{w}x{h}+{(sw - w) // 2}+{(sh - h) // 2}")
+    def _measure_window(self):
+        """((natural w, h), (minimum w, h)) in pixels, from what the content asks for.
+
+        The log Text requests 80 columns x 14 rows, far more than it needs to be useful,
+        so the minimum is measured with the log asking for its least (it gives its size back
+        at once): what is left is what the menu bar and the controls need, at the current
+        fonts and display scaling.
+        """
+        root = self.root
+        root.update_idletasks()
+        natural = (root.winfo_reqwidth(), root.winfo_reqheight())
+        original = (self.log.cget("width"), self.log.cget("height"))
+        self.log.config(width=1, height=self.LOG_MIN_ROWS)
+        try:
+            root.update_idletasks()
+            minimum = (root.winfo_reqwidth(), root.winfo_reqheight())
+        finally:
+            self.log.config(width=original[0], height=original[1])
+            root.update_idletasks()
+        return natural, minimum
+
+    def _apply_window_prefs(self):
+        """Size, minimum size and position of the window; the saved geometry is reused only
+        where it is safe: cut to the work area and the content's minimum, and dropped when
+        its spot is on a monitor that is no longer there."""
+        root = self.root
+        root.attributes("-topmost", self.always_on_top.get())
+        area = geometry.work_area(root)
+        natural, minimum = self._measure_window()
+        min_w, min_h = geometry.fit_size(*minimum, area)
+        root.minsize(min_w, min_h)
+        width, height = geometry.fit_size(*natural, area)
+        saved = None
+        if self.settings.get_bool("window", "remember_geometry", True):
+            saved = geometry.parse_geometry(self.settings.get("window", "geometry", ""))
+        if saved is not None:
+            width, height = geometry.fit_size(max(saved[0], min_w), max(saved[1], min_h), area)
+            screen = (root.winfo_vrootx(), root.winfo_vrooty(),
+                      root.winfo_vrootx() + root.winfo_vrootwidth(),
+                      root.winfo_vrooty() + root.winfo_vrootheight())
+            placed = geometry.visible_position(saved[2:], (width, height), screen)
+            if placed is not None:
+                try:
+                    root.geometry(f"{width}x{height}+{placed[0]}+{placed[1]}")
+                    return
+                except tk.TclError:
+                    pass
+        self._center_on_screen(width, height, area)
+
+    def _center_on_screen(self, width, height, area):
+        left, top, right, bottom = area
+        self.root.geometry(f"{width}x{height}+{left + (right - left - width) // 2}+{top + (bottom - top - height) // 2}")
+
+    def _savable_geometry(self):
+        """The window's geometry, or None when it must not be remembered: a maximized or
+        minimized window reports a size/position that would reopen it somewhere odd
+        (a minimized one is parked at -32000,-32000)."""
+        try:
+            if self.root.state() != "normal":
+                return None
+            text = self.root.geometry()
+        except tk.TclError:
+            return None
+        return text if geometry.parse_geometry(text) else None
 
     def _save_settings(self):
         s = self.settings
@@ -165,7 +211,9 @@ class ExtractorApp:
         s.set("defaults", "fast_check", self.opt_fast_check.get())
         s.set("defaults", "debug", self.opt_debug.get())
         if self.settings.get_bool("window", "remember_geometry", True):
-            s.set("window", "geometry", self.root.geometry())
+            saved_geometry = self._savable_geometry()
+            if saved_geometry:  # otherwise keep what was saved last time
+                s.set("window", "geometry", saved_geometry)
         self._save_gui_ini()
 
     def _save_gui_ini(self):
