@@ -36,6 +36,9 @@ GUI_LABELS = {
     "history_enabled": "Remember the last 10 source/destination paths",
 }
 
+# Theme choices in Preferences: stored value (gui.ini) and label. "auto" follows Windows.
+THEME_CHOICES = (("auto", "System"), ("light", "Light"), ("dark", "Dark"))
+
 LOG_FILENAME = "magic-extractor.log"
 WARNING_SIGN = "\u26a0"  # shown at the start of an option's warning alert
 LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
@@ -61,7 +64,6 @@ class ExtractorApp:
 
         # Persisted GUI settings (gui.ini).
         self.settings = GuiSettings(runner.resolve_gui_config_path())
-        self._theme_forced = False
         self._load_settings()
 
         # Command-line arguments win over persisted defaults.
@@ -79,6 +81,7 @@ class ExtractorApp:
         theme.scale_theme_fonts(self.root)  # sv-ttk fonts follow the display scaling
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
+        self._start_theme_watch()
         self._enable_dnd()
         self._apply_window_prefs()
 
@@ -95,10 +98,9 @@ class ExtractorApp:
     # ---- settings --------------------------------------------------------
     def _load_settings(self):
         s = self.settings
-        theme_pref = (s.get("gui", "theme", "auto") or "auto").strip().lower()
-        if theme_pref not in theme.THEMES:  # e.g. "system": sv-ttk would raise
-            theme_pref = "auto"
-        self.theme_mode = theme.initial_mode() if theme_pref == "auto" else theme_pref
+        # auto = follow the Windows setting (also while running), dark/light = pinned.
+        self.theme_pref = theme.normalize(s.get("gui", "theme", "auto"))
+        self.theme_mode = theme.resolve_mode(self.theme_pref)
         self.keep_open = tk.BooleanVar(value=s.get_bool("gui", "keep_open", True))
         self.always_on_top = tk.BooleanVar(value=s.get_bool("gui", "always_on_top", False))
 
@@ -196,8 +198,7 @@ class ExtractorApp:
 
     def _save_settings(self):
         s = self.settings
-        if self._theme_forced:
-            s.set("gui", "theme", self.theme_mode)
+        s.set("gui", "theme", self.theme_pref)
         s.set("gui", "keep_open", self.keep_open.get())
         s.set("gui", "always_on_top", self.always_on_top.get())
         s.set("history", "enabled", self.history_enabled.get())
@@ -709,13 +710,40 @@ class ExtractorApp:
         """Put the icon for ``semantic`` on a ttk button (text-only without assets)."""
         return self.icons.attach(button, semantic, self.theme_mode, with_text=with_text)
 
-    def _toggle_theme(self):
-        self.theme_mode = theme.toggle(self.root)
-        self._theme_forced = True
+    def _apply_theme(self):
+        """Resolve the theme preference (System asks Windows) and re-skin the window."""
+        self.theme_mode = theme.resolve_mode(self.theme_pref)
+        theme.apply(self.root, self.theme_mode)
         theme.scale_theme_fonts(self.root)
         self.icons.retheme(self.theme_mode)
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
+
+    def _toggle_theme(self):
+        """Ctrl+T: flip light/dark and pin it. Preferences > Theme > System goes back to
+        following Windows. Not while a dialog is open (it is modal)."""
+        if self._focus_open_dialog():
+            return
+        self.theme_pref = "light" if self.theme_mode == "dark" else "dark"
+        self._apply_theme()
+
+    THEME_POLL_MS = 2000  # how often the Windows light/dark setting is read
+
+    def _start_theme_watch(self):
+        self.root.after(self.THEME_POLL_MS, self._poll_system_theme)
+
+    def _poll_system_theme(self):
+        """Follow the Windows light/dark setting while the app runs (Theme = System).
+
+        A change waits until the open dialog, if any, is closed: a dialog's colors are fixed
+        when it is built, so re-skinning half of it would look broken."""
+        try:
+            if (self.theme_pref == "auto" and not self._closing and self._open_dialog() is None
+                    and theme.system_mode() != self.theme_mode):
+                self._apply_theme()
+            self.root.after(self.THEME_POLL_MS, self._poll_system_theme)
+        except tk.TclError:
+            pass  # the window is gone
 
     # ---- dialogs ---------------------------------------------------------
     def _make_dialog(self, title):
@@ -727,15 +755,22 @@ class ExtractorApp:
         body.pack(fill="both", expand=True)
         return win, body
 
-    def _focus_open_dialog(self):
-        """True after raising a dialog that is already open: dialogs are modal, so a
-        shortcut must not stack a second copy of one."""
+    def _open_dialog(self):
+        """The dialog that is open right now, or None."""
         for child in self.root.winfo_children():
             if isinstance(child, dialogs.DialogWindow) and child.winfo_exists():
-                child.lift()
-                child.focus_force()
-                return True
-        return False
+                return child
+        return None
+
+    def _focus_open_dialog(self):
+        """True after raising a dialog that is already open: dialogs are modal, so a
+        shortcut must not stack a second copy of one (or act behind it)."""
+        dialog = self._open_dialog()
+        if dialog is None:
+            return False
+        dialog.lift()
+        dialog.focus_force()
+        return True
 
     def _confirm(self, title, message, detail="", confirm_label="OK", confirm_icon="dismiss",
                  cancel_label="Cancel", parent=None):
@@ -885,8 +920,15 @@ class ExtractorApp:
                 "debug": self.opt_debug,
                 "history_enabled": self.history_enabled}
         copies = {key: tk.BooleanVar(value=variable.get()) for key, variable in live.items()}
+        theme_copy = tk.StringVar(value=self.theme_pref)
         interface = ttk.LabelFrame(options, text="Interface", padding=10)
         interface.pack(fill="x", pady=(10, 0))
+        theme_row = ttk.Frame(interface)
+        theme_row.pack(fill="x", anchor="w", pady=(0, dialogs.XS))
+        ttk.Label(theme_row, text="Theme:").pack(side="left")
+        for value, label in THEME_CHOICES:
+            ttk.Radiobutton(theme_row, text=label, variable=theme_copy, value=value).pack(
+                side="left", padx=(dialogs.SM, 0))
         for key, variable in copies.items():
             self._option_check(interface, key, GUI_LABELS[key], variable)
 
@@ -898,9 +940,13 @@ class ExtractorApp:
                 return
             for key, variable in live.items():
                 variable.set(copies[key].get())
+            theme_changed = theme_copy.get() != self.theme_pref
+            self.theme_pref = theme_copy.get()
             self.root.attributes("-topmost", self.always_on_top.get())
             self._save_settings()
             dialogs.close_dialog(win)
+            if theme_changed:
+                self._apply_theme()  # after the dialog is gone: nothing half-skinned
 
         buttons, save_button, _others = dialogs.button_row(
             body, self._icon, ("Save", "save", save), ("Cancel", "dismiss", lambda: dialogs.close_dialog(win)))

@@ -233,10 +233,12 @@ context-menu entry (Edit → Add to Explorer menu).
 - Options with side effects (deleting the source, Recursive, fixing extensions,
   ...) show a warning under them in Run options and Preferences while they are on.
 - Keyboard: Enter runs OK; Ctrl+O / Ctrl+D pick the source / destination; Ctrl+R
-  Run options; Ctrl+, Preferences; Ctrl+B Batch; Ctrl+L clear the log; Ctrl+T dark
-  mode; F1 About; Ctrl+Q exit; Escape closes a dialog.
+  Run options; Ctrl+, Preferences; Ctrl+B Batch; Ctrl+L clear the log; Ctrl+T flip
+  light/dark (and keep it); F1 About; Ctrl+Q exit; Escape closes a dialog.
 - Closing the window during a run asks first, then cancels it and stops every
   extractor it started.
+- The theme follows the Windows light/dark setting while the window is open; pick
+  System, Light or Dark under Preferences → Theme (Light/Dark keep it fixed).
 
 ## Building (Windows)
 The release workflow (`.github/workflows/release.yml`) builds both executables from

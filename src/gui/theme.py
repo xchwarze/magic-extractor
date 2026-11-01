@@ -35,13 +35,33 @@ def is_available():
     return sv_ttk is not None
 
 
-def initial_mode():
-    """OS theme via darkdetect; fall back to dark."""
+def system_mode():
+    """The Windows light/dark setting ('dark'/'light') via darkdetect; dark when it
+    cannot be read (darkdetect missing, unreadable registry)."""
     if darkdetect is not None:
-        detected = darkdetect.theme()
-        if detected:
+        try:
+            detected = darkdetect.theme()
+        except Exception:
+            detected = None
+        if detected and detected.lower() in ("dark", "light"):
             return detected.lower()
     return "dark"
+
+
+def normalize(preference):
+    """A stored theme preference as 'auto' (follow Windows), 'dark' or 'light'.
+
+    'system' is accepted as 'auto'; anything unknown means 'auto' (sv-ttk would raise)."""
+    text = str(preference or "auto").strip().lower()
+    if text == "system":
+        text = "auto"
+    return text if text in THEMES else "auto"
+
+
+def resolve_mode(preference):
+    """The mode ('dark'/'light') a stored preference stands for right now."""
+    preference = normalize(preference)
+    return system_mode() if preference == "auto" else preference
 
 
 def current(root):
@@ -61,13 +81,6 @@ def apply(root, mode):
     _muted_label_style(root, mode)  # ttk styles are per theme: redo it after every switch
     _title_bar(root, mode)
     _dark_menu_popups(mode)
-
-
-def toggle(root):
-    """Flip theme; return the new mode."""
-    new_mode = "light" if current(root) == "dark" else "dark"
-    apply(root, new_mode)
-    return new_mode
 
 
 # Bootstrap 5.3 "alert-warning" colors (light / dark color mode).
