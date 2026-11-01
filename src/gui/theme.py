@@ -18,8 +18,10 @@ except ImportError:
     darkdetect = None
 
 # Palette for non-ttk widgets sv-ttk does not skin.
-DARK = {"bg": "#1c1c1c", "fg": "#fafafa"}
-LIGHT = {"bg": "#ffffff", "fg": "#000000"}
+# hint/link pass the 4.5:1 contrast target on their bg (WCAG AA body text).
+DARK = {"bg": "#1c1c1c", "fg": "#fafafa", "hint": "#a0a0a0", "link": "#6ea8fe"}
+LIGHT = {"bg": "#ffffff", "fg": "#000000", "hint": "#6c757d", "link": "#0a58ca"}
+THEMES = ("auto", "dark", "light")
 
 
 def is_available():
@@ -79,6 +81,7 @@ def restyle_text(widget, mode):
     """Recolor a tk.Text (not covered by sv-ttk)."""
     colors = palette(mode)
     widget.config(bg=colors["bg"], fg=colors["fg"], insertbackground=colors["fg"])
+    widget.tag_config("hint", foreground=colors["hint"])
 
 
 def restyle_toplevel(win, mode):

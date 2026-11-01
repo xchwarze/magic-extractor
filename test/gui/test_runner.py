@@ -16,6 +16,35 @@ class RunStreamingTest(unittest.TestCase):
             lines.append, lambda: False)
         self.assertEqual((code, lines), (3, ["one", "two"]))
 
+    @unittest.skipUnless(os.name == "nt", "process-tree check uses Windows APIs")
+    def test_cancel_kills_the_whole_process_tree(self):
+        # The child starts a grandchild (like the CLI starting 7z.exe) and
+        # prints its PID; after Cancel the grandchild must be gone too.
+        import ctypes
+        import time
+        script = ("import subprocess, sys, time;"
+                  "p = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)']);"
+                  "print(p.pid, flush=True); time.sleep(60)")
+        pids = []
+        start = time.monotonic()
+        runner.run_streaming([sys.executable, "-c", script], pids.append,
+                             lambda: bool(pids) and time.monotonic() - start > 1.0)
+        grandchild = int(pids[0])
+        deadline = time.monotonic() + 5
+        alive = True
+        while alive and time.monotonic() < deadline:
+            handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, grandchild)
+            code = ctypes.c_ulong()
+            alive = bool(handle) and ctypes.windll.kernel32.GetExitCodeProcess(
+                handle, ctypes.byref(code)) and code.value == 259
+            if handle:
+                ctypes.windll.kernel32.CloseHandle(handle)
+            time.sleep(0.1)
+        if alive:  # don't leave it running after a failure
+            import subprocess as sp
+            sp.run(["taskkill", "/F", "/PID", str(grandchild)], capture_output=True)
+        self.assertFalse(alive, "the grandchild process survived Cancel")
+
     def test_cancel_works_while_the_process_prints_nothing(self):
         import time
         start = time.monotonic()

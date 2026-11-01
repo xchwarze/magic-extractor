@@ -138,7 +138,11 @@ def kill_tree(process):
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
     else:
-        process.kill()
+        import signal
+        try:
+            os.killpg(process.pid, signal.SIGKILL)  # its own session/group (start_new_session)
+        except (ProcessLookupError, PermissionError):
+            process.kill()
 
 
 def run_streaming(argv, on_line, should_cancel, poll_seconds=0.2):
@@ -161,6 +165,7 @@ def run_streaming(argv, on_line, should_cancel, poll_seconds=0.2):
         errors="replace",
         bufsize=1,
         creationflags=creationflags,
+        start_new_session=(os.name != "nt"),  # POSIX: a group kill_tree can kill whole
     )
     lines = queue.Queue()
 
@@ -186,5 +191,9 @@ def run_streaming(argv, on_line, should_cancel, poll_seconds=0.2):
             on_line(line.rstrip("\n"))
     finally:
         reader.join(timeout=1)
-        process.stdout.close()
+        # A descendant that survived (e.g. taskkill was denied) keeps the pipe
+        # open and the reader blocked; closing it then would block this thread
+        # too, so leave both to the daemon reader instead of hanging the GUI.
+        if not reader.is_alive():
+            process.stdout.close()
     return process.wait()

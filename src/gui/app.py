@@ -1,4 +1,5 @@
 """Universal-Extractor-style Tk window that drives the magic-extractor CLI."""
+import logging
 import os
 import queue
 import subprocess
@@ -45,6 +46,10 @@ class ExtractorApp:
         # not first paint at the default spot and then jump to its saved position.
         self.root.withdraw()
         self.log_queue = queue.Queue()
+        # The worker thread never touches Tk: it posts lines to log_queue and
+        # its final result here; _drain_log (main thread) picks both up.
+        self.done_queue = queue.Queue()
+        self._running = False
         self.worker = None
         self.cancel_flag = threading.Event()
         self.batch_queue = []  # list of (mode, source, dest)
@@ -82,7 +87,9 @@ class ExtractorApp:
     # ---- settings --------------------------------------------------------
     def _load_settings(self):
         s = self.settings
-        theme_pref = (s.get("gui", "theme", "auto") or "auto").lower()
+        theme_pref = (s.get("gui", "theme", "auto") or "auto").strip().lower()
+        if theme_pref not in theme.THEMES:  # e.g. "system": sv-ttk would raise
+            theme_pref = "auto"
         self.theme_mode = theme.initial_mode() if theme_pref == "auto" else theme_pref
         self.keep_open = tk.BooleanVar(value=s.get_bool("gui", "keep_open", True))
         self.always_on_top = tk.BooleanVar(value=s.get_bool("gui", "always_on_top", False))
@@ -151,10 +158,15 @@ class ExtractorApp:
         s.set("defaults", "debug", self.opt_debug.get())
         if self.settings.get_bool("window", "remember_geometry", True):
             s.set("window", "geometry", self.root.geometry())
+        self._save_gui_ini()
+
+    def _save_gui_ini(self):
+        """Save gui.ini; a failure is reported, never raised (closing must work)."""
         try:
-            s.save()
-        except OSError:
-            pass
+            self.settings.save()
+        except Exception as exc:
+            logging.error(f"Could not save gui.ini: {exc}")
+            self.log_queue.put(f"[settings] could not save gui.ini: {exc}")
 
     # ---- UI construction -------------------------------------------------
     def _build_menu(self):
@@ -376,10 +388,7 @@ class ExtractorApp:
         self.dest_entry.config(values=self._dst_hist)
         self.settings.set("history", "sources", history.join(self._src_hist))
         self.settings.set("history", "dests", history.join(self._dst_hist))
-        try:
-            self.settings.save()
-        except OSError:
-            pass
+        self._save_gui_ini()
 
     def _show_placeholder(self):
         self.log.config(state="normal")
@@ -387,6 +396,8 @@ class ExtractorApp:
         self.log.insert("1.0", LOG_PLACEHOLDER, ("hint",))
         self.log.config(state="disabled")
         self._log_empty = True
+
+    LOG_BATCH = 500  # lines per main-loop tick, so a flood never freezes the UI
 
     def _append(self, text):
         self.log.config(state="normal")
@@ -408,14 +419,30 @@ class ExtractorApp:
         self._open_path(os.path.join(out, LOG_FILENAME) if out else "")
 
     def _drain_log(self):
+        """Move queued log lines into the pane in bounded batches (one insert per
+        tick) and finish a run the worker reported; reschedules itself."""
+        lines = []
         try:
-            while True:
-                self._append(self.log_queue.get_nowait())
+            while len(lines) < self.LOG_BATCH:
+                lines.append(self.log_queue.get_nowait())
         except queue.Empty:
             pass
-        self.root.after(100, self._drain_log)
+        if lines:
+            self._append("\n".join(lines))
+        if self.log_queue.empty():
+            try:
+                all_ok = self.done_queue.get_nowait()
+            except queue.Empty:
+                pass
+            else:
+                self._on_run_finished(all_ok)
+        try:
+            self.root.after(10 if not self.log_queue.empty() else 100, self._drain_log)
+        except tk.TclError:
+            pass  # window already destroyed
 
     def _set_running(self, running):
+        self._running = running
         state = "disabled" if running else "normal"
         self.ok_btn.config(state=state)
         self.batch_btn.config(state=state)
@@ -465,22 +492,29 @@ class ExtractorApp:
         self._set_running(True)
 
         def work():
+            # Runs off the main thread: only queues here, never Tk (thread-safety).
             all_ok = True
-            for mode, src, dest in jobs:
-                job_opts = dict(opts)
-                if mode == "extract":
-                    job_opts["delete_source"] = delete_flag
-                self.log_queue.put(f"=== {mode}: {src} ===")
-                argv = runner.build_command(prefix, mode, src, dest, job_opts)
-                self.log_queue.put("$ " + " ".join(runner.display_command(argv)))
-                code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
-                self.log_queue.put(f"[exit {code}]")
-                all_ok = all_ok and code == 0
-                if self.cancel_flag.is_set():
-                    self.log_queue.put("[cancelled]")
-                    all_ok = False
-                    break
-            self.root.after(0, self._on_run_finished, all_ok)
+            try:
+                for mode, src, dest in jobs:
+                    job_opts = dict(opts)
+                    if mode == "extract":
+                        job_opts["delete_source"] = delete_flag
+                    self.log_queue.put(f"=== {mode}: {src} ===")
+                    argv = runner.build_command(prefix, mode, src, dest, job_opts)
+                    self.log_queue.put("$ " + " ".join(runner.display_command(argv)))
+                    try:
+                        code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
+                    except Exception as exc:  # e.g. the backend exe is blocked or missing
+                        self.log_queue.put(f"[error] could not run the backend: {exc}")
+                        code = -1
+                    self.log_queue.put(f"[exit {code}]")
+                    all_ok = all_ok and code == 0
+                    if self.cancel_flag.is_set():
+                        self.log_queue.put("[cancelled]")
+                        all_ok = False
+                        break
+            finally:
+                self.done_queue.put(all_ok)  # buttons are always re-enabled
 
         self.worker = threading.Thread(target=work, daemon=True)
         self.worker.start()
@@ -513,9 +547,10 @@ class ExtractorApp:
         if self.batch_queue:
             self._run_queue()
             return
-        picked = filedialog.askopenfilenames(title="Select files to extract")
+        mode = self.mode.get()
+        picked = filedialog.askopenfilenames(title=f"Select files to {mode}")
         for path in picked:
-            self.batch_queue.append(("extract", os.path.normpath(path), ""))
+            self.batch_queue.append((mode, os.path.normpath(path), ""))
         if self.batch_queue:
             self._run_queue()
 
@@ -537,14 +572,30 @@ class ExtractorApp:
         self._append("[batch] queue cleared")
 
     def _on_cancel(self):
-        if self.worker and self.worker.is_alive():
+        if self._running:
             self.cancel_flag.set()
         else:
             self._on_close()
 
     def _on_close(self):
-        self._save_settings()
-        self.root.destroy()
+        """Close the window. A running job is cancelled first (after asking), so no
+        extractor keeps running (or deletes a source) with nobody watching; a
+        failing settings save never keeps the window open."""
+        if self._running:
+            if not messagebox.askyesno(
+                    "Extraction running",
+                    "An extraction is still running.\nCancel it and close the window?",
+                    parent=self.root):
+                return
+            self.cancel_flag.set()
+            if self.worker is not None:
+                self.worker.join(timeout=10)  # the worker never waits on Tk
+        try:
+            self._save_settings()
+        except Exception as exc:
+            logging.error(f"Could not save the settings: {exc}")
+        finally:
+            self.root.destroy()
 
     def _toggle_theme(self):
         self.theme_mode = theme.toggle(self.root)

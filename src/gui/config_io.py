@@ -26,18 +26,18 @@ def config_bool(values, key):
 
 def _load(path):
     """Parse config.ini like the CLI does: a UTF-8 BOM is fine; a malformed
-    file reads as empty instead of crashing the Preferences dialog."""
+    file reads as empty (ok=False) instead of crashing the Preferences dialog."""
     parser = configparser.ConfigParser()
     try:
         parser.read(path, encoding="utf-8-sig")
+        return parser, True
     except (configparser.Error, UnicodeDecodeError):
-        parser = configparser.ConfigParser()
-    return parser
+        return configparser.ConfigParser(), False
 
 
 def read_config(path):
     """Return the [settings] section as {key: str}; {} if the file/section is absent."""
-    parser = _load(path)
+    parser, _ok = _load(path)
     if not parser.has_section(SECTION):
         return {}
     return dict(parser.items(SECTION))
@@ -45,7 +45,10 @@ def read_config(path):
 
 def write_config(path, values):
     """Update keys under [settings], preserving other keys/sections; create as needed."""
-    parser = _load(path)
+    parser, ok = _load(path)
+    if not ok:
+        # Rewriting it from an empty parse would silently drop every other key.
+        raise ValueError(f"{path} could not be read (malformed); not overwriting it. Fix or delete it first.")
     if not parser.has_section(SECTION):
         parser.add_section(SECTION)
     for key, value in values.items():

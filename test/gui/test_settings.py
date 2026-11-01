@@ -40,5 +40,55 @@ class GuiSettingsTest(unittest.TestCase):
         self.assertEqual(GuiSettings(self.path).get("window", "geometry"), "460x360+10+10")
 
 
+class GuiSettingsRobustnessTest(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.path = os.path.join(self.dir, "gui.ini")
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def write(self, text):
+        with open(self.path, "w", encoding="utf-8") as fh:
+            fh.write(text)
+
+    def test_unicode_and_percent_values_round_trip(self):
+        self.write("[history]\n")
+        settings = GuiSettings(self.path)
+        settings.set("history", "sources", "C:/архив 100%.zip")
+        settings.save()
+        self.assertEqual(GuiSettings(self.path).get("history", "sources"), "C:/архив 100%.zip")
+
+    def test_save_keeps_comments_and_only_changes_values(self):
+        self.write("; how to use this file\n[gui]\n; keep the window\nkeep_open = True\n")
+        settings = GuiSettings(self.path)
+        settings.set("gui", "keep_open", False)
+        settings.set("window", "geometry", "500x400+0+0")
+        settings.save()
+        with open(self.path, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("; how to use this file", text)
+        self.assertIn("; keep the window", text)
+        self.assertIn("keep_open = False", text)
+        self.assertIn("[window]", text)
+
+    def test_malformed_file_reads_as_defaults(self):
+        self.write("stray line before any section\n[gui]\n")
+        self.assertTrue(GuiSettings(self.path).get_bool("gui", "keep_open", True))
+
+    def test_failed_write_leaves_the_file_intact(self):
+        self.write("[gui]\nkeep_open = True\n")
+        settings = GuiSettings(self.path)
+        settings.set("gui", "keep_open", False)
+        from unittest import mock
+        with mock.patch("gui.settings.os.replace", side_effect=OSError("disk full")):
+            with self.assertRaises(OSError):
+                settings.save()
+        with open(self.path, encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "[gui]\nkeep_open = True\n")
+        self.assertEqual([n for n in os.listdir(self.dir) if n != "gui.ini"], [])
+
+
 if __name__ == "__main__":
     unittest.main()
