@@ -1,5 +1,8 @@
+import json
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cli"))
@@ -36,38 +39,54 @@ class FormatsRegistryTest(unittest.TestCase):
         self.assertTrue(formats.MIME_HANDLERS)
         self.assertTrue(formats.DETECTION_HANDLERS)
 
-    # --- get_handler_from_detection -------------------------------------- #
+    # --- get_handlers_from_detection ------------------------------------- #
     def test_detection_routes_to_expected_handler(self):
         # pyinstaller needs a 7z plugin, so it routes to the extended handler.
-        self.assertIs(
-            formats.get_handler_from_detection("pyinstaller"),
-            Format7zExtHandler,
+        self.assertEqual(
+            formats.get_handlers_from_detection("pyinstaller"),
+            (Format7zExtHandler,),
         )
 
     def test_detection_lookup_is_case_insensitive(self):
-        self.assertIs(
-            formats.get_handler_from_detection("PyInstaller"),
-            Format7zExtHandler,
+        self.assertEqual(
+            formats.get_handlers_from_detection("PyInstaller"),
+            (Format7zExtHandler,),
         )
 
-    def test_unknown_detection_returns_none(self):
-        self.assertIsNone(formats.get_handler_from_detection("no-such-detection"))
+    def test_unknown_detection_returns_empty(self):
+        self.assertEqual(formats.get_handlers_from_detection("no-such-detection"), ())
 
-    # --- get_handler_from_mime ------------------------------------------- #
+    # --- get_handlers_from_mime ------------------------------------------ #
     def test_mime_routes_to_expected_handler(self):
-        self.assertIs(
-            formats.get_handler_from_mime("application/x-7z-compressed"),
-            Format7zHandler,
+        self.assertEqual(
+            formats.get_handlers_from_mime("application/vnd.rar"),
+            (FormatRarHandler,),
         )
 
     def test_mime_lookup_is_case_insensitive(self):
-        self.assertIs(
-            formats.get_handler_from_mime("APPLICATION/VND.RAR"),
-            FormatRarHandler,
+        self.assertEqual(
+            formats.get_handlers_from_mime("APPLICATION/VND.RAR"),
+            (FormatRarHandler,),
         )
 
-    def test_unknown_mime_returns_none(self):
-        self.assertIsNone(formats.get_handler_from_mime("application/x-no-such-mime"))
+    def test_unknown_mime_returns_empty(self):
+        self.assertEqual(formats.get_handlers_from_mime("application/x-no-such-mime"), ())
+
+    # --- several handlers per key, in registry (priority) order ----------- #
+    def test_init_handlers_accepts_string_or_list(self):
+        data_dir = tempfile.mkdtemp()
+        try:
+            with open(os.path.join(data_dir, "handlers.json"), "w", encoding="utf-8") as fh:
+                json.dump({
+                    "mime_handlers": {"application/x-foo": "FormatRarHandler"},
+                    "detection_handlers": {"foo": ["Format7zHandler", "NoSuchHandler", "Format7zExtHandler"]},
+                }, fh)
+            formats.init_handlers(data_dir)
+            self.assertEqual(formats.get_handlers_from_mime("application/x-foo"), (FormatRarHandler,))
+            # unknown class names are skipped, the rest keep their order
+            self.assertEqual(formats.get_handlers_from_detection("foo"), (Format7zHandler, Format7zExtHandler))
+        finally:
+            shutil.rmtree(data_dir)
 
 
 if __name__ == "__main__":

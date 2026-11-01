@@ -9,7 +9,7 @@ from cli_paths import BIN_PATH
 from detection_filter import is_generic_detection
 from extraction import process_extraction
 from file_type import binwalk_file_map
-from formats import get_handler_from_detection
+from formats import get_handlers_from_detection
 
 
 def process_carve(args):
@@ -58,7 +58,7 @@ def process_carve(args):
         if size <= 0:
             continue
 
-        has_handler = bool(get_handler_from_detection(name)) and not is_generic_detection(
+        has_handler = bool(get_handlers_from_detection(name)) and not is_generic_detection(
             name
         )
         if not carve_all and not has_handler:

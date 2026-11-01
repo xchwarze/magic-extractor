@@ -40,6 +40,19 @@ class DetectionWorkflowTest(unittest.TestCase):
         self.assertEqual(candidates, [first_handler])
         self.assertEqual(collect_mock.call_count, 1)
 
+    def test_collect_candidates_adds_every_handler_of_a_shared_key(self):
+        primary, fallback = type("Primary", (), {}), type("Fallback", (), {})
+        candidates = []
+
+        with mock.patch.object(detection, "get_handlers_from_mime", return_value=(primary, fallback)), \
+                mock.patch.object(detection, "get_handlers_from_detection", return_value=(fallback,)), \
+                mock.patch.object(detection, "filter_mimes", side_effect=lambda values: values), \
+                mock.patch.object(detection, "filter_detections", side_effect=lambda values: values):
+            added = detection.collect_candidates(("src", ["mime/x"], ["name"]), candidates)
+
+        self.assertTrue(added)
+        self.assertEqual(candidates, [primary, fallback])  # priority order, no duplicates
+
     def test_find_candidates_runs_every_detector_in_bruteforce_mode(self):
         outputs = [("first", [], []), ("second", [], [])]
 

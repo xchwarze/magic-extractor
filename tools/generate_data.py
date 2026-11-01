@@ -33,14 +33,24 @@ def _write_json(path, data):
 def main():
     mime_handlers, detection_handlers, signatures = {}, {}, []
 
+    # Several handlers may claim one key: they are tried in registry order
+    # (formats._HANDLER_CLASSES).
+    priority = {name: index for index, name in enumerate(formats.HANDLER_REGISTRY)}
+
+    def route(table, key, handler_name):
+        names = table.setdefault(key.lower(), [])
+        if handler_name not in names:
+            names.append(handler_name)
+            names.sort(key=priority.get)
+
     for handler_name, handler in sorted(formats.HANDLER_REGISTRY.items()):
         for mime in handler.detection_mimes():
-            mime_handlers[mime.lower()] = handler_name
+            route(mime_handlers, mime, handler_name)
         for name in handler.detection_names():
-            detection_handlers[name.lower()] = handler_name
+            route(detection_handlers, name, handler_name)
         for signature in handler.detection_signatures():
             key = signature['name'].lower()
-            detection_handlers[key] = handler_name       # ensure the magic name routes
+            route(detection_handlers, key, handler_name)  # ensure the magic name routes
             signatures.append({'name': key, 'patterns': signature['patterns']})
 
     # Group signatures by name: one entry per name whose `patterns` is a list of
@@ -57,11 +67,16 @@ def main():
         with open(EXTRAS_FILE, encoding='utf-8') as fh:
             extras = json.load(fh)
         for mime, handler_name in extras.get('mime_handlers', {}).items():
-            mime_handlers.setdefault(mime.lower(), handler_name)
+            mime_handlers.setdefault(mime.lower(), [handler_name])
         for name, handler_name in extras.get('detection_handlers', {}).items():
-            detection_handlers.setdefault(name.lower(), handler_name)
+            detection_handlers.setdefault(name.lower(), [handler_name])
 
-    _write_json(HANDLERS_FILE, {'mime_handlers': mime_handlers, 'detection_handlers': detection_handlers})
+    # A single handler stays a plain string; only shared keys become a list.
+    def flatten(table):
+        return {key: names[0] if len(names) == 1 else names for key, names in table.items()}
+
+    _write_json(HANDLERS_FILE, {'mime_handlers': flatten(mime_handlers),
+                                'detection_handlers': flatten(detection_handlers)})
     _write_json(SIGNATURES_FILE, signatures)
 
     print(f"Wrote {len(mime_handlers)} MIME + {len(detection_handlers)} detection entries "

@@ -11,7 +11,7 @@ from file_type import (
     determine_file_type_with_magic,
     determine_file_type_with_signatures,
 )
-from formats import HANDLER_REGISTRY, get_handler_from_detection, get_handler_from_mime
+from formats import HANDLER_REGISTRY, get_handlers_from_detection, get_handlers_from_mime
 
 
 PE_INSTALLER_FALLBACK = (
@@ -56,20 +56,22 @@ def collect_candidates(output, candidates):
     source, mimes, detections = output
     added = False
     for mime_type in filter_mimes(mimes):
-        handler_class = get_handler_from_mime(mime_type=mime_type)
-        if handler_class and handler_class not in candidates:
-            logging.info(f"Candidate handler from {source} MIME: {mime_type}")
-            candidates.append(handler_class)
-            added = True
+        for handler_class in get_handlers_from_mime(mime_type=mime_type):
+            if handler_class not in candidates:
+                logging.info(
+                    f"Candidate handler {handler_class.__name__} from {source} MIME: {mime_type}"
+                )
+                candidates.append(handler_class)
+                added = True
 
     for detected_type in filter_detections(detections):
-        handler_class = get_handler_from_detection(detection=detected_type)
-        if handler_class and handler_class not in candidates:
-            logging.info(
-                f"Candidate handler from {source} detection: {detected_type}"
-            )
-            candidates.append(handler_class)
-            added = True
+        for handler_class in get_handlers_from_detection(detection=detected_type):
+            if handler_class not in candidates:
+                logging.info(
+                    f"Candidate handler {handler_class.__name__} from {source} detection: {detected_type}"
+                )
+                candidates.append(handler_class)
+                added = True
     return added
 
 
