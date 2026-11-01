@@ -10,7 +10,7 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons
+from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs
 from gui.icons.catalog import COMPACT
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
@@ -804,10 +804,12 @@ class ExtractorApp:
             self._save_settings()
             win.destroy()
 
-        win.bind("<Return>", lambda _event: save())
         buttons = ttk.Frame(body); buttons.pack(pady=(12, 0))
-        self._icon(ttk.Button(buttons, text="Save", command=save), "save").pack(side="left", padx=4)
+        save_button = self._icon(ttk.Button(buttons, text="Save", command=save), "save")
+        save_button.pack(side="left", padx=4)
         self._icon(ttk.Button(buttons, text="Cancel", command=win.destroy), "dismiss").pack(side="left", padx=4)
+        # Enter presses the focused button (Cancel cancels); only elsewhere does it Save.
+        dialogs.bind_default(win, save_button.invoke)
         self._center_on_parent(win)
 
     def _about(self):
