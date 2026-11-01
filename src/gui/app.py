@@ -184,7 +184,7 @@ class ExtractorApp:
             self.log_queue.put(f"[settings] could not save gui.ini: {exc}")
 
     # ---- UI construction -------------------------------------------------
-    # Keyboard access to every action (the self-drawn menu bar is mouse-only).
+    # Keyboard access to every action (F10 also enters the self-drawn menu bar).
     SHORTCUTS = (
         ("<Control-o>", "_browse_source"), ("<Control-d>", "_browse_dest"),
         ("<Control-l>", "_clear_log"), ("<Control-b>", "_on_batch"),
@@ -192,9 +192,19 @@ class ExtractorApp:
         ("<Control-t>", "_toggle_theme"), ("<F1>", "_about"), ("<Control-q>", "_on_close"),
     )
 
+    # Settings and system changes that wait for the run to finish: dimmed in the menu bar and
+    # their shortcuts ignored (a change meanwhile would not apply to the run anyway).
+    RUN_LOCKED_ENTRIES = ("Run options...", "Preferences...", "Add to Explorer menu", "Remove from Explorer menu")
+    RUN_LOCKED_SHORTCUTS = ("_open_run_options", "_open_preferences")
+
+    def _shortcut(self, method):
+        if self._running and method in self.RUN_LOCKED_SHORTCUTS:
+            return
+        getattr(self, method)()
+
     def _bind_keys(self):
         for sequence, method in self.SHORTCUTS:
-            self.root.bind(sequence, lambda _event, m=method: getattr(self, m)())
+            self.root.bind(sequence, lambda _event, m=method: self._shortcut(m))
         # Enter runs OK from the main window (not while a run is going).
         self.root.bind("<Return>", lambda _event: None if self._running else self._on_ok())
 
@@ -561,6 +571,7 @@ class ExtractorApp:
         state = "disabled" if running else "normal"
         self.ok_btn.config(state=state)
         self.batch_btn.config(state=state)
+        self.menubar.set_entry_state(self.RUN_LOCKED_ENTRIES, state)
         if running:  # busy indicator: a run has no known length
             self.progress.config(mode="indeterminate")
             self.progress.start(15)

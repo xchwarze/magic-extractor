@@ -305,6 +305,59 @@ class CallbackErrorTest(AppTestCase):
             self.app._report_callback_exception(ValueError, ValueError("boom"), None)
 
 
+class RunLockTest(AppTestCase):
+    """While a run is active the risky menu entries and their shortcuts are off."""
+
+    def setUp(self):
+        super().setUp()
+        patch = mock.patch.object(tk.Misc, "focus_force")
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def edit_menu_entries(self):
+        bar = self.app.menubar
+        index = bar._titles.index("Edit")
+        bar._open(bar._buttons[index][0], "Edit")
+        entries = {row.widgets[1].cget("text"): row.enabled for row in bar._popup.rows.rows}
+        bar.close()
+        return entries
+
+    def test_risky_entries_are_disabled_during_a_run_and_back_after(self):
+        before = self.edit_menu_entries()
+        self.assertTrue(all(before.values()))
+        self.app._set_running(True)
+        during = self.edit_menu_entries()
+        for name in ("Run options...", "Preferences...", "Add to Explorer menu", "Remove from Explorer menu"):
+            self.assertFalse(during[name], name)
+        self.assertTrue(during["Toggle dark mode"])
+        self.app._set_running(False)
+        self.assertEqual(self.edit_menu_entries(), before)
+
+    def test_their_shortcuts_are_ignored_during_a_run(self):
+        with mock.patch.object(self.app, "_open_preferences") as prefs, \
+                mock.patch.object(self.app, "_open_run_options") as options, \
+                mock.patch.object(self.app, "_toggle_theme") as toggle:
+            self.app._set_running(True)
+            for method in ("_open_preferences", "_open_run_options", "_toggle_theme"):
+                self.app._shortcut(method)
+            prefs.assert_not_called()
+            options.assert_not_called()
+            toggle.assert_called_once()  # not a risky one
+            self.app._set_running(False)
+            self.app._shortcut("_open_preferences")
+            prefs.assert_called_once()
+
+    def test_the_bound_shortcut_goes_through_the_guard(self):
+        self.app._set_running(True)
+        with mock.patch.object(self.app, "_open_preferences") as prefs:
+            self.root.event_generate("<Control-comma>")
+        prefs.assert_not_called()
+        self.app._set_running(False)
+
+    def test_f10_is_bound_for_the_menu_bar(self):
+        self.assertIn("<Key-F10>", self.root.bind())
+
+
 class StatusLayoutTest(AppTestCase):
     def test_the_bar_and_the_line_sit_under_the_log_and_start_idle(self):
         self.assertEqual(self.app.status.full, "Ready")
