@@ -47,6 +47,7 @@ import argparse
 import io
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -152,17 +153,17 @@ def extracted_something(output_dir):
     return False
 
 
-def first_candidate(identify_stdout):
-    """Pull the first 'Candidate handlers' entry from `identify` output, if any."""
-    lines = identify_stdout.splitlines()
-    for index, line in enumerate(lines):
-        if line.startswith("Candidate handlers"):
-            for follow in lines[index + 1:]:
-                stripped = follow.strip()
-                if stripped.startswith("- "):
-                    return stripped[2:]
-            break
-    return ""
+TRIED_RE = re.compile(r"Trying handler: (\w+)")
+SUCCEEDED_RE = re.compile(r"Extraction completed successfully using handler: (\w+)")
+
+
+def handler_chain(extract_log):
+    """Every handler `extract` tried, in order, tagged ok/FAIL: 'A FAIL > B ok'."""
+    succeeded = set(SUCCEEDED_RE.findall(extract_log))
+    return " > ".join(
+        f"{name} {'ok' if name in succeeded else 'FAIL'}"
+        for name in TRIED_RE.findall(extract_log)
+    )
 
 
 def run_cli(command, sample, extra=None, timeout=180, debug=False):
@@ -195,7 +196,6 @@ def run_one_sample(fmt, sample, timeout, debug=False):
     """identify + extract one sample into a throwaway dir; return a result dict."""
     id_rc, id_out, id_err = run_cli('identify', sample, timeout=timeout, debug=debug)
     id_ok = id_rc == 0
-    handler = first_candidate(id_out)
 
     out_dir = tempfile.mkdtemp(prefix='mx_battery_')
     try:
@@ -203,6 +203,7 @@ def run_one_sample(fmt, sample, timeout, debug=False):
         ex_ok = ex_rc == 0 and extracted_something(out_dir)
     finally:
         shutil.rmtree(out_dir, ignore_errors=True)  # never touch the corpus
+    handler = handler_chain(ex_out + ex_err)
 
     # Captured output for the report (identify + extract, stdout + stderr). The
     # CLI's ERROR log (which includes the failing tool's stderr, e.g. a missing
@@ -240,12 +241,16 @@ def run_extraction_battery(timeout, debug=False):
         print("STAGE 2: FAIL\n")
         return False, []
 
-    header = f"  {'STATUS':<6} {'FORMAT':<12} {'IDENT':<6} {'EXTRACT':<8} {'HANDLER':<26} SAMPLE"
+    samples = list(iter_samples())
+    # HANDLERS (the tried chain) goes last: it has no fixed width.
+    sample_width = max([len(os.path.relpath(s, TEST_DIR)) for _f, s in samples] + [len('SAMPLE')])
+    header = (f"  {'STATUS':<6} {'FORMAT':<12} {'IDENT':<6} {'EXTRACT':<8} "
+              f"{'SAMPLE':<{sample_width}} HANDLERS (tried in order)")
     print(header)
     print("  " + "-" * (len(header) - 2))
 
     results = []
-    for fmt, sample in iter_samples():
+    for fmt, sample in samples:
         try:
             res = run_one_sample(fmt, sample, timeout, debug=debug)
         except Exception as exc:  # keep the battery going on any unexpected error
@@ -257,7 +262,7 @@ def run_extraction_battery(timeout, debug=False):
         print(f"  {status:<6} {res['fmt']:<12} "
               f"{'OK' if res['id_ok'] else 'FAIL':<6} "
               f"{'OK' if res['ex_ok'] else 'FAIL':<8} "
-              f"{res['handler']:<26.26} {res['sample']}")
+              f"{res['sample']:<{sample_width}} {res['handler'] or '-'}")
         # On failure, dump the captured output so the real error (e.g. a missing
         # DLL logged at ERROR) is visible in the pipeline log.
         if not res['ok'] and res.get('log'):
