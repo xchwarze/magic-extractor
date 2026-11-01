@@ -144,7 +144,7 @@ class ExtractorApp:
         s.set("defaults", "lock_destination", self.lock_dest.get())
         s.set("defaults", "delete_source", self.opt_delete.get())
         s.set("defaults", "recursive", self.opt_recursive.get())
-        s.set("defaults", "max_depth", self.opt_max_depth.get())
+        s.set("defaults", "max_depth", self._max_depth())
         s.set("defaults", "bruteforce", self.opt_bruteforce.get())
         s.set("defaults", "fast_check", self.opt_fast_check.get())
         s.set("defaults", "debug", self.opt_debug.get())
@@ -297,20 +297,38 @@ class ExtractorApp:
         # path: running it through tk.splitlist would treat its backslashes as
         # Tcl backslash-escapes (e.g. "\temp" -> a literal tab) and corrupt it.
         data = event.data
-        dropped = (data,) if "{" not in data else self.root.tk.splitlist(data)
+        if "{" in data:
+            dropped = self.root.tk.splitlist(data)
+        else:
+            # Unbraced: no path in it has a space (tkdnd braces those), so a
+            # space separates several dropped paths. Split plainly, without
+            # Tcl's backslash processing.
+            dropped = tuple(part for part in data.split(" ") if part)
         if not dropped:
             return
         self.source.set(dropped[0])
         self._autofill(force=True)
 
+    def _max_depth(self, default=5):
+        """The Max depth box as an int; an empty/non-numeric box makes IntVar.get()
+        raise TclError, which used to block saving settings and closing the window."""
+        try:
+            return max(0, int(self.opt_max_depth.get()))
+        except (tk.TclError, ValueError):
+            return default
+
     def _current_opts(self):
         return {
             "recursive": self.opt_recursive.get(),
-            "max_depth": self.opt_max_depth.get(),
+            "max_depth": self._max_depth(),
             "bruteforce": self.opt_bruteforce.get(),
             "password": self.opt_password.get(),
             "fast_check": self.opt_fast_check.get(),
             "debug": self.opt_debug.get(),
+            # A locked destination is a shared folder kept on purpose: extract
+            # into it. Otherwise an existing, non-empty destination makes the
+            # CLI use a new <folder>_<date-time> folder.
+            "merge_output": self.lock_dest.get(),
         }
 
     def _resolve_delete(self):
@@ -446,6 +464,7 @@ class ExtractorApp:
         self._set_running(True)
 
         def work():
+            all_ok = True
             for mode, src, dest in jobs:
                 job_opts = dict(opts)
                 if mode == "extract":
@@ -455,17 +474,21 @@ class ExtractorApp:
                 self.log_queue.put("$ " + " ".join(argv))
                 code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
                 self.log_queue.put(f"[exit {code}]")
+                all_ok = all_ok and code == 0
                 if self.cancel_flag.is_set():
                     self.log_queue.put("[cancelled]")
+                    all_ok = False
                     break
-            self.root.after(0, self._on_run_finished)
+            self.root.after(0, self._on_run_finished, all_ok)
 
         self.worker = threading.Thread(target=work, daemon=True)
         self.worker.start()
 
-    def _on_run_finished(self):
+    def _on_run_finished(self, all_ok=True):
         self._set_running(False)
-        if not self.keep_open.get():
+        # "keep_open" off means auto-close on success: a failed or cancelled run
+        # stays open so its log can be read.
+        if all_ok and not self.keep_open.get():
             self._on_close()
 
     def _on_ok(self):
@@ -582,7 +605,7 @@ class ExtractorApp:
     def _open_preferences(self):
         path = runner.resolve_config_path()
         current = config_io.read_config(path)
-        cfg_vars = {k: tk.BooleanVar(value=current.get(k, "False") == "True") for k in CONFIG_KEYS}
+        cfg_vars = {k: tk.BooleanVar(value=config_io.config_bool(current, k)) for k in CONFIG_KEYS}
         win, body = self._make_dialog("Preferences")
 
         extraction = ttk.LabelFrame(body, text="Extraction", padding=10)

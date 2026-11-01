@@ -40,5 +40,17 @@ class ConfigIoTest(unittest.TestCase):
         self.assertEqual(values["fast_check"], "True")  # untouched
 
 
+
+class ConfigBoolTest(unittest.TestCase):
+    def test_reads_booleans_like_the_cli(self):
+        values = {"a": "true", "b": "YES", "c": "1", "d": "False", "e": "off"}
+        self.assertEqual([config_io.config_bool(values, k) for k in "abcde"],
+                         [True, True, True, False, False])
+
+    def test_missing_key_uses_the_cli_default(self):
+        self.assertTrue(config_io.config_bool({}, "delete_to_recycle_bin"))
+        self.assertFalse(config_io.config_bool({}, "check_unicode"))
+
+
 if __name__ == "__main__":
     unittest.main()

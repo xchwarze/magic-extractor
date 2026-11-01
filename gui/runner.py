@@ -1,7 +1,9 @@
 """Command construction and subprocess streaming for the GUI (subprocess bridge to the CLI)."""
 import os
+import queue
 import subprocess
 import sys
+import threading
 
 EXE_NAME = "magic-extractor.exe"
 
@@ -14,7 +16,7 @@ def build_command(prefix, mode, source, dest, opts):
     mode   : "extract", "scan", or "carve".
     source : input path.
     dest   : output dir (extract/carve); falsy -> CLI-derived.
-    opts   : recursive/max_depth/bruteforce/password/fast_check.
+    opts   : recursive/max_depth/bruteforce/password/fast_check/merge_output.
     """
     if mode == "scan":
         cmd = prefix + ["identify", source]
@@ -30,7 +32,7 @@ def build_command(prefix, mode, source, dest, opts):
             cmd.append(dest)
         password = opts.get("password")
         if password:
-            cmd += ["--password", password]
+            cmd.append(password_arg(password))
         if opts.get("fast_check", False):
             cmd.append("--fast-check")
         if opts.get("debug"):
@@ -43,13 +45,15 @@ def build_command(prefix, mode, source, dest, opts):
 
     password = opts.get("password")
     if password:
-        cmd += ["--password", password]
+        cmd.append(password_arg(password))
     if opts.get("recursive"):
         cmd += ["-r", "--max-depth", str(opts.get("max_depth", 5))]
     if opts.get("bruteforce"):
         cmd.append("-b")
     if opts.get("delete_source"):
         cmd.append("--delete-source")
+    if opts.get("merge_output"):
+        cmd.append("--merge-output")
     if opts.get("fast_check", False):
         cmd.append("--fast-check")
     if opts.get("debug"):
@@ -108,11 +112,31 @@ def read_version():
         return "dev"
 
 
-def run_streaming(argv, on_line, should_cancel):
+def password_arg(password):
+    """`--password=<pw>`: a separate argument starting with '-' (e.g. "-secret")
+    would be read by argparse as an option and fail with "expected one argument"."""
+    return f"--password={password}"
+
+
+def kill_tree(process):
+    """Kill the CLI and every extractor it started (terminate() alone left e.g.
+    7z.exe running after Cancel)."""
+    if os.name == "nt":
+        subprocess.run(
+            ["taskkill", "/T", "/F", "/PID", str(process.pid)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    else:
+        process.kill()
+
+
+def run_streaming(argv, on_line, should_cancel, poll_seconds=0.2):
     """
     Run argv, streaming merged stdout+stderr line-by-line to on_line(str).
-    Polls should_cancel(); terminates the process if it returns True.
-    Returns the process exit code (or -1 if cancelled).
+    should_cancel() is polled every poll_seconds, even while the process prints
+    nothing (an extractor can be silent for minutes); on cancel the whole
+    process tree is killed. Returns the exit code, or -1 if cancelled.
     """
     # CREATE_NO_WINDOW stops a console window from popping up for each child on
     # Windows when the GUI itself is windowed (--noconsole); 0 elsewhere.
@@ -121,16 +145,36 @@ def run_streaming(argv, on_line, should_cancel):
         argv,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        stdin=subprocess.DEVNULL,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         bufsize=1,
         creationflags=creationflags,
     )
-    try:
+    lines = queue.Queue()
+
+    def read_output():
         for line in iter(process.stdout.readline, ""):
+            lines.put(line)
+        lines.put(None)  # end of output
+
+    reader = threading.Thread(target=read_output, daemon=True)
+    reader.start()
+    try:
+        while True:
             if should_cancel():
-                process.terminate()
+                kill_tree(process)
+                process.wait()
                 return -1
+            try:
+                line = lines.get(timeout=poll_seconds)
+            except queue.Empty:
+                continue
+            if line is None:
+                break
             on_line(line.rstrip("\n"))
     finally:
+        reader.join(timeout=1)
         process.stdout.close()
     return process.wait()

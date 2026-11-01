@@ -8,6 +8,24 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from gui import runner
 
 
+class RunStreamingTest(unittest.TestCase):
+    def test_streams_lines_and_returns_the_exit_code(self):
+        lines = []
+        code = runner.run_streaming(
+            [sys.executable, "-c", "print('one'); print('two'); raise SystemExit(3)"],
+            lines.append, lambda: False)
+        self.assertEqual((code, lines), (3, ["one", "two"]))
+
+    def test_cancel_works_while_the_process_prints_nothing(self):
+        import time
+        start = time.monotonic()
+        code = runner.run_streaming(
+            [sys.executable, "-c", "import time; time.sleep(30)"],
+            lambda _line: None, lambda: time.monotonic() - start > 0.5)
+        self.assertEqual(code, -1)
+        self.assertLess(time.monotonic() - start, 10)
+
+
 class BuildCommandTest(unittest.TestCase):
     PREFIX = ["magic-extractor.exe"]
 
@@ -32,7 +50,7 @@ class BuildCommandTest(unittest.TestCase):
         opts = {"password": "pw", "fast_check": True, "debug": True}
         cmd = runner.build_command(self.PREFIX, "carve", "firmware.bin", "out", opts)
         self.assertEqual(cmd, ["magic-extractor.exe", "carve", "firmware.bin", "out",
-                               "--password", "pw", "--fast-check", "--debug"])
+                               "--password=pw", "--fast-check", "--debug"])
 
     def test_carve_ignores_extract_only_options(self):
         opts = {"recursive": True, "max_depth": 9, "bruteforce": True,
@@ -42,7 +60,11 @@ class BuildCommandTest(unittest.TestCase):
 
     def test_password_included_when_set(self):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"password": "pw"})
-        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--password", "pw"])
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--password=pw"])
+
+    def test_password_starting_with_a_dash_stays_one_argument(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"password": "-secret"})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "--password=-secret"])
 
     def test_password_omitted_when_blank(self):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"password": ""})
@@ -73,6 +95,14 @@ class BuildCommandTest(unittest.TestCase):
     def test_delete_source_omitted_when_false(self):
         cmd = runner.build_command(self.PREFIX, "extract", "a.7z", None, {"delete_source": False})
         self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z"])
+
+    def test_merge_output_flag(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", "out", {"merge_output": True})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "out", "--merge-output"])
+
+    def test_merge_output_omitted_when_false(self):
+        cmd = runner.build_command(self.PREFIX, "extract", "a.7z", "out", {"merge_output": False})
+        self.assertEqual(cmd, ["magic-extractor.exe", "extract", "a.7z", "out"])
 
     def test_scan_ignores_delete_source(self):
         cmd = runner.build_command(self.PREFIX, "scan", "a.7z", None, {"delete_source": True})
