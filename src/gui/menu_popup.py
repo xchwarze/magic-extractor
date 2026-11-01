@@ -97,7 +97,7 @@ class RowList:
         widgets = [row, title]
         if shortcut:
             hint = tk.Label(row, text=shortcut, anchor="e", padx=ROW_PAD_X, pady=ROW_PAD_Y,
-                            bg=colors["bg"], fg=colors["hint"] if item.enabled else colors["disabled"],
+                            bg=colors["bg"], fg=colors["muted"] if item.enabled else colors["disabled"],
                             font=theme.body_font(self.inner))
             hint.pack(side="right")
             widgets.append(hint)

@@ -1,6 +1,8 @@
 """The main window's output surfaces: log pane, status line, error reporting (headless Tk)."""
 import os
 import sys
+import threading
+import time
 import tkinter as tk
 import unittest
 from unittest import mock
@@ -128,9 +130,10 @@ class LogMenuTest(AppTestCase):
 
     def test_a_locked_clipboard_is_reported_not_raised(self):
         self.app._append("alpha")
-        with mock.patch.object(self.root, "clipboard_clear", side_effect=tk.TclError("locked")):
+        with mock.patch.object(self.root, "clipboard_clear", side_effect=tk.TclError("locked")), \
+                self.assertLogs(level="WARNING"):
             self.app._copy_log_all()
-        self.assertIn("could not copy", self.app.log.get("1.0", "end"))
+        self.assertIn("could not copy", self.app.log.get("1.0", "end").lower())
 
     def test_save_as_writes_the_output_as_utf8(self):
         line = "extracting архив.zip"
@@ -150,7 +153,8 @@ class LogMenuTest(AppTestCase):
 
     def test_a_save_that_fails_is_reported_in_the_log(self):
         self.app._append("alpha")
-        with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=self.tmp):  # a folder
+        with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=self.tmp), \
+                self.assertLogs(level="ERROR"):  # the target is a folder
             self.app._save_log_as()
         self.assertIn("could not save", self.app.log.get("1.0", "end"))
 
@@ -158,6 +162,132 @@ class LogMenuTest(AppTestCase):
         self.app._append("alpha")
         self.open_menu().activate(3)
         self.assertTrue(self.app.log_pane.is_empty)
+
+
+class RunStatusTest(AppTestCase):
+    """The status line and the busy indicator follow a (batch) run; the worker only uses queues."""
+
+    def setUp(self):
+        super().setUp()
+        patch = mock.patch.object(app_module.runner, "resolve_backend", return_value=["backend"])
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.release = threading.Event()
+        self.addCleanup(self.release.set)
+
+    def jobs(self, *names):
+        return [("extract", os.path.join(self.tmp, name), "") for name in names]
+
+    def pump(self, until, timeout=10):
+        deadline = time.monotonic() + timeout
+        while not until() and time.monotonic() < deadline:
+            self.root.update()
+            time.sleep(0.01)
+        self.assertTrue(until(), "timed out waiting for the run")
+
+    def fake_streaming(self, codes, hold=None):
+        """run_streaming stand-in: exit code per source file name; waits on ``hold`` for one of them."""
+        def run(argv, on_line, should_cancel, poll_seconds=0.2):
+            name = os.path.basename(argv[2])
+            on_line(f"working on {name}")
+            if name == hold:
+                while not self.release.is_set() and not should_cancel():
+                    time.sleep(0.01)
+                if should_cancel():
+                    return -1
+            return codes[name]
+        return run
+
+    def test_status_follows_the_job_and_the_summary_counts_the_results(self):
+        codes = {"a.zip": 0, "b.zip": 0, "c.zip": 1}
+        with mock.patch.object(app_module.runner, "run_streaming", self.fake_streaming(codes, hold="b.zip")):
+            self.app._run_jobs(self.jobs("a.zip", "b.zip", "c.zip"))
+            self.pump(lambda: "2 of 3: b.zip" in self.app.status.full)
+            self.assertEqual(str(self.app.progress.cget("mode")), "indeterminate")  # busy indicator
+            self.assertTrue(self.app._running)
+            self.release.set()
+            self.pump(lambda: not self.app._running)
+        self.assertEqual(self.app.status.full, "2 extracted, 1 failed")
+        self.assertEqual(self.app.status.level, "warning")
+        self.assertEqual(str(self.app.progress.cget("mode")), "determinate")
+        self.assertEqual(float(self.app.progress.cget("value")), 0.0)
+
+    def test_a_single_run_names_the_file_in_both_phases(self):
+        codes = {"only.zip": 0}
+        with mock.patch.object(app_module.runner, "run_streaming", self.fake_streaming(codes, hold="only.zip")):
+            self.app._run_jobs(self.jobs("only.zip"))
+            self.assertEqual(self.app.status.full, "Extracting only.zip")
+            self.release.set()
+            self.pump(lambda: not self.app._running)
+        self.assertEqual(self.app.status.full, "Extracted: only.zip")
+        self.assertEqual(self.app.status.level, "info")
+
+    def test_a_failed_single_run_is_an_error(self):
+        with mock.patch.object(app_module.runner, "run_streaming", self.fake_streaming({"bad.zip": 2})):
+            self.app._run_jobs(self.jobs("bad.zip"))
+            self.pump(lambda: not self.app._running)
+        self.assertEqual(self.app.status.full, "Failed: bad.zip (exit code 2)")
+        self.assertEqual(self.app.status.level, "error")
+
+    def test_cancelling_reports_what_was_done_and_what_was_not(self):
+        codes = {"a.zip": 0, "b.zip": 0, "c.zip": 0}
+        with mock.patch.object(app_module.runner, "run_streaming", self.fake_streaming(codes, hold="b.zip")):
+            self.app._run_jobs(self.jobs("a.zip", "b.zip", "c.zip"))
+            self.pump(lambda: "2 of 3: b.zip" in self.app.status.full)
+            self.app._on_cancel()
+            self.assertEqual(self.app.status.full, "Cancelling...")
+            self.pump(lambda: not self.app._running)
+        self.assertEqual(self.app.status.full, "Cancelled: 1 extracted, 2 not run")
+
+    def test_a_job_that_cannot_even_build_its_command_counts_as_failed(self):
+        with mock.patch.object(app_module.runner, "build_command", side_effect=ValueError("bad option")):
+            self.app._run_jobs(self.jobs("a.zip"))
+            self.pump(lambda: not self.app._running)
+        self.assertEqual(self.app.status.level, "error")
+        self.assertIn("bad option", self.app.log.get("1.0", "end"))
+
+    def test_the_worker_never_updates_a_widget_from_its_own_thread(self):
+        # Status and log are fed through the queues and applied by _drain_log, on the main thread.
+        threads = []
+        real_status, real_append = self.app.status.set, self.app.log_pane.append
+
+        def status_set(*args, **kwargs):
+            threads.append(threading.current_thread())
+            return real_status(*args, **kwargs)
+
+        def log_append(*args, **kwargs):
+            threads.append(threading.current_thread())
+            return real_append(*args, **kwargs)
+
+        codes = {"a.zip": 0, "b.zip": 0}
+        with mock.patch.object(self.app.status, "set", status_set), \
+                mock.patch.object(self.app.log_pane, "append", log_append), \
+                mock.patch.object(app_module.runner, "run_streaming", self.fake_streaming(codes)):
+            self.app._run_jobs(self.jobs("a.zip", "b.zip"))
+            self.pump(lambda: not self.app._running)
+        self.assertTrue(threads)
+        self.assertEqual({thread for thread in threads}, {threading.main_thread()})
+        self.assertEqual(self.app.status.full, "2 extracted")
+
+    def test_queueing_a_file_says_how_many_wait(self):
+        self.app.source.set(os.path.join(self.tmp, "q.zip"))
+        self.app._on_batch()
+        self.assertIn("Queued q.zip: 1 waiting", self.app.status.full)
+
+    def test_a_copy_that_fails_turns_the_status_red(self):
+        self.app._append("alpha")
+        with mock.patch.object(self.root, "clipboard_clear", side_effect=tk.TclError("locked")), \
+                self.assertLogs(level="WARNING"):
+            self.app._copy_log_all()
+        self.assertEqual(self.app.status.level, "error")
+
+
+class StatusLayoutTest(AppTestCase):
+    def test_the_bar_and_the_line_sit_under_the_log_and_start_idle(self):
+        self.assertEqual(self.app.status.full, "Ready")
+        self.assertEqual(str(self.app.progress.cget("mode")), "determinate")
+        self.assertGreater(self.app.status.label.winfo_y(), -1)
+        self.assertEqual(self.app.status.label.master, self.app.progress.master)
 
 
 if __name__ == "__main__":
