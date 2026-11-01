@@ -8,7 +8,7 @@ import threading
 import webbrowser
 import tkinter as tk
 import tkinter.font as tkfont
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs
 from gui.icons.catalog import COMPACT
@@ -375,10 +375,12 @@ class ExtractorApp:
         if mode == "delete":
             return True
         if mode == "ask":
-            return messagebox.askyesno(
-                "Delete source",
+            # The safe answer (keep) is the default for Enter and Escape; the run goes on either way.
+            return self._confirm(
+                "Delete source files?",
                 "Delete each source file after a successful extraction?",
-                parent=self.root)
+                confirm_label="Delete sources", confirm_icon="delete",
+                cancel_label="Keep sources")
         return False
 
     def _current_output_dir(self):
@@ -390,7 +392,7 @@ class ExtractorApp:
 
     def _open_path(self, path):
         if not path or not os.path.exists(path):
-            messagebox.showinfo("Not found", f"Not found:\n{path}", parent=self.root)
+            self._message("Not found", f"Not found:\n{path}")
             return
         try:
             if sys.platform == "win32":
@@ -400,7 +402,7 @@ class ExtractorApp:
             else:
                 subprocess.Popen(["xdg-open", path])
         except OSError as exc:
-            messagebox.showerror("Error", str(exc), parent=self.root)
+            self._message("Error", str(exc))
 
     def _push_history(self, src, dest):
         if not self.history_enabled.get():
@@ -481,23 +483,23 @@ class ExtractorApp:
 
     def _install_context_menu(self):
         if not context_menu.is_supported():
-            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.", parent=self.root)
+            self._message("Windows only", "Explorer integration is Windows-only.")
             return
         try:
             context_menu.install(self._context_menu_parts())
-            messagebox.showinfo("Done", "Added 'Extract with Magic Extractor' to the Explorer menu.", parent=self.root)
+            self._message("Done", "Added 'Extract with Magic Extractor' to the Explorer menu.")
         except OSError as exc:
-            messagebox.showerror("Error", str(exc), parent=self.root)
+            self._message("Error", str(exc))
 
     def _uninstall_context_menu(self):
         if not context_menu.is_supported():
-            messagebox.showinfo("Windows only", "Explorer integration is Windows-only.", parent=self.root)
+            self._message("Windows only", "Explorer integration is Windows-only.")
             return
         try:
             context_menu.uninstall()
-            messagebox.showinfo("Done", "Removed from the Explorer menu.", parent=self.root)
+            self._message("Done", "Removed from the Explorer menu.")
         except OSError as exc:
-            messagebox.showerror("Error", str(exc), parent=self.root)
+            self._message("Error", str(exc))
 
     # ---- actions ---------------------------------------------------------
     def _run_jobs(self, jobs):
@@ -505,7 +507,7 @@ class ExtractorApp:
         try:
             prefix = runner.resolve_backend()
         except FileNotFoundError as exc:
-            messagebox.showerror("Backend not found", str(exc), parent=self.root)
+            self._message("Backend not found", str(exc))
             return
         opts = self._current_opts()
         needs_extract = any(mode == "extract" for mode, _, _ in jobs)
@@ -554,7 +556,7 @@ class ExtractorApp:
     def _on_ok(self):
         src = self.source.get().strip()
         if not src:
-            messagebox.showwarning("No source", "Select a source file first.", parent=self.root)
+            self._message("No source", "Select a source file first.")
             return
         self._run_jobs([(self.mode.get(), src, self.dest.get())])
 
@@ -607,10 +609,12 @@ class ExtractorApp:
         extractor keeps running (or deletes a source) with nobody watching; a
         failing settings save never keeps the window open."""
         if self._running:
-            if not messagebox.askyesno(
+            if not self._confirm(
                     "Extraction running",
-                    "An extraction is still running.\nCancel it and close the window?",
-                    parent=self.root):
+                    "An extraction is still running.",
+                    detail="Stop it and close the window?",
+                    confirm_label="Stop and close", confirm_icon="stop",
+                    cancel_label="Keep running"):
                 return
             self.cancel_flag.set()
             if self.worker is not None:
@@ -636,20 +640,34 @@ class ExtractorApp:
 
     # ---- dialogs ---------------------------------------------------------
     def _make_dialog(self, title):
-        """A themed, non-resizable Toplevel hidden until centered; returns
-        (window, padded body frame). Content goes in the body."""
-        win = tk.Toplevel(self.root)
-        win.withdraw()
-        win.transient(self.root)
-        win.resizable(False, False)
-        if self.always_on_top.get():
-            win.attributes("-topmost", True)  # else it hides behind an always-on-top main window
-        theme.restyle_toplevel(win, self.theme_mode)
-        win.title(title)
-        win.bind("<Escape>", lambda _event: win.destroy())
-        body = ttk.Frame(win, padding=14)
+        """A themed, non-resizable Toplevel hidden until presented; returns
+        (window, padded body frame). Content goes in the body; Escape and the
+        close button close it (see gui/dialogs.py)."""
+        win = dialogs.create_dialog(self.root, title, self.theme_mode)
+        body = ttk.Frame(win, padding=dialogs.LG)
         body.pack(fill="both", expand=True)
         return win, body
+
+    def _focus_open_dialog(self):
+        """True after raising a dialog that is already open: dialogs are modal, so a
+        shortcut must not stack a second copy of one."""
+        for child in self.root.winfo_children():
+            if isinstance(child, dialogs.DialogWindow) and child.winfo_exists():
+                child.lift()
+                child.focus_force()
+                return True
+        return False
+
+    def _confirm(self, title, message, detail="", confirm_label="OK", confirm_icon="dismiss",
+                 cancel_label="Cancel", parent=None):
+        """Themed yes/no box; True only on the confirm button. Cancel is the default."""
+        return dialogs.confirm(parent or self.root, self.theme_mode, self._icon, title, message,
+                               detail=detail, confirm_label=confirm_label, confirm_icon=confirm_icon,
+                               cancel_label=cancel_label)
+
+    def _message(self, title, message, parent=None):
+        """Themed notice with a Close button (info, warning and error alike)."""
+        dialogs.show_message(parent or self.root, self.theme_mode, self._icon, title, message)
 
     def _scrollable(self, parent):
         """
@@ -686,15 +704,10 @@ class ExtractorApp:
         canvas.bind("<Leave>", lambda _e: canvas.unbind_all("<MouseWheel>"))
         return inner
 
-    def _center_on_parent(self, win):
-        """Center win over the main window, then reveal it."""
-        win.update_idletasks()
-        px, py = self.root.winfo_rootx(), self.root.winfo_rooty()
-        pw, ph = self.root.winfo_width(), self.root.winfo_height()
-        w, h = win.winfo_width(), win.winfo_height()
-        win.geometry(f"+{px + (pw - w) // 2}+{py + (ph - h) // 2}")
-        win.deiconify()
-        theme.titlebar(win, self.theme_mode)  # dark title bar once the dialog is mapped
+    def _present_dialog(self, win, initial_focus=None):
+        """Center win over the main window inside the screen's work area, reveal it
+        and make it modal."""
+        dialogs.present(win, self.root, self.theme_mode, initial_focus=initial_focus)
 
     def _add_option_alert(self, container, key, variable):
         """
@@ -743,6 +756,8 @@ class ExtractorApp:
         self._add_option_alert(row, key, variable)
 
     def _open_run_options(self):
+        if self._focus_open_dialog():
+            return
         win, body = self._make_dialog("Run options")
 
         opts = ttk.LabelFrame(body, text="Extraction", padding=10)
@@ -765,10 +780,14 @@ class ExtractorApp:
             ttk.Radiobutton(after, text=label, variable=self.opt_delete, value=value).pack(anchor="w", pady=1)
         self._add_option_alert(after, "delete_source", self.opt_delete)
 
-        self._icon(ttk.Button(body, text="Close", command=win.destroy), "dismiss").pack(pady=(12, 0))
-        self._center_on_parent(win)
+        row, close, _others = dialogs.button_row(body, self._icon, ("Close", "dismiss", lambda: dialogs.close_dialog(win)))
+        row.pack(anchor="e", pady=(dialogs.LG, 0))
+        dialogs.bind_default(win, close.invoke)
+        self._present_dialog(win, initial_focus=close)
 
     def _open_preferences(self):
+        if self._focus_open_dialog():
+            return
         path = runner.resolve_config_path()
         current = config_io.read_config(path)
         cfg_vars = {k: tk.BooleanVar(value=config_io.config_bool(current, k)) for k in CONFIG_KEYS}
@@ -796,23 +815,23 @@ class ExtractorApp:
             try:
                 config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
             except (OSError, ValueError) as exc:  # e.g. read-only install folder
-                messagebox.showerror("Could not save the preferences", str(exc), parent=win)
+                self._message("Could not save the preferences", str(exc), parent=win)
                 return
             for key, variable in live.items():
                 variable.set(copies[key].get())
             self.root.attributes("-topmost", self.always_on_top.get())
             self._save_settings()
-            win.destroy()
+            dialogs.close_dialog(win)
 
-        buttons = ttk.Frame(body); buttons.pack(pady=(12, 0))
-        save_button = self._icon(ttk.Button(buttons, text="Save", command=save), "save")
-        save_button.pack(side="left", padx=4)
-        self._icon(ttk.Button(buttons, text="Cancel", command=win.destroy), "dismiss").pack(side="left", padx=4)
-        # Enter presses the focused button (Cancel cancels); only elsewhere does it Save.
-        dialogs.bind_default(win, save_button.invoke)
-        self._center_on_parent(win)
+        buttons, save_button, _others = dialogs.button_row(
+            body, self._icon, ("Save", "save", save), ("Cancel", "dismiss", lambda: dialogs.close_dialog(win)))
+        buttons.pack(anchor="e", pady=(dialogs.LG, 0))
+        dialogs.bind_default(win, save_button.invoke)  # Enter presses the focused button, else Save
+        self._present_dialog(win, initial_focus=save_button)
 
     def _about(self):
+        if self._focus_open_dialog():
+            return
         win, body = self._make_dialog("About")
         ttk.Label(body, text="Magic Extractor", font=("", 12, "bold")).pack(anchor="w")
         ttk.Label(body, text="Universal extraction tool.").pack(anchor="w", pady=(2, 10))
@@ -822,5 +841,7 @@ class ExtractorApp:
         link = ttk.Label(body, text=url, foreground=theme.palette(self.theme_mode)["link"], cursor="hand2")
         link.pack(anchor="w", pady=(2, 0))
         link.bind("<Button-1>", lambda e: webbrowser.open(url))
-        self._icon(ttk.Button(body, text="Close", command=win.destroy), "dismiss").pack(pady=(14, 0))
-        self._center_on_parent(win)
+        row, close, _others = dialogs.button_row(body, self._icon, ("Close", "dismiss", lambda: dialogs.close_dialog(win)))
+        row.pack(anchor="e", pady=(dialogs.LG, 0))
+        dialogs.bind_default(win, close.invoke)
+        self._present_dialog(win, initial_focus=close)

@@ -10,7 +10,10 @@ import os
 import sys
 import tkinter as tk
 
-from gui.icons.catalog import COMPACT, DISABLED, NORMAL, REGULAR, THEMES, asset_name, nearest_size
+from gui.geometry import dpi_scale
+from gui.icons.catalog import (
+    ACCENT, ACCENT_DISABLED, ACCENT_ICONS, COMPACT, DISABLED, NORMAL, REGULAR, THEMES, asset_name, nearest_size,
+)
 
 _FROZEN_SUBPATH = ("gui", "icons", "assets")
 GAP = 6  # transparent pixels between the icon and the button text
@@ -23,14 +26,6 @@ def assets_dir():
         candidates.append(os.path.join(sys._MEIPASS, *_FROZEN_SUBPATH))
     candidates.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets"))
     return next((path for path in candidates if os.path.isdir(path)), None)
-
-
-def dpi_scale(widget):
-    """1.0 at 100% display scaling, 1.5 at 150%, ... (1.0 in a DPI-unaware process)."""
-    try:
-        return float(widget.winfo_fpixels("1i")) / 96.0
-    except tk.TclError:
-        return 1.0
 
 
 def icon_size(widget, base_size):
@@ -82,10 +77,13 @@ class ButtonIcons:
 
     def _apply(self, button, semantic, mode, size, with_text):
         gap = round(GAP * dpi_scale(self.root)) if with_text else 0
-        normal = self.photo(mode, semantic, size, NORMAL, gap)
+        # An Accent.TButton draws its text in another colour than a plain one, so its
+        # icon has its own tints (only the icons in ACCENT_ICONS are baked that way).
+        accent = semantic in ACCENT_ICONS and str(button.cget("style")).startswith("Accent.")
+        normal = self.photo(mode, semantic, size, ACCENT if accent else NORMAL, gap)
         if normal is None:
             return  # no assets: keep the text-only button
-        disabled = self.photo(mode, semantic, size, DISABLED, gap) or normal
+        disabled = self.photo(mode, semantic, size, ACCENT_DISABLED if accent else DISABLED, gap) or normal
         button.configure(image=(normal, "disabled", disabled),
                          compound="left" if with_text else "image")
         button._icon_refs = (normal, disabled)  # keep the images alive

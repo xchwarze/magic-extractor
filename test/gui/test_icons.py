@@ -34,7 +34,7 @@ class AssetsTest(unittest.TestCase):
             for mode in catalog.THEMES
             for semantic in catalog.GLYPHS
             for size in catalog.SIZES
-            for variant in catalog.VARIANTS
+            for variant in catalog.variants_for(semantic)
             if not os.path.isfile(os.path.join(folder, mode, catalog.asset_name(semantic, size, variant)))
         ]
         self.assertEqual(missing, [])
@@ -42,7 +42,7 @@ class AssetsTest(unittest.TestCase):
     def test_no_stale_assets(self):
         folder = icons.assets_dir()
         expected = {catalog.asset_name(s, z, v) for s in catalog.GLYPHS for z in catalog.SIZES
-                    for v in catalog.VARIANTS}
+                    for v in catalog.variants_for(s)}
         for mode in catalog.THEMES:
             self.assertEqual(set(os.listdir(os.path.join(folder, mode))) - expected, set())
 

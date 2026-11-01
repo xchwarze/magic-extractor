@@ -113,6 +113,18 @@ def body_font(widget):
     return "TkDefaultFont"
 
 
+def heading_font(widget):
+    """The theme's strong body font for a dialog's lead sentence."""
+    from tkinter import font
+
+    try:
+        if "SunValleyBodyStrongFont" in font.names(widget):
+            return "SunValleyBodyStrongFont"
+    except Exception:
+        pass
+    return "TkHeadingFont"
+
+
 def palette(mode):
     """Return {'bg':..., 'fg':...} for the given mode."""
     return DARK if mode == "dark" else LIGHT

@@ -20,6 +20,8 @@ GLYPHS = {
     "browse_file": "document",     # pick the source file
     "browse": "folder-open",       # pick the destination folder
     "save": "save",                # Preferences: Save
+    "delete": "delete",            # confirm dialog: delete the source
+    "stop": "stop",                # confirm dialog: stop the run and close
     # menu bar titles
     "menu_file": "folder",
     "menu_edit": "edit",
@@ -28,14 +30,29 @@ GLYPHS = {
 
 NORMAL = ""
 DISABLED = "disabled"
-VARIANTS = (NORMAL, DISABLED)
+ACCENT = "accent"                  # on an Accent.TButton, whose text has another colour
+ACCENT_DISABLED = "accent-disabled"
+VARIANTS = (NORMAL, DISABLED)      # every icon has these two
 THEMES = ("light", "dark")
+
+# Icons shown on an Accent.TButton (the primary button of a dialog). They get the two extra
+# accent variants; a test keeps this set equal to what the dialogs actually use.
+ACCENT_ICONS = frozenset({"save", "dismiss"})
+
+
+def variants_for(semantic):
+    """The PNG variants baked for ``semantic``."""
+    if semantic not in GLYPHS:
+        raise ValueError(f"unknown icon {semantic!r}")
+    if semantic in ACCENT_ICONS:
+        return VARIANTS + (ACCENT, ACCENT_DISABLED)
+    return VARIANTS
 
 # Text colour of a ttk button per theme and state (sv-ttk 2.6 light/dark themes);
 # the PNGs are tinted with these so an icon matches its label.
 BUTTON_FOREGROUNDS = {
-    "dark": {NORMAL: "#fafafa", DISABLED: "#7a7a7a"},
-    "light": {NORMAL: "#1c1c1c", DISABLED: "#a2a2a2"},
+    "dark": {NORMAL: "#fafafa", DISABLED: "#7a7a7a", ACCENT: "#000000", ACCENT_DISABLED: "#a5a5a5"},
+    "light": {NORMAL: "#1c1c1c", DISABLED: "#a2a2a2", ACCENT: "#ffffff", ACCENT_DISABLED: "#ffffff"},
 }
 
 

@@ -55,7 +55,7 @@ def generate(output):
         os.makedirs(folder)
         for semantic in catalog.GLYPHS:
             for size in catalog.SIZES:
-                for variant in catalog.VARIANTS:
+                for variant in catalog.variants_for(semantic):
                     color = catalog.BUTTON_FOREGROUNDS[mode][variant]
                     target = os.path.join(folder, catalog.asset_name(semantic, size, variant))
                     with open(target, "wb") as fh:

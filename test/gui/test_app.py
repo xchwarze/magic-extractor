@@ -32,8 +32,8 @@ class AppTestCase(unittest.TestCase):
             mock.patch.object(runner, "resolve_config_path", return_value=self.config_path),
         ]
         # No real modal dialog may ever open in a test (it would block the run).
-        for name in ("showwarning", "showerror", "showinfo", "askyesno"):
-            patches.append(mock.patch.object(app_module.messagebox, name, return_value=False))
+        patches.append(mock.patch.object(app_module.dialogs, "confirm", return_value=False))
+        patches.append(mock.patch.object(app_module.dialogs, "show_message"))
         for patch in patches:
             patch.start()
             self.addCleanup(patch.stop)
@@ -86,8 +86,7 @@ class RunLifecycleTest(AppTestCase):
 
     def test_backend_that_cannot_start_re_enables_the_buttons(self):
         self.app.source.set(os.path.join(self.tmp, "a.zip"))
-        with mock.patch.object(runner, "resolve_backend", return_value=[os.path.join(self.tmp, "missing.exe")]), \
-                mock.patch.object(app_module.messagebox, "askyesno", return_value=False):
+        with mock.patch.object(runner, "resolve_backend", return_value=[os.path.join(self.tmp, "missing.exe")]):
             self.app._on_ok()
             self.pump_until_idle()
         self.assertFalse(self.app._running)
@@ -98,14 +97,14 @@ class RunLifecycleTest(AppTestCase):
         self.app._set_running(True)
         worker = mock.Mock()
         self.app.worker = worker
-        with mock.patch.object(app_module.messagebox, "askyesno", return_value=True):
+        with mock.patch.object(app_module.dialogs, "confirm", return_value=True):
             self.app._on_close()
         self.assertTrue(self.app.cancel_flag.is_set())
         worker.join.assert_called_once()
 
     def test_closing_during_a_run_can_be_refused(self):
         self.app._set_running(True)
-        with mock.patch.object(app_module.messagebox, "askyesno", return_value=False):
+        with mock.patch.object(app_module.dialogs, "confirm", return_value=False):
             self.app._on_close()
         self.assertFalse(self.app.cancel_flag.is_set())
         self.assertTrue(self.root.winfo_exists())
@@ -168,7 +167,8 @@ class PreferencesTest(AppTestCase):
         win = self.open_preferences()
         with mock.patch.object(app_module.config_io, "write_config", side_effect=PermissionError("read-only")):
             self.button(win, "Save").invoke()
-        app_module.messagebox.showerror.assert_called_once()
+        app_module.dialogs.show_message.assert_called_once()
+        self.assertEqual(app_module.dialogs.show_message.call_args.args[3], "Could not save the preferences")
         self.assertTrue(win.winfo_exists())
 
     def test_dialogs_have_keyboard_bindings(self):
