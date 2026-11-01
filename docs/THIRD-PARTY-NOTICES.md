@@ -75,6 +75,7 @@ apply to the distributed build. All permissive.
 | Package | Used by | License |
 |---------|---------|---------|
 | `puremagic` | CLI (MIME detector) | MIT |
+| Fluent System Icons (Microsoft) | GUI button and menu icons, baked to PNGs in `src/gui/icons/assets/` by `tools/generate_icons.py` (dev-only: `tkinter-icons[fluent]` + Pillow) | MIT |
 | `colorama` | CLI (colored console output) | BSD-3-Clause |
 | `send2trash` | CLI (`--delete-source` → Recycle Bin) | BSD-3-Clause |
 | `sv-ttk` | GUI theme (optional) | MIT |

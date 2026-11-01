@@ -56,6 +56,20 @@ class AppTestCase(unittest.TestCase):
         return [w for w in self.root.winfo_children() if isinstance(w, tk.Toplevel) and w.winfo_exists()]
 
 
+class IconsTest(AppTestCase):
+    def test_buttons_and_menu_titles_have_icons(self):
+        self.assertNotEqual(str(self.app.ok_btn.cget("image")), "")
+        self.assertNotEqual(str(self.app.batch_btn.cget("image")), "")
+        self.assertNotEqual(str(self.app.dest_btn.cget("image")), "")
+        title, _icon = self.app.menubar._buttons[0]
+        self.assertNotEqual(str(title.cget("image")), "")
+
+    def test_theme_toggle_retints_the_icons(self):
+        before = str(self.app.ok_btn.cget("image"))
+        self.app._toggle_theme()
+        self.assertNotEqual(str(self.app.ok_btn.cget("image")), before)
+
+
 class StartupTest(AppTestCase):
     gui_ini = "stray line before any section\n[gui]\ntheme = system\n"
 

@@ -72,6 +72,47 @@ def alert_colors(mode):
     return ALERT_WARNING["dark" if mode == "dark" else "light"]
 
 
+_applied_font_factor = {}
+
+
+def scale_theme_fonts(root):
+    """
+    Scale sv-ttk's fonts with the display scaling. They are pixel-sized
+    (negative sizes), which Tk's scaling never reaches, so in a DPI-aware
+    process ttk text would stay at 100% while geometry and Tk's own fonts grow.
+    No-op at 96 DPI or without sv-ttk; safe to call repeatedly (never compounds).
+    """
+    from tkinter import font
+
+    try:
+        factor = float(root.winfo_fpixels("1i")) / 96.0
+        applied = _applied_font_factor.get(str(root), 1.0)
+        if abs(factor - applied) < 0.01:
+            return
+        for name in font.names(root):
+            if not name.startswith("SunValley"):
+                continue  # only sv-ttk's fonts are pixel-sized
+            named = font.nametofont(name, root=root)
+            size = int(named.cget("size"))
+            if size < 0:
+                named.configure(size=round(size / applied * factor))
+        _applied_font_factor[str(root)] = factor
+    except Exception:  # never let font tuning stop the GUI
+        pass
+
+
+def body_font(widget):
+    """The theme's body font, so Tk-only widgets (menus, alerts) match ttk text."""
+    from tkinter import font
+
+    try:
+        if "SunValleyBodyFont" in font.names(widget):
+            return "SunValleyBodyFont"
+    except Exception:
+        pass
+    return "TkDefaultFont"
+
+
 def palette(mode):
     """Return {'bg':..., 'fg':...} for the given mode."""
     return DARK if mode == "dark" else LIGHT

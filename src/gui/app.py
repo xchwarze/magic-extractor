@@ -10,7 +10,8 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io, theme, paths, history, context_menu, option_warnings
+from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons
+from gui.icons.catalog import COMPACT
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
@@ -68,9 +69,11 @@ class ExtractorApp:
         if initial_dest:
             self.dest.set(initial_dest)
 
+        self.icons = icons.ButtonIcons(self.root)
         self._build_menu()
         self._build_body()
         theme.apply(self.root, self.theme_mode)
+        theme.scale_theme_fonts(self.root)  # sv-ttk fonts follow the display scaling
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
         self._enable_dnd()
@@ -188,33 +191,36 @@ class ExtractorApp:
     def _build_menu(self):
         # Self-drawn menu bar: native tk.Menu bars/dropdowns are OS-rendered on
         # Windows and ignore colors, so they never go dark. MenuBar draws its own.
-        self.menubar = MenuBar(self.root, self.theme_mode)
+        self.menubar = MenuBar(
+            self.root, self.theme_mode,
+            icon=lambda semantic, mode: self.icons.photo(
+                mode, semantic, icons.icon_size(self.root, COMPACT), gap=round(4 * icons.dpi_scale(self.root))))
         self.menubar.pack(fill="x", side="top")
         self.menubar.add_menu("File", [
-            ("Open source...          Ctrl+O", self._browse_source),
-            ("Open destination...     Ctrl+D", self._browse_dest),
+            ("Open source...\tCtrl+O", self._browse_source),
+            ("Open destination...\tCtrl+D", self._browse_dest),
             None,
-            ("Clear log                Ctrl+L", self._clear_log),
+            ("Clear log\tCtrl+L", self._clear_log),
             ("Open log file", self._open_log_file),
             ("Open log folder", self._open_log_folder),
             None,
             ("Show batch queue", self._show_batch),
             ("Clear batch queue", self._clear_batch),
             None,
-            ("Exit                     Ctrl+Q", self._on_close),
-        ])
+            ("Exit\tCtrl+Q", self._on_close),
+        ], icon="menu_file")
         self.menubar.add_menu("Edit", [
-            ("Run options...           Ctrl+R", self._open_run_options),
-            ("Preferences...           Ctrl+,", self._open_preferences),
+            ("Run options...\tCtrl+R", self._open_run_options),
+            ("Preferences...\tCtrl+,", self._open_preferences),
             None,
-            ("Toggle dark mode         Ctrl+T", self._toggle_theme),
+            ("Toggle dark mode\tCtrl+T", self._toggle_theme),
             None,
             ("Add to Explorer menu", self._install_context_menu),
             ("Remove from Explorer menu", self._uninstall_context_menu),
-        ])
+        ], icon="menu_edit")
         self.menubar.add_menu("Help", [
-            ("About                    F1", self._about),
-        ])
+            ("About\tF1", self._about),
+        ], icon="menu_help")
 
     def _build_body(self):
         pad = {"padx": 10, "pady": 4}
@@ -234,7 +240,8 @@ class ExtractorApp:
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
         self.source_entry.pack(side="left", fill="x", expand=True)
-        ttk.Button(row, text="...", width=3, command=self._browse_source).pack(side="left", padx=4)
+        self._icon(ttk.Button(row, text="...", width=3, command=self._browse_source),
+                   "browse_file", with_text=False).pack(side="left", padx=4)
 
         # Destination row
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
@@ -245,15 +252,17 @@ class ExtractorApp:
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.dest_entry = ttk.Combobox(row, textvariable=self.dest, values=self._dst_hist)
         self.dest_entry.pack(side="left", fill="x", expand=True)
-        self.dest_btn = ttk.Button(row, text="...", width=3, command=self._browse_dest)
+        self.dest_btn = self._icon(ttk.Button(row, text="...", width=3, command=self._browse_dest),
+                                   "browse", with_text=False)
         self.dest_btn.pack(side="left", padx=4)
 
         # Buttons
         row = ttk.Frame(frm); row.pack(fill="x", padx=10, pady=(8, 4))
-        self.ok_btn = ttk.Button(row, text="OK", width=10, command=self._on_ok)
+        self.ok_btn = self._icon(ttk.Button(row, text="OK", width=10, command=self._on_ok), "run")
         self.ok_btn.pack(side="left", padx=(0, 8))
-        ttk.Button(row, text="Cancel", width=10, command=self._on_cancel).pack(side="left", padx=8)
-        self.batch_btn = ttk.Button(row, text="Batch", width=10, command=self._on_batch)
+        self._icon(ttk.Button(row, text="Cancel", width=10, command=self._on_cancel),
+                   "dismiss").pack(side="left", padx=8)
+        self.batch_btn = self._icon(ttk.Button(row, text="Batch", width=10, command=self._on_batch), "batch")
         self.batch_btn.pack(side="left", padx=8)
 
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
@@ -613,9 +622,15 @@ class ExtractorApp:
         finally:
             self.root.destroy()
 
+    def _icon(self, button, semantic, with_text=True):
+        """Put the icon for ``semantic`` on a ttk button (text-only without assets)."""
+        return self.icons.attach(button, semantic, self.theme_mode, with_text=with_text)
+
     def _toggle_theme(self):
         self.theme_mode = theme.toggle(self.root)
         self._theme_forced = True
+        theme.scale_theme_fonts(self.root)
+        self.icons.retheme(self.theme_mode)
         theme.restyle_text(self.log, self.theme_mode)
         self.menubar.recolor(self.theme_mode)
 
@@ -694,6 +709,7 @@ class ExtractorApp:
         wrap = tkfont.nametofont("TkDefaultFont").measure("0") * 60
         alert = tk.Label(
             container, justify="left", anchor="w", wraplength=wrap, padx=8, pady=6,
+            font=theme.body_font(container),
             bg=colors["bg"], fg=colors["fg"], highlightthickness=1,
             highlightbackground=colors["border"], highlightcolor=colors["border"],
         )
@@ -749,7 +765,7 @@ class ExtractorApp:
             ttk.Radiobutton(after, text=label, variable=self.opt_delete, value=value).pack(anchor="w", pady=1)
         self._add_option_alert(after, "delete_source", self.opt_delete)
 
-        ttk.Button(body, text="Close", command=win.destroy).pack(pady=(12, 0))
+        self._icon(ttk.Button(body, text="Close", command=win.destroy), "dismiss").pack(pady=(12, 0))
         self._center_on_parent(win)
 
     def _open_preferences(self):
@@ -790,8 +806,8 @@ class ExtractorApp:
 
         win.bind("<Return>", lambda _event: save())
         buttons = ttk.Frame(body); buttons.pack(pady=(12, 0))
-        ttk.Button(buttons, text="Save", command=save).pack(side="left", padx=4)
-        ttk.Button(buttons, text="Cancel", command=win.destroy).pack(side="left", padx=4)
+        self._icon(ttk.Button(buttons, text="Save", command=save), "save").pack(side="left", padx=4)
+        self._icon(ttk.Button(buttons, text="Cancel", command=win.destroy), "dismiss").pack(side="left", padx=4)
         self._center_on_parent(win)
 
     def _about(self):
@@ -804,5 +820,5 @@ class ExtractorApp:
         link = ttk.Label(body, text=url, foreground=theme.palette(self.theme_mode)["link"], cursor="hand2")
         link.pack(anchor="w", pady=(2, 0))
         link.bind("<Button-1>", lambda e: webbrowser.open(url))
-        ttk.Button(body, text="Close", command=win.destroy).pack(pady=(14, 0))
+        self._icon(ttk.Button(body, text="Close", command=win.destroy), "dismiss").pack(pady=(14, 0))
         self._center_on_parent(win)
