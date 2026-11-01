@@ -21,6 +21,10 @@ def run_per_file(args, process, output_name=None):
         return process(args)
 
     items = [item for item in sorted(pathlib.Path(args.file_path).iterdir()) if item.is_file()]
+    if not items:
+        # Subfolders are not processed; an empty run is a failure, not a silent 0.
+        logging.error(f"No files to process in {args.file_path} (subfolders are not processed)")
+        return False
     all_ok = True
     for item in items:
         logging.info(f"Processing file: {item}")

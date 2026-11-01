@@ -8,8 +8,13 @@ import pathlib
 
 from cli_paths import BIN_PATH
 from detection import find_candidate_handlers
-from formats.base_extractor import default_output_dir
+from formats.base_extractor import STAGING_PREFIX, default_output_dir, remove_stale_staging
 from helpers import delete_source, run_per_file
+
+
+def _has_user_content(folder):
+    """Whether folder holds anything besides staging folders of runs in progress."""
+    return any(not name.startswith(STAGING_PREFIX) for name in os.listdir(folder))
 
 
 def resolve_output_dir(args, now=None):
@@ -29,7 +34,10 @@ def resolve_output_dir(args, now=None):
     else:
         output_dir = os.path.abspath(default_output_dir(str(args.file_path)))
 
-    if os.path.isdir(output_dir) and os.listdir(output_dir) and not getattr(args, "merge_output", False):
+    if os.path.isdir(output_dir):
+        remove_stale_staging(output_dir)  # left by a run that was killed (GUI Cancel)
+    if (os.path.isdir(output_dir) and _has_user_content(output_dir)
+            and not getattr(args, "merge_output", False)):
         stamp = (now or datetime.datetime.now()).strftime("%Y%m%d-%H%M%S")
         candidate, suffix = f"{output_dir}_{stamp}", 2
         while os.path.exists(candidate):
@@ -101,6 +109,7 @@ def extract_nested(files, args, depth):
     targets = [pathlib.Path(path) for path in files
                if os.path.basename(path) != "magic-extractor.log"]
 
+    failed = []
     for nested_path in targets:
         if not nested_path.is_file():
             continue
@@ -117,7 +126,16 @@ def extract_nested(files, args, depth):
         nested_args.file_path = nested_path
         nested_args.output_dir = None
         nested_args.open_output_folder = False
-        process_extraction(nested_args, depth + 1, candidates=candidates)
+        if not process_extraction(nested_args, depth + 1, candidates=candidates):
+            failed.append(nested_path)
+
+    if failed:
+        # Contract: recursion is best effort. A nested file can be a detection
+        # candidate without being an archive (every DLL of an installer is a PE
+        # candidate), so nested failures are reported here but do not change
+        # the exit code of the extraction that produced them.
+        logging.warning(f"{len(failed)} nested file(s) could not be extracted "
+                        f"(listed above); the exit code only reflects the top-level extraction.")
 
 
 def run_extract(args):
@@ -128,8 +146,9 @@ def run_extract(args):
     def extract_one(file_args):
         if not process_extraction(file_args):
             return False
-        if delete_after:
-            delete_source(file_args.file_path, use_recycle_bin)
+        if delete_after and not delete_source(file_args.file_path, use_recycle_bin):
+            logging.error(f"Extracted, but the source could not be deleted as asked: {file_args.file_path}")
+            return False
         return True
 
     return run_per_file(args, extract_one, output_name=batch_output_name)

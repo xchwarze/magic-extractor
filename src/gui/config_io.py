@@ -24,10 +24,20 @@ def config_bool(values, key):
     return str(values[key]).strip().lower() in TRUE_VALUES
 
 
+def _load(path):
+    """Parse config.ini like the CLI does: a UTF-8 BOM is fine; a malformed
+    file reads as empty instead of crashing the Preferences dialog."""
+    parser = configparser.ConfigParser()
+    try:
+        parser.read(path, encoding="utf-8-sig")
+    except (configparser.Error, UnicodeDecodeError):
+        parser = configparser.ConfigParser()
+    return parser
+
+
 def read_config(path):
     """Return the [settings] section as {key: str}; {} if the file/section is absent."""
-    parser = configparser.ConfigParser()
-    parser.read(path)
+    parser = _load(path)
     if not parser.has_section(SECTION):
         return {}
     return dict(parser.items(SECTION))
@@ -35,11 +45,10 @@ def read_config(path):
 
 def write_config(path, values):
     """Update keys under [settings], preserving other keys/sections; create as needed."""
-    parser = configparser.ConfigParser()
-    parser.read(path)
+    parser = _load(path)
     if not parser.has_section(SECTION):
         parser.add_section(SECTION)
     for key, value in values.items():
         parser.set(SECTION, key, str(value))
-    with open(path, "w") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         parser.write(fh)

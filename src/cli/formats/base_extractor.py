@@ -25,25 +25,82 @@ def _free_name(path):
     return path
 
 
-def merge_move(source, destination):
+def _same_path(first, second):
+    return os.path.normcase(os.path.abspath(first)) == os.path.normcase(os.path.abspath(second))
+
+
+def merge_move(source, destination, protect=None):
     """
     Move source to destination and return the path it ended up at. Folders are
     merged and a file replaces a file (like an extractor's overwrite-all), but
-    a file never replaces a folder or the other way round: the incoming one
-    gets a free "<name> (n)" instead, so nothing already there is deleted.
+    a file never replaces a folder or the other way round, and nothing ever
+    replaces ``protect`` (the archive being extracted, when it sits in the
+    output folder): the incoming one gets a free "<name> (n)" instead.
     """
     if os.path.isdir(source) and os.path.isdir(destination):
         for name in os.listdir(source):
-            merge_move(os.path.join(source, name), os.path.join(destination, name))
+            merge_move(os.path.join(source, name), os.path.join(destination, name), protect)
         os.rmdir(source)
         return destination
     if os.path.exists(destination):
-        if os.path.isdir(source) != os.path.isdir(destination):
+        if (os.path.isdir(source) != os.path.isdir(destination)
+                or (protect is not None and _same_path(destination, protect))):
             destination = _free_name(destination)
         else:
             os.remove(destination)
     shutil.move(source, destination)
     return destination
+
+
+def staging_owner_pid(name):
+    """PID encoded in a staging folder name (.mx_staging_<pid>_<uuid>), or None."""
+    if not name.startswith(STAGING_PREFIX):
+        return None
+    pid = name[len(STAGING_PREFIX):].split('_', 1)[0]
+    return int(pid) if pid.isdigit() else None
+
+
+def pid_alive(pid):
+    """Whether a process with this PID is running (never signals it)."""
+    if os.name == 'nt':
+        import ctypes
+        process_query_limited_information, still_active = 0x1000, 259
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+        if not handle:
+            return False
+        try:
+            exit_code = ctypes.c_ulong()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+                return False
+            return exit_code.value == still_active
+        finally:
+            kernel32.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def remove_stale_staging(folder):
+    """
+    Remove staging folders left by a run that was killed (e.g. GUI Cancel:
+    taskkill skips the cleanup), i.e. whose owner process is gone. Folders of
+    a run still in progress (or of an unknown owner) are kept.
+    """
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return
+    for name in names:
+        pid = staging_owner_pid(name)
+        if pid is None or pid == os.getpid() or pid_alive(pid):
+            continue
+        logging.info(f"Removing leftover staging folder of an interrupted run: {name}")
+        shutil.rmtree(os.path.join(folder, name), ignore_errors=True)
 
 
 class BaseExtractor:
@@ -118,7 +175,8 @@ class BaseExtractor:
             bool: True if the extraction succeeded and was moved into place.
         """
         final_dir = self.extract_directory
-        staging = os.path.join(final_dir, f'{STAGING_PREFIX}{uuid.uuid4().hex}')
+        # <pid> lets a later run recognise and remove it if this one gets killed.
+        staging = os.path.join(final_dir, f'{STAGING_PREFIX}{os.getpid()}_{uuid.uuid4().hex}')
         os.makedirs(staging)
         self.extract_directory = staging
         try:
@@ -129,7 +187,8 @@ class BaseExtractor:
                 logging.error(f"{type(self).__name__} reported success but extracted nothing")
                 return False
             self.extracted_names = [
-                os.path.basename(merge_move(os.path.join(staging, name), os.path.join(final_dir, name)))
+                os.path.basename(merge_move(os.path.join(staging, name), os.path.join(final_dir, name),
+                                            protect=self.target_file))
                 for name in extracted
             ]
             return True
