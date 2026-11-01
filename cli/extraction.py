@@ -31,11 +31,12 @@ def process_extraction(args, depth=0):
         bruteforce=getattr(args, "bruteforce", False),
     )
     for candidate in candidates:
+        logging.info(f"Trying handler: {candidate.__name__}")
         handler = candidate(cli_args=args, bin_path=BIN_PATH)
         handler.pre_extract_actions()
         if handler.extract():
             handler.post_extract_actions()
-            logging.info("Extraction completed successfully.")
+            logging.info(f"Extraction completed successfully using handler: {candidate.__name__}")
             if getattr(args, "recursive", False):
                 extract_nested(handler.extract_directory, args, depth)
             return True
