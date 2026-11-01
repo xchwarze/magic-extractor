@@ -26,6 +26,14 @@ class RunStreamingTest(unittest.TestCase):
         self.assertLess(time.monotonic() - start, 10)
 
 
+class DisplayCommandTest(unittest.TestCase):
+    def test_password_is_masked_in_the_log(self):
+        argv = runner.build_command(["mx.exe"], "extract", "a.7z", None, {"password": "s3cret"})
+        shown = " ".join(runner.display_command(argv))
+        self.assertNotIn("s3cret", shown)
+        self.assertIn("--password=***", shown)
+
+
 class BuildCommandTest(unittest.TestCase):
     PREFIX = ["magic-extractor.exe"]
 

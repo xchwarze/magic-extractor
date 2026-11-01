@@ -112,6 +112,11 @@ def read_version():
         return "dev"
 
 
+def display_command(argv):
+    """argv for the log pane, with the password masked."""
+    return ["--password=***" if arg.startswith("--password=") else arg for arg in argv]
+
+
 def password_arg(password):
     """`--password=<pw>`: a separate argument starting with '-' (e.g. "-secret")
     would be read by argparse as an option and fail with "expected one argument"."""

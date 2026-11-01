@@ -472,7 +472,7 @@ class ExtractorApp:
                     job_opts["delete_source"] = delete_flag
                 self.log_queue.put(f"=== {mode}: {src} ===")
                 argv = runner.build_command(prefix, mode, src, dest, job_opts)
-                self.log_queue.put("$ " + " ".join(argv))
+                self.log_queue.put("$ " + " ".join(runner.display_command(argv)))
                 code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
                 self.log_queue.put(f"[exit {code}]")
                 all_ok = all_ok and code == 0
