@@ -282,6 +282,29 @@ class RunStatusTest(AppTestCase):
         self.assertEqual(self.app.status.level, "error")
 
 
+class CallbackErrorTest(AppTestCase):
+    def test_a_failing_callback_is_logged_and_shown_not_lost(self):
+        # In the windowed exe Tk's default report goes to a stderr that does not exist.
+        self.root.after(0, lambda: 1 / 0)
+        with self.assertLogs(level="ERROR") as logs:
+            self.root.update()
+        self.assertIn("ZeroDivisionError", "\n".join(logs.output))
+        self.assertEqual(self.app.status.level, "error")
+        self.assertIn("ZeroDivisionError", self.app.status.full)
+        self.assertIn("[error] internal error: ZeroDivisionError", self.app.log.get("1.0", "end"))
+
+    def test_the_log_file_is_named_when_there_is_one(self):
+        with mock.patch.object(app_module.logging_setup, "log_path", return_value="X:/gui.log"), \
+                self.assertLogs(level="ERROR"):
+            self.app._report_callback_exception(ValueError, ValueError("boom"), None)
+        self.assertIn("(details in X:/gui.log)", self.app.log.get("1.0", "end"))
+
+    def test_the_hook_never_raises_even_with_the_window_gone(self):
+        self.app.log_pane.frame.destroy()
+        with self.assertLogs(level="ERROR"):
+            self.app._report_callback_exception(ValueError, ValueError("boom"), None)
+
+
 class StatusLayoutTest(AppTestCase):
     def test_the_bar_and_the_line_sit_under_the_log_and_start_idle(self):
         self.assertEqual(self.app.status.full, "Ready")

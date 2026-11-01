@@ -12,6 +12,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons
 from gui.icons.catalog import COMPACT, DISABLED, NORMAL
+from gui import logging_setup
 from gui.log_pane import LogPane, copy_to_clipboard, save_text
 from gui.menu_popup import ICON_GAP, Item, show_context_menu
 from gui.settings import GuiSettings
@@ -92,6 +93,8 @@ class ExtractorApp:
             self._autofill(force=True)
 
         self._bind_keys()
+        # Tk prints a failing callback to a stderr the windowed exe does not have.
+        self.root.report_callback_exception = self._report_callback_exception
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(100, self._drain_log)
         self.root.deiconify()  # geometry is set; reveal at the final position
@@ -540,6 +543,18 @@ class ExtractorApp:
         status = getattr(self, "status", None)
         if status is not None:
             status.set(text, level)
+
+    def _report_callback_exception(self, exc_type, exc, tb):
+        """Tk calls this when a callback raises: log the traceback and say so in the log
+        pane and the status line instead of losing it."""
+        logging.error("Unhandled error in a Tk callback", exc_info=(exc_type, exc, tb))
+        message = f"{exc_type.__name__}: {exc}"
+        where = logging_setup.log_path()
+        try:
+            self._append(f"[error] internal error: {message}" + (f" (details in {where})" if where else ""))
+            self._set_status(f"Internal error: {message}", "error")
+        except Exception:  # the error hook itself must never raise (e.g. window being destroyed)
+            logging.debug("could not show the callback error", exc_info=True)
 
     def _set_running(self, running):
         self._running = running

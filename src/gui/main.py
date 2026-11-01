@@ -1,4 +1,5 @@
 """Entry point for the Magic Extractor GUI."""
+import logging
 import os
 import sys
 
@@ -6,7 +7,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
-from gui import app_icon
+from gui import app_icon, logging_setup, runner
 from gui.app import ExtractorApp
 
 
@@ -44,16 +45,24 @@ def _enable_dpi_awareness():
 
 
 def main():
-    _enable_dpi_awareness()
-    app_icon.set_app_user_model_id()  # before the first window, so the taskbar uses our icon
-    root = _make_root()
-    app_icon.apply(root)
-    source, dest, mode = _parse_args(sys.argv[1:])
-    ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
-    scale = root.winfo_fpixels("1i") / 96.0  # 1.0 at 100%, 2.0 at 200%
-    root.minsize(int(460 * scale), int(360 * scale))
+    # First thing, so a failure below is recorded even in the windowed exe (no console).
+    logging_setup.configure(os.path.dirname(runner.resolve_gui_config_path()))
+    try:
+        _enable_dpi_awareness()
+        app_icon.set_app_user_model_id()  # before the first window, so the taskbar uses our icon
+        root = _make_root()
+        app_icon.apply(root)
+        source, dest, mode = _parse_args(sys.argv[1:])
+        ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
+        scale = root.winfo_fpixels("1i") / 96.0  # 1.0 at 100%, 2.0 at 200%
+        root.minsize(int(460 * scale), int(360 * scale))
+    except Exception as exc:
+        logging_setup.report_fatal("Magic Extractor", f"The window could not start: {exc}")
+        return 1
+    logging.info("Magic Extractor GUI %s started", runner.read_version())
     root.mainloop()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
