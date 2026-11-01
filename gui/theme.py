@@ -58,6 +58,18 @@ def toggle(root):
     return new_mode
 
 
+# Bootstrap 5.3 "alert-warning" colors (light / dark color mode).
+ALERT_WARNING = {
+    "light": {"bg": "#fff3cd", "fg": "#664d03", "border": "#ffe69c"},
+    "dark": {"bg": "#332701", "fg": "#ffda6a", "border": "#997404"},
+}
+
+
+def alert_colors(mode):
+    """Return {'bg', 'fg', 'border'} for a warning alert in the given mode."""
+    return ALERT_WARNING["dark" if mode == "dark" else "light"]
+
+
 def palette(mode):
     """Return {'bg':..., 'fg':...} for the given mode."""
     return DARK if mode == "dark" else LIGHT

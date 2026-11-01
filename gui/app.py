@@ -8,7 +8,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from gui import runner, config_io, theme, paths, history, context_menu
+from gui import runner, config_io, theme, paths, history, context_menu, option_warnings
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
@@ -33,6 +33,7 @@ GUI_LABELS = {
 }
 
 LOG_FILENAME = "magic-extractor.log"
+WARNING_SIGN = "\u26a0"  # shown at the start of an option's warning alert
 LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
 
 
@@ -577,17 +578,59 @@ class ExtractorApp:
         win.deiconify()
         theme.titlebar(win, self.theme_mode)  # dark title bar once the dialog is mapped
 
+    def _add_option_alert(self, container, key, variable):
+        """
+        A Bootstrap-style warning alert under an option, shown while the option
+        is in a risky state (see gui/option_warnings.py) and hidden otherwise.
+        """
+        if key not in option_warnings.OPTION_WARNINGS:
+            return
+        colors = theme.alert_colors(self.theme_mode)
+        alert = tk.Label(
+            container, justify="left", anchor="w", wraplength=380, padx=8, pady=6,
+            bg=colors["bg"], fg=colors["fg"], highlightthickness=1,
+            highlightbackground=colors["border"], highlightcolor=colors["border"],
+        )
+
+        def update(*_args):
+            text = option_warnings.warning_for(key, variable.get())
+            if text:
+                alert.config(text=WARNING_SIGN + "  " + text)
+                alert.pack(fill="x", padx=(22, 0), pady=(1, 6))
+            else:
+                alert.pack_forget()
+
+        trace = variable.trace_add("write", update)
+
+        def forget_trace(event):
+            # the variable outlives the dialog; drop the callback with the widget
+            if event.widget is container:
+                try:
+                    variable.trace_remove("write", trace)
+                except tk.TclError:
+                    pass
+
+        container.bind("<Destroy>", forget_trace, add="+")
+        update()
+
+    def _option_check(self, parent, key, text, variable, pady=1):
+        """A Checkbutton with its warning alert (if it has one) right below it."""
+        row = ttk.Frame(parent)
+        row.pack(fill="x", anchor="w")
+        ttk.Checkbutton(row, text=text, variable=variable).pack(anchor="w", pady=pady)
+        self._add_option_alert(row, key, variable)
+
     def _open_run_options(self):
         win, body = self._make_dialog("Run options")
 
         opts = ttk.LabelFrame(body, text="Extraction", padding=10)
         opts.pack(fill="x")
-        ttk.Checkbutton(opts, text="Recursive (extract nested archives)", variable=self.opt_recursive).pack(anchor="w", pady=2)
+        self._option_check(opts, "recursive", "Recursive (extract nested archives)", self.opt_recursive, pady=2)
         row = ttk.Frame(opts); row.pack(anchor="w", pady=2)
         ttk.Label(row, text="Max depth:").pack(side="left")
         ttk.Spinbox(row, from_=1, to=99, width=5, textvariable=self.opt_max_depth).pack(side="left", padx=6)
-        ttk.Checkbutton(opts, text="Bruteforce (try every handler)", variable=self.opt_bruteforce).pack(anchor="w", pady=2)
-        ttk.Checkbutton(opts, text="Fast type check (first 64 KB only)", variable=self.opt_fast_check).pack(anchor="w", pady=2)
+        self._option_check(opts, "bruteforce", "Bruteforce (try every handler)", self.opt_bruteforce, pady=2)
+        self._option_check(opts, "fast_check", "Fast type check (first 64 KB only)", self.opt_fast_check, pady=2)
         row = ttk.Frame(opts); row.pack(anchor="w", pady=2, fill="x")
         ttk.Label(row, text="Password:").pack(side="left")
         ttk.Entry(row, textvariable=self.opt_password, show="*").pack(side="left", padx=6, fill="x", expand=True)
@@ -598,6 +641,7 @@ class ExtractorApp:
                              ("ask", "Ask before deleting the source"),
                              ("delete", "Delete the source file")):
             ttk.Radiobutton(after, text=label, variable=self.opt_delete, value=value).pack(anchor="w", pady=1)
+        self._add_option_alert(after, "delete_source", self.opt_delete)
 
         ttk.Button(body, text="Close", command=win.destroy).pack(pady=(12, 0))
         self._center_on_parent(win)
@@ -611,15 +655,16 @@ class ExtractorApp:
         extraction = ttk.LabelFrame(body, text="Extraction", padding=10)
         extraction.pack(fill="x")
         for key in CONFIG_KEYS:
-            ttk.Checkbutton(extraction, text=CONFIG_LABELS[key], variable=cfg_vars[key]).pack(anchor="w", pady=1)
+            self._option_check(extraction, key, CONFIG_LABELS[key], cfg_vars[key])
 
         interface = ttk.LabelFrame(body, text="Interface", padding=10)
         interface.pack(fill="x", pady=(10, 0))
-        ttk.Checkbutton(interface, text=GUI_LABELS["auto_fill_destination"], variable=self.auto_fill).pack(anchor="w", pady=1)
-        ttk.Checkbutton(interface, text=GUI_LABELS["keep_open"], variable=self.keep_open).pack(anchor="w", pady=1)
-        ttk.Checkbutton(interface, text=GUI_LABELS["always_on_top"], variable=self.always_on_top).pack(anchor="w", pady=1)
-        ttk.Checkbutton(interface, text=GUI_LABELS["debug"], variable=self.opt_debug).pack(anchor="w", pady=1)
-        ttk.Checkbutton(interface, text=GUI_LABELS["history_enabled"], variable=self.history_enabled).pack(anchor="w", pady=1)
+        for key, variable in (("auto_fill_destination", self.auto_fill),
+                              ("keep_open", self.keep_open),
+                              ("always_on_top", self.always_on_top),
+                              ("debug", self.opt_debug),
+                              ("history_enabled", self.history_enabled)):
+            self._option_check(interface, key, GUI_LABELS[key], variable)
 
         def save():
             config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
