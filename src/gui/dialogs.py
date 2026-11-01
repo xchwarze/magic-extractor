@@ -152,6 +152,7 @@ def present(window, parent, mode, initial_focus=None, modal=True):
     can restore them when dialogs are nested.
     """
     window.previous_grab, window.previous_focus = _current_grab_and_focus(window)
+    theme.apply_widget_tree(window, mode)  # entry fonts etc., before the size is measured
     center_window(window, parent)  # placed while still withdrawn: never flashes at a default spot
     window.deiconify()
     _reclamp(window, work_area(window, near=parent))

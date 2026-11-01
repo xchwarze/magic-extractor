@@ -6,6 +6,7 @@ bar. All third-party imports degrade gracefully: if sv-ttk / darkdetect /
 pywinstyles are missing, the GUI still runs with the default ttk look.
 """
 import sys
+import tkinter as tk
 
 try:
     import sv_ttk
@@ -18,9 +19,14 @@ except ImportError:
     darkdetect = None
 
 # Palette for non-ttk widgets sv-ttk does not skin.
-# hint/link pass the 4.5:1 contrast target on their bg (WCAG AA body text).
-DARK = {"bg": "#1c1c1c", "fg": "#fafafa", "hint": "#a0a0a0", "link": "#6ea8fe"}
-LIGHT = {"bg": "#ffffff", "fg": "#000000", "hint": "#6c757d", "link": "#0a58ca"}
+# hint/link pass the 4.5:1 contrast target on their bg (WCAG AA body text); muted is the
+# secondary text of ttk labels (Muted.TLabel) and passes it on sv-ttk's own surface, which is
+# #fafafa in light mode (hint, made for the white Text, is 4.49:1 there). accent is sv-ttk's
+# accent, border a hairline, select_fg the text drawn on the accent (a selection).
+DARK = {"bg": "#1c1c1c", "fg": "#fafafa", "hint": "#a0a0a0", "link": "#6ea8fe",
+        "muted": "#a0a0a0", "border": "#3a3a3a", "accent": "#57c8ff", "select_fg": "#000000"}
+LIGHT = {"bg": "#ffffff", "fg": "#000000", "hint": "#6c757d", "link": "#0a58ca",
+         "muted": "#666666", "border": "#d6d6d6", "accent": "#005fb8", "select_fg": "#ffffff"}
 THEMES = ("auto", "dark", "light")
 
 
@@ -48,7 +54,11 @@ def current(root):
 def apply(root, mode):
     """Apply mode ('dark'/'light') to ttk widgets + the Windows title bar + native menus."""
     if sv_ttk is not None:
-        sv_ttk.set_theme(mode)
+        # A set_theme to the theme already in use would re-fire <<ThemeChanged>> and
+        # re-skin every widget for nothing.
+        if sv_ttk.get_theme(root) != mode:
+            sv_ttk.set_theme(mode, root)
+    _muted_label_style(root, mode)  # ttk styles are per theme: redo it after every switch
     _title_bar(root, mode)
     _dark_menu_popups(mode)
 
@@ -131,10 +141,63 @@ def palette(mode):
 
 
 def restyle_text(widget, mode):
-    """Recolor a tk.Text (not covered by sv-ttk)."""
+    """Recolor a tk.Text (not covered by sv-ttk): colors, selection and a flat border."""
     colors = palette(mode)
-    widget.config(bg=colors["bg"], fg=colors["fg"], insertbackground=colors["fg"])
+    widget.config(
+        bg=colors["bg"], fg=colors["fg"], insertbackground=colors["fg"],
+        selectbackground=colors["accent"], selectforeground=colors["select_fg"],
+        # a selection stays visible while another widget has the focus
+        inactiveselectbackground=colors["border"],
+        # Tk's default 3D relief clashes with Sun Valley: a flat 1 px frame, accent when focused
+        relief="flat", borderwidth=0, highlightthickness=1,
+        highlightbackground=colors["border"], highlightcolor=colors["accent"],
+    )
     widget.tag_config("hint", foreground=colors["hint"])
+
+
+def restyle_canvas(widget):
+    """Match a tk.Canvas to the ttk surface it sits on (sv-ttk's, not the Text palette's)."""
+    from tkinter import ttk
+
+    try:
+        widget.config(bg=ttk.Style(widget).lookup(".", "background") or palette(current(widget))["bg"])
+    except tk.TclError:
+        pass
+
+
+def apply_widget_tree(widget, mode):
+    """Theme what sv-ttk leaves out, below ``widget``: Text and Canvas colors, and the entry font.
+
+    sv-ttk swaps the font of Entry/Combobox/Spinbox only on <<ThemeChanged>>, so widgets
+    created later (a dialog's Password box, the Max depth spinner) would keep the smaller
+    default font. Call it once a dialog is built, before it is measured.
+    """
+    try:
+        widget_class = str(widget.winfo_class())
+        children = widget.winfo_children()
+    except tk.TclError:  # destroyed while walking
+        return
+    if widget_class == "Text":
+        restyle_text(widget, mode)
+    elif widget_class == "Canvas":
+        restyle_canvas(widget)
+    elif widget_class in ("TEntry", "TCombobox", "TSpinbox") and sv_ttk is not None:
+        try:
+            widget.tk.call("config_entry_font", widget)  # sv-ttk's own proc
+        except tk.TclError:
+            pass
+    for child in children:
+        apply_widget_tree(child, mode)
+
+
+def _muted_label_style(root, mode):
+    """``Muted.TLabel``: a TLabel in the secondary-text color (sv-ttk has none)."""
+    from tkinter import ttk
+
+    try:
+        ttk.Style(root).configure("Muted.TLabel", foreground=palette(mode)["muted"])
+    except tk.TclError:
+        pass
 
 
 def restyle_toplevel(win, mode):
@@ -180,21 +243,41 @@ def _dark_menu_popups(mode):
         pass
 
 
+def _frame_hwnd(win):
+    """HWND of the native frame around a Tk window (``winfo_id`` is its client child).
+
+    update_idletasks realizes the window without running event handlers.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    win.update_idletasks()
+    user32 = ctypes.WinDLL("user32", use_last_error=True)  # private: own prototypes
+    user32.GetParent.restype = wintypes.HWND
+    user32.GetParent.argtypes = (wintypes.HWND,)
+    return int(user32.GetParent(win.winfo_id()) or win.winfo_id())
+
+
 def _title_bar(root, mode):
     """Dark title bar on Windows; no-op elsewhere and on any failure."""
     if sys.platform != "win32":
         return
     try:
+        hwnd = _frame_hwnd(root)
+    except (AttributeError, OSError, tk.TclError):
+        return
+    # pywinstyles gets the HWND, not the widget: given a widget it calls root.update(),
+    # which re-enters the event loop (queued callbacks run in the middle of building the
+    # window) and forces a full layout and paint pass.
+    try:
         import pywinstyles
-        pywinstyles.apply_style(root, "dark" if mode == "dark" else "normal")
+        pywinstyles.apply_style(hwnd, "dark" if mode == "dark" else "normal")
         return
     except Exception:
         pass
     # Fallback: raw DWM attribute (DWMWA_USE_IMMERSIVE_DARK_MODE = 20).
     try:
         import ctypes
-        root.update_idletasks()
-        hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
         value = ctypes.c_int(2 if mode == "dark" else 0)
         ctypes.windll.dwmapi.DwmSetWindowAttribute(
             hwnd, 20, ctypes.byref(value), ctypes.sizeof(value)

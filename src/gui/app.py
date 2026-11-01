@@ -913,7 +913,7 @@ class ExtractorApp:
             return
         win, body = self._make_dialog("About")
         ttk.Label(body, text="Magic Extractor", font=("", 12, "bold")).pack(anchor="w")
-        ttk.Label(body, text="Universal extraction tool.").pack(anchor="w", pady=(2, 10))
+        ttk.Label(body, text="Universal extraction tool.", style="Muted.TLabel").pack(anchor="w", pady=(2, 10))
         ttk.Label(body, text=f"Version: {runner.read_version()}").pack(anchor="w")
         ttk.Label(body, text="Author: DSR! (xchwarze)").pack(anchor="w")
         url = "https://github.com/xchwarze/magic-extractor"
