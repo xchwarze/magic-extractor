@@ -1,6 +1,8 @@
 import os
 import uuid
 import shutil
+import tempfile
+import contextlib
 import subprocess
 import logging
 import warnings
@@ -101,6 +103,80 @@ def remove_stale_staging(folder):
             continue
         logging.info(f"Removing leftover staging folder of an interrupted run: {name}")
         shutil.rmtree(os.path.join(folder, name), ignore_errors=True)
+
+
+def _is_ascii(text):
+    return all(ord(char) < 128 for char in text)
+
+
+def _short_folder(folder):
+    """The 8.3 form of an existing folder (Windows), or the folder unchanged."""
+    if os.name != 'nt':
+        return folder
+    import ctypes
+    buffer = ctypes.create_unicode_buffer(32768)
+    if ctypes.windll.kernel32.GetShortPathNameW(folder, buffer, len(buffer)):
+        return buffer.value
+    return folder
+
+
+@contextlib.contextmanager
+def ascii_path(path):
+    """
+    Yield a pure-ASCII path to the existing file `path`, for old tools that
+    only take ANSI command lines (unace, uharc fail on e.g. "архив.ace").
+
+    A non-ASCII path becomes a hard link (or, across volumes, a copy) with an
+    ASCII name in a temporary folder, removed afterwards. The file's own 8.3
+    short name is not enough: those tools resolve it back to the long name
+    through the ANSI API and then cannot open it; a short *folder* is fine.
+    """
+    path = os.path.abspath(path)
+    if _is_ascii(path):
+        yield path
+        return
+    work_dir = tempfile.mkdtemp(prefix='mx_ascii_')
+    try:
+        extension = os.path.splitext(path)[1]
+        name = 'source' + (extension if _is_ascii(extension) else '')
+        link = os.path.join(work_dir, name)
+        try:
+            os.link(path, link)
+        except OSError:
+            shutil.copy2(path, link)
+        safe = os.path.join(_short_folder(work_dir), name)
+        if not _is_ascii(safe):
+            logging.warning(f"No ASCII path available for an ANSI-only tool: {safe}")
+        logging.debug(f"Using an ASCII-named link for an ANSI-only tool: {safe}")
+        yield safe
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
+
+
+@contextlib.contextmanager
+def ascii_folder(folder):
+    """
+    Yield a pure-ASCII path to write into instead of the existing `folder`,
+    for old tools that work in their current directory through the ANSI API
+    (unace extracts nothing when it is e.g. "выход"): the folder itself if
+    ASCII, else its 8.3 short form, else a temporary ASCII folder whose
+    content is moved into `folder` afterwards.
+    """
+    folder = os.path.abspath(folder)
+    if _is_ascii(folder):
+        yield folder
+        return
+    short = _short_folder(folder)
+    if _is_ascii(short):
+        yield short
+        return
+    work_dir = tempfile.mkdtemp(prefix='mx_ascii_out_')
+    try:
+        yield work_dir
+        for name in os.listdir(work_dir):
+            merge_move(os.path.join(work_dir, name), os.path.join(folder, name))
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
 
 
 class BaseExtractor:

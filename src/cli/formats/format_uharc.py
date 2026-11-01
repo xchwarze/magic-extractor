@@ -1,7 +1,7 @@
 import os
 import subprocess
 import logging
-from .base_extractor import BaseExtractor
+from .base_extractor import BaseExtractor, ascii_path
 
 class FormatUharcHandler(BaseExtractor):
     """
@@ -23,9 +23,12 @@ class FormatUharcHandler(BaseExtractor):
         Returns:
             bool: True if the extraction was successful, False otherwise.
         """
-        for uharc_version in self.UHARC_VERSIONS:
-            if self.try_extract_with_uharc(uharc_version, self.target_file, self.extract_directory):
-                return True
+        # uharc only takes ANSI paths: an ASCII path to the archive, and the
+        # output folder as cwd instead of -t<folder> (works whatever its name).
+        with ascii_path(self.target_file) as archive:
+            for uharc_version in self.UHARC_VERSIONS:
+                if self.try_extract_with_uharc(uharc_version, archive, self.extract_directory):
+                    return True
 
         logging.error("Failed to extract UHARC file with all provided versions.")
         return False
@@ -44,9 +47,8 @@ class FormatUharcHandler(BaseExtractor):
         """
         command_list = [
             os.path.join(self.extractors_path, 'uharc', uharc_version),
-            'x',                        # Extract files
+            'x',                        # Extract files (into the cwd = extract_directory)
             '-o+',                      # Overwrite existing files (- = never, + = always, p = prompt)
-            f'-t{extract_directory}',   # Target directory
         ]
         # -pw<password> exists from v0.4 on (v0.2 has no encryption switch).
         if self.cli_args.password and uharc_version != 'uharc-v0.2.exe':
@@ -54,9 +56,12 @@ class FormatUharcHandler(BaseExtractor):
         command_list.append(file_path)  # File to extract
 
         try:
-            self.run_command(command_list)  # raises on non-zero
+            self.run_command(command_list, workdir=extract_directory)  # raises on non-zero
             logging.info(f"Successfully extracted using {uharc_version}")
             return True
         except subprocess.CalledProcessError as exc:
             logging.error(f"Failed to extract with {uharc_version}: {exc.stderr}")
+            return False
+        except OSError as exc:  # e.g. this version's exe is missing: try the next one
+            logging.error(f"Could not run {uharc_version}: {exc}")
             return False
