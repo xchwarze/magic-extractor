@@ -41,13 +41,13 @@ class LoggingSetupTest(unittest.TestCase):
         path = logging_setup.configure(self.tmp, frozen=True)
         self.assertEqual(path, os.path.join(self.tmp, "gui.log"))
         self.assertEqual(logging_setup.log_path(), path)
-        logging.error("something broke: %s", "архив")
+        logging.error("something broke: %s", "\u0430\u0440\u0445\u0438\u0432")
         for handler in self.file_handlers():
             handler.flush()
         with open(path, encoding="utf-8") as handle:
             content = handle.read()
         self.assertIn("ERROR", content)
-        self.assertIn("something broke: архив", content)
+        self.assertIn("something broke: \u0430\u0440\u0445\u0438\u0432", content)
 
     def test_configuring_twice_adds_one_handler(self):
         logging_setup.configure(self.tmp, frozen=True)

@@ -138,7 +138,7 @@ class LogMenuTest(AppTestCase):
         self.assertIn("could not copy", self.app.log.get("1.0", "end").lower())
 
     def test_save_as_writes_the_output_as_utf8(self):
-        line = "extracting архив.zip"
+        line = "extracting \u0430\u0440\u0445\u0438\u0432.zip"
         self.app._append(line)
         target = os.path.join(self.tmp, "saved.log")
         with mock.patch.object(app_module.filedialog, "asksaveasfilename", return_value=target):

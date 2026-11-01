@@ -13,7 +13,7 @@ SHIFT, CONTROL, ALT = 0x1, 0x4, 0x20000
 class EditingKeyTest(unittest.TestCase):
     def test_typing_and_deleting_are_blocked(self):
         for keysym, char in (("a", "a"), ("space", " "), ("BackSpace", "\b"), ("Delete", "\x7f"),
-                             ("Return", "\r"), ("KP_Enter", "\r"), ("eacute", "é")):
+                             ("Return", "\r"), ("KP_Enter", "\r"), ("eacute", "\u00e9")):
             self.assertTrue(is_editing_key(0, keysym, char), keysym)
 
     def test_navigation_and_selection_keys_are_allowed(self):
@@ -33,6 +33,12 @@ class EditingKeyTest(unittest.TestCase):
 
     def test_alt_accelerators_are_left_alone(self):
         self.assertFalse(is_editing_key(ALT, "f", "f"))
+
+    def test_altgr_characters_are_blocked(self):
+        # Windows reports AltGr as Control+Alt: "@" on a German keyboard is AltGr+Q.
+        self.assertTrue(is_editing_key(CONTROL | ALT, "at", "@"))
+        self.assertTrue(is_editing_key(CONTROL | ALT, "EuroSign", chr(0x20AC)))
+        self.assertFalse(is_editing_key(CONTROL | ALT, "Left", ""))
 
 
 class TkTestCase(unittest.TestCase):

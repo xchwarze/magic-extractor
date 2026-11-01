@@ -34,9 +34,11 @@ def is_editing_key(state, keysym, char):
     """
     state = state if isinstance(state, int) else 0
     keysym = str(keysym)
-    if state & _ALT:
+    # Windows reports AltGr as Control+Alt: that is typing ("@" on a German keyboard), not a shortcut.
+    alt_gr = bool(state & _ALT and state & _CONTROL)
+    if state & _ALT and not alt_gr:
         return False
-    if state & _CONTROL:
+    if state & _CONTROL and not alt_gr:
         return keysym in _EDITING_KEYSYMS or keysym.lower() in _EDITING_CONTROL_LETTERS
     if keysym == "Insert":
         return bool(state & _SHIFT)  # Shift+Insert pastes; Insert alone only toggles overwrite

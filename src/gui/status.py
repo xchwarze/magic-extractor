@@ -12,7 +12,7 @@ from gui import theme
 from gui.surfaces import surface
 from gui.tooltip import Tooltip
 
-ELLIPSIS = "…"
+ELLIPSIS = "\u2026"
 
 # mode -> (verb while running, what success is called, what failure is called, level of a failure)
 _MODES = {
