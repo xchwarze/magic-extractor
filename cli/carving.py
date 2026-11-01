@@ -10,9 +10,15 @@ from detection_filter import is_generic_detection
 from extraction import process_extraction
 from file_type import binwalk_file_map
 from formats import get_handlers_from_detection
+from helpers import run_per_file
 
 
 def process_carve(args):
+    """Carve a file, or each file of a directory (one at a time)."""
+    return run_per_file(args, _carve_file, output_name=lambda item, _items: f"{item.name}_carved")
+
+
+def _carve_file(args):
     """List or carve embedded blobs at offsets reported by binwalk."""
     entries = binwalk_file_map(args.file_path, BIN_PATH)
     if not entries:
@@ -51,6 +57,7 @@ def process_carve(args):
         data = source_fh.read()
 
     carved_any = False
+    extractions_ok = True
     for index, entry in selected:
         name = (entry.get("name") or "").lower()
         offset = entry.get("offset", 0) or 0
@@ -84,8 +91,11 @@ def process_carve(args):
                 recursive=False,
                 open_output_folder=False,
             )
-            process_extraction(nested_args)
+            if not process_extraction(nested_args):
+                extractions_ok = False
+                logging.error(f"Carved [{index}] {name} could not be extracted: {carved_path}")
 
     if not carved_any:
         logging.error(f"No matching data to carve in {args.file_path}")
-    return carved_any
+    # Success means everything with a handler was carved AND extracted.
+    return carved_any and extractions_ok

@@ -1,6 +1,7 @@
 """File detection and ordered handler candidate selection."""
 
 import logging
+import os
 
 from cli_paths import BIN_PATH
 from detection_filter import filter_detections, filter_mimes
@@ -28,6 +29,11 @@ PE_INSTALLER_FALLBACK = (
 
 def detector_outputs(file_path, fast_check):
     """Yield each detector's MIME types and labels, cheapest detector first."""
+    if not os.path.isfile(file_path):
+        # Detectors work on one file at a time; a directory makes DIE, puremagic
+        # and the signature reader fail with confusing errors.
+        logging.error(f"Not a file, skipping detection: {file_path}")
+        return
     mime_types = determine_file_type_with_magic(
         file_path=file_path, fast_check=fast_check
     )

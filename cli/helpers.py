@@ -1,5 +1,39 @@
 import os
 import logging
+import argparse
+import pathlib
+
+
+def run_per_file(args, process, output_name=None):
+    """
+    Run ``process(args)`` on ``args.file_path``, or once per file when it is a
+    directory (non-recursive, sorted). Detectors and extractors only ever get
+    one file at a time, never the directory itself.
+
+    ``output_name(item, items) -> str``: each file of the directory gets its
+    own ``<base>/<output_name(item, items)>`` folder, where ``base`` is
+    ``args.output_dir`` or else the file's own folder, so no two files of the
+    directory write into the same one. ``items`` are all the files of the run.
+
+    Returns True only if every file succeeded.
+    """
+    if not os.path.isdir(args.file_path):
+        return process(args)
+
+    items = [item for item in sorted(pathlib.Path(args.file_path).iterdir()) if item.is_file()]
+    all_ok = True
+    for item in items:
+        logging.info(f"Processing file: {item}")
+        item_args = argparse.Namespace(**vars(args))
+        item_args.file_path = item
+        if output_name:
+            output_dir = getattr(args, "output_dir", None)
+            base = pathlib.Path(output_dir) if output_dir else item.parent
+            item_args.output_dir = base / output_name(item, items)
+        if not process(item_args):
+            all_ok = False
+            logging.error(f"Failed for file: {item}")
+    return all_ok
 
 def delete_source(path, use_recycle_bin=True):
     """

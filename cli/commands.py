@@ -1,6 +1,7 @@
 """Read-only CLI commands: identify and list."""
 
 import logging
+import os
 
 from cli_paths import BIN_PATH
 from detection import (
@@ -10,9 +11,27 @@ from detection import (
     find_candidate_handlers,
 )
 from detection_filter import filter_detections, filter_mimes
+from helpers import run_per_file
 
 
 def process_identify(args):
+    """Identify a file, or each file of a directory (one at a time)."""
+    return run_per_file(args, _identify_file)
+
+
+def process_list(args):
+    """List a file, or each file of a directory (one at a time)."""
+    many = os.path.isdir(args.file_path)
+
+    def list_one(file_args):
+        if many:
+            print(f"File: {file_args.file_path}")
+        return _list_file(file_args)
+
+    return run_per_file(args, list_one)
+
+
+def _identify_file(args):
     """Print detector results and candidate handlers without extracting."""
     outputs = list(detector_outputs(args.file_path, args.fast_check))
     print(f"File: {args.file_path}")
@@ -34,7 +53,7 @@ def process_identify(args):
     return False
 
 
-def process_list(args):
+def _list_file(args):
     """List contents with the first candidate handler that supports listing."""
     candidates = find_candidate_handlers(
         file_path=args.file_path, fast_check=args.fast_check
