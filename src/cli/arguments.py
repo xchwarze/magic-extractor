@@ -171,8 +171,9 @@ def configure_parser():
     extract_parser.add_argument(
         "--merge-output",
         help=(
-            "Extract into the output folder even if it already has files "
-            "(default: use a new <folder>_<YYYYmmdd-HHMMSS> folder instead)"
+            "Extract into the output folder even if it already has files, "
+            "overwriting files and folders with the same names (never the archive "
+            "being extracted). Default: use a new <folder>_<YYYYmmdd-HHMMSS> folder"
         ),
         action="store_true",
     )

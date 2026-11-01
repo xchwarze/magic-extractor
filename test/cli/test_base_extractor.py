@@ -65,12 +65,30 @@ class MergeMoveTest(unittest.TestCase):
         with open(os.path.join(self.tmp, "dst", "same.txt")) as fh:
             self.assertEqual(fh.read(), "new")
 
-    def test_file_never_replaces_a_folder(self):
+    def test_merge_overwrites_everything_even_a_folder_with_a_file(self):
+        # --merge-output contract: the archive's version wins, whatever was there.
         self._write("src/data", "file from the archive")
         self._write("dst/data/keep.txt", "user folder")
         final = merge_move(os.path.join(self.tmp, "src", "data"), os.path.join(self.tmp, "dst", "data"))
-        self.assertEqual(os.path.basename(final), "data (1)")
-        self.assertTrue(os.path.isfile(os.path.join(self.tmp, "dst", "data", "keep.txt")))
+        self.assertEqual(os.path.basename(final), "data")
+        with open(final) as fh:
+            self.assertEqual(fh.read(), "file from the archive")
+
+    def test_merge_overwrites_a_file_with_a_folder(self):
+        self._write("src/data/new.txt", "from the archive")
+        self._write("dst/data", "user file")
+        final = merge_move(os.path.join(self.tmp, "src", "data"), os.path.join(self.tmp, "dst", "data"))
+        self.assertEqual(os.path.basename(final), "data")
+        self.assertTrue(os.path.isfile(os.path.join(final, "new.txt")))
+
+    def test_a_folder_holding_the_source_archive_is_never_replaced(self):
+        archive = self._write("dst/sub/outer.zip", "THE ARCHIVE")
+        self._write("src/sub", "a file named like the folder")
+        final = merge_move(os.path.join(self.tmp, "src", "sub"), os.path.join(self.tmp, "dst", "sub"),
+                           protect=archive)
+        self.assertEqual(os.path.basename(final), "sub (1)")
+        with open(archive) as fh:
+            self.assertEqual(fh.read(), "THE ARCHIVE")
 
 
 class PeaHeaderGuardTest(unittest.TestCase):

@@ -31,13 +31,23 @@ def _same_path(first, second):
     return os.path.normcase(os.path.abspath(first)) == os.path.normcase(os.path.abspath(second))
 
 
+def _holds(folder, path):
+    """Whether ``path`` is ``folder`` itself or lies inside it."""
+    folder = os.path.normcase(os.path.abspath(folder))
+    path = os.path.normcase(os.path.abspath(path))
+    return path == folder or path.startswith(folder.rstrip(os.sep) + os.sep)
+
+
 def merge_move(source, destination, protect=None):
     """
-    Move source to destination and return the path it ended up at. Folders are
-    merged and a file replaces a file (like an extractor's overwrite-all), but
-    a file never replaces a folder or the other way round, and nothing ever
-    replaces ``protect`` (the archive being extracted, when it sits in the
-    output folder): the incoming one gets a free "<name> (n)" instead.
+    Move source to destination and return the path it ended up at.
+
+    --merge-output contract: the archive's version overwrites everything with
+    the same name. Folders are merged; a file replaces a file, a folder or a
+    file replaces the other kind. The one exception is ``protect`` (the archive
+    being extracted, when it sits in the output folder): neither it nor a
+    folder holding it is ever replaced; the incoming entry gets a free
+    "<name> (n)" instead.
     """
     if os.path.isdir(source) and os.path.isdir(destination):
         for name in os.listdir(source):
@@ -45,9 +55,10 @@ def merge_move(source, destination, protect=None):
         os.rmdir(source)
         return destination
     if os.path.exists(destination):
-        if (os.path.isdir(source) != os.path.isdir(destination)
-                or (protect is not None and _same_path(destination, protect))):
+        if protect is not None and _holds(destination, protect):
             destination = _free_name(destination)
+        elif os.path.isdir(destination):
+            shutil.rmtree(destination)
         else:
             os.remove(destination)
     shutil.move(source, destination)
