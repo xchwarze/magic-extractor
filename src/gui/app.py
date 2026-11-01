@@ -12,6 +12,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons
 from gui.icons.catalog import COMPACT
+from gui.log_pane import LogPane
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
 
@@ -74,7 +75,7 @@ class ExtractorApp:
         self._build_body()
         theme.apply(self.root, self.theme_mode)
         theme.scale_theme_fonts(self.root)  # sv-ttk fonts follow the display scaling
-        theme.restyle_text(self.log, self.theme_mode)
+        self.log_pane.restyle(self.theme_mode)
         self.menubar.recolor(self.theme_mode)
         self._enable_dnd()
         self._apply_window_prefs()
@@ -267,13 +268,10 @@ class ExtractorApp:
 
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
 
-        # Log pane
-        self.log = tk.Text(frm, height=14, state="disabled", wrap="word",
-                           relief="flat", borderwidth=1, padx=8, pady=6)
-        self.log.pack(fill="both", expand=True, **pad)
-        self.log.tag_config("hint", foreground=theme.palette(self.theme_mode)["hint"])
-        self._log_empty = True
-        self._show_placeholder()
+        # Log pane: read-only, scrollable, bounded (gui/log_pane.py)
+        self.log_pane = LogPane(frm, LOG_PLACEHOLDER, self.theme_mode)
+        self.log_pane.frame.pack(fill="both", expand=True, **pad)
+        self.log = self.log_pane.text
         self._sync_mode()
 
     # ---- helpers ---------------------------------------------------------
@@ -415,26 +413,13 @@ class ExtractorApp:
         self.settings.set("history", "dests", history.join(self._dst_hist))
         self._save_gui_ini()
 
-    def _show_placeholder(self):
-        self.log.config(state="normal")
-        self.log.delete("1.0", "end")
-        self.log.insert("1.0", LOG_PLACEHOLDER, ("hint",))
-        self.log.config(state="disabled")
-        self._log_empty = True
-
     LOG_BATCH = 500  # lines per main-loop tick, so a flood never freezes the UI
 
     def _append(self, text):
-        self.log.config(state="normal")
-        if self._log_empty:
-            self.log.delete("1.0", "end")  # drop the placeholder on first real line
-            self._log_empty = False
-        self.log.insert("end", text + "\n")
-        self.log.see("end")
-        self.log.config(state="disabled")
+        self.log_pane.append(text)
 
     def _clear_log(self):
-        self._show_placeholder()
+        self.log_pane.clear()
 
     def _open_log_folder(self):
         self._open_path(self._current_output_dir())
@@ -631,7 +616,7 @@ class ExtractorApp:
         self._theme_forced = True
         theme.scale_theme_fonts(self.root)
         self.icons.retheme(self.theme_mode)
-        theme.restyle_text(self.log, self.theme_mode)
+        self.log_pane.restyle(self.theme_mode)
         self.menubar.recolor(self.theme_mode)
 
     # ---- dialogs ---------------------------------------------------------
