@@ -7,6 +7,7 @@ import sys
 import threading
 import webbrowser
 import tkinter as tk
+import tkinter.font as tkfont
 from tkinter import filedialog, messagebox, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings
@@ -80,6 +81,7 @@ class ExtractorApp:
         if initial_source and not initial_dest:
             self._autofill(force=True)
 
+        self._bind_keys()
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(100, self._drain_log)
         self.root.deiconify()  # geometry is set; reveal at the final position
@@ -169,35 +171,49 @@ class ExtractorApp:
             self.log_queue.put(f"[settings] could not save gui.ini: {exc}")
 
     # ---- UI construction -------------------------------------------------
+    # Keyboard access to every action (the self-drawn menu bar is mouse-only).
+    SHORTCUTS = (
+        ("<Control-o>", "_browse_source"), ("<Control-d>", "_browse_dest"),
+        ("<Control-l>", "_clear_log"), ("<Control-b>", "_on_batch"),
+        ("<Control-r>", "_open_run_options"), ("<Control-comma>", "_open_preferences"),
+        ("<Control-t>", "_toggle_theme"), ("<F1>", "_about"), ("<Control-q>", "_on_close"),
+    )
+
+    def _bind_keys(self):
+        for sequence, method in self.SHORTCUTS:
+            self.root.bind(sequence, lambda _event, m=method: getattr(self, m)())
+        # Enter runs OK from the main window (not while a run is going).
+        self.root.bind("<Return>", lambda _event: None if self._running else self._on_ok())
+
     def _build_menu(self):
         # Self-drawn menu bar: native tk.Menu bars/dropdowns are OS-rendered on
         # Windows and ignore colors, so they never go dark. MenuBar draws its own.
         self.menubar = MenuBar(self.root, self.theme_mode)
         self.menubar.pack(fill="x", side="top")
         self.menubar.add_menu("File", [
-            ("Open source...", self._browse_source),
-            ("Open destination...", self._browse_dest),
+            ("Open source...          Ctrl+O", self._browse_source),
+            ("Open destination...     Ctrl+D", self._browse_dest),
             None,
-            ("Clear log", self._clear_log),
+            ("Clear log                Ctrl+L", self._clear_log),
             ("Open log file", self._open_log_file),
             ("Open log folder", self._open_log_folder),
             None,
             ("Show batch queue", self._show_batch),
             ("Clear batch queue", self._clear_batch),
             None,
-            ("Exit", self._on_close),
+            ("Exit                     Ctrl+Q", self._on_close),
         ])
         self.menubar.add_menu("Edit", [
-            ("Run options...", self._open_run_options),
-            ("Preferences...", self._open_preferences),
+            ("Run options...           Ctrl+R", self._open_run_options),
+            ("Preferences...           Ctrl+,", self._open_preferences),
             None,
-            ("Toggle dark mode", self._toggle_theme),
+            ("Toggle dark mode         Ctrl+T", self._toggle_theme),
             None,
             ("Add to Explorer menu", self._install_context_menu),
             ("Remove from Explorer menu", self._uninstall_context_menu),
         ])
         self.menubar.add_menu("Help", [
-            ("About", self._about),
+            ("About                    F1", self._about),
         ])
 
     def _build_body(self):
@@ -246,7 +262,7 @@ class ExtractorApp:
         self.log = tk.Text(frm, height=14, state="disabled", wrap="word",
                            relief="flat", borderwidth=1, padx=8, pady=6)
         self.log.pack(fill="both", expand=True, **pad)
-        self.log.tag_config("hint", foreground="#888888")
+        self.log.tag_config("hint", foreground=theme.palette(self.theme_mode)["hint"])
         self._log_empty = True
         self._show_placeholder()
         self._sync_mode()
@@ -615,9 +631,45 @@ class ExtractorApp:
             win.attributes("-topmost", True)  # else it hides behind an always-on-top main window
         theme.restyle_toplevel(win, self.theme_mode)
         win.title(title)
+        win.bind("<Escape>", lambda _event: win.destroy())
         body = ttk.Frame(win, padding=14)
         body.pack(fill="both", expand=True)
         return win, body
+
+    def _scrollable(self, parent):
+        """
+        A frame that scrolls vertically when its content is taller than ~70% of
+        the screen (Preferences with every warning shown, or at 200% scaling),
+        so the dialog's buttons below it always stay on screen.
+        """
+        outer = ttk.Frame(parent)
+        outer.pack(fill="both", expand=True)
+        canvas = tk.Canvas(outer, highlightthickness=0, borderwidth=0,
+                           bg=theme.palette(self.theme_mode)["bg"])
+        scrollbar = ttk.Scrollbar(outer, orient="vertical", command=canvas.yview)
+        inner = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=inner, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+
+        def fit(_event=None):
+            max_height = int(self.root.winfo_screenheight() * 0.7)
+            height = min(inner.winfo_reqheight(), max_height)
+            canvas.configure(width=inner.winfo_reqwidth(), height=height,
+                             scrollregion=(0, 0, inner.winfo_reqwidth(), inner.winfo_reqheight()))
+            if inner.winfo_reqheight() > max_height:
+                scrollbar.pack(side="right", fill="y")
+            else:
+                scrollbar.pack_forget()
+
+        def wheel(event):
+            if scrollbar.winfo_ismapped():
+                canvas.yview_scroll(int(-event.delta / 120), "units")
+
+        inner.bind("<Configure>", fit)
+        canvas.bind("<Enter>", lambda _e: canvas.bind_all("<MouseWheel>", wheel))
+        canvas.bind("<Leave>", lambda _e: canvas.unbind_all("<MouseWheel>"))
+        return inner
 
     def _center_on_parent(self, win):
         """Center win over the main window, then reveal it."""
@@ -637,8 +689,11 @@ class ExtractorApp:
         if key not in option_warnings.OPTION_WARNINGS:
             return
         colors = theme.alert_colors(self.theme_mode)
+        # Wrap by text width (about 60 characters), not fixed pixels, so it
+        # follows the font size and the display scaling.
+        wrap = tkfont.nametofont("TkDefaultFont").measure("0") * 60
         alert = tk.Label(
-            container, justify="left", anchor="w", wraplength=380, padx=8, pady=6,
+            container, justify="left", anchor="w", wraplength=wrap, padx=8, pady=6,
             bg=colors["bg"], fg=colors["fg"], highlightthickness=1,
             highlightbackground=colors["border"], highlightcolor=colors["border"],
         )
@@ -702,27 +757,38 @@ class ExtractorApp:
         current = config_io.read_config(path)
         cfg_vars = {k: tk.BooleanVar(value=config_io.config_bool(current, k)) for k in CONFIG_KEYS}
         win, body = self._make_dialog("Preferences")
+        options = self._scrollable(body)
 
-        extraction = ttk.LabelFrame(body, text="Extraction", padding=10)
+        extraction = ttk.LabelFrame(options, text="Extraction", padding=10)
         extraction.pack(fill="x")
         for key in CONFIG_KEYS:
             self._option_check(extraction, key, CONFIG_LABELS[key], cfg_vars[key])
 
-        interface = ttk.LabelFrame(body, text="Interface", padding=10)
+        # Edit copies; the live settings only change on Save (Cancel undoes nothing).
+        live = {"auto_fill_destination": self.auto_fill,
+                "keep_open": self.keep_open,
+                "always_on_top": self.always_on_top,
+                "debug": self.opt_debug,
+                "history_enabled": self.history_enabled}
+        copies = {key: tk.BooleanVar(value=variable.get()) for key, variable in live.items()}
+        interface = ttk.LabelFrame(options, text="Interface", padding=10)
         interface.pack(fill="x", pady=(10, 0))
-        for key, variable in (("auto_fill_destination", self.auto_fill),
-                              ("keep_open", self.keep_open),
-                              ("always_on_top", self.always_on_top),
-                              ("debug", self.opt_debug),
-                              ("history_enabled", self.history_enabled)):
+        for key, variable in copies.items():
             self._option_check(interface, key, GUI_LABELS[key], variable)
 
         def save():
-            config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
+            try:
+                config_io.write_config(path, {k: cfg_vars[k].get() for k in CONFIG_KEYS})
+            except (OSError, ValueError) as exc:  # e.g. read-only install folder
+                messagebox.showerror("Could not save the preferences", str(exc), parent=win)
+                return
+            for key, variable in live.items():
+                variable.set(copies[key].get())
             self.root.attributes("-topmost", self.always_on_top.get())
             self._save_settings()
             win.destroy()
 
+        win.bind("<Return>", lambda _event: save())
         buttons = ttk.Frame(body); buttons.pack(pady=(12, 0))
         ttk.Button(buttons, text="Save", command=save).pack(side="left", padx=4)
         ttk.Button(buttons, text="Cancel", command=win.destroy).pack(side="left", padx=4)
@@ -735,7 +801,7 @@ class ExtractorApp:
         ttk.Label(body, text=f"Version: {runner.read_version()}").pack(anchor="w")
         ttk.Label(body, text="Author: DSR! (xchwarze)").pack(anchor="w")
         url = "https://github.com/xchwarze/magic-extractor"
-        link = ttk.Label(body, text=url, foreground="#4da3ff", cursor="hand2")
+        link = ttk.Label(body, text=url, foreground=theme.palette(self.theme_mode)["link"], cursor="hand2")
         link.pack(anchor="w", pady=(2, 0))
         link.bind("<Button-1>", lambda e: webbrowser.open(url))
         ttk.Button(body, text="Close", command=win.destroy).pack(pady=(14, 0))

@@ -28,13 +28,30 @@ def _parse_args(argv):
     return source, dest, mode
 
 
+def _enable_dpi_awareness():
+    """Per-monitor DPI awareness (Windows) before Tk starts, so text is crisp at
+    125-200% scaling instead of bitmap-stretched."""
+    if os.name != "nt":
+        return
+    import ctypes
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)  # per-monitor
+    except (AttributeError, OSError):
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()  # system-aware fallback
+        except (AttributeError, OSError):
+            pass
+
+
 def main():
+    _enable_dpi_awareness()
     app_icon.set_app_user_model_id()  # before the first window, so the taskbar uses our icon
     root = _make_root()
     app_icon.apply(root)
     source, dest, mode = _parse_args(sys.argv[1:])
     ExtractorApp(root, initial_source=source, initial_dest=dest, initial_mode=mode)
-    root.minsize(460, 360)
+    scale = root.winfo_fpixels("1i") / 96.0  # 1.0 at 100%, 2.0 at 200%
+    root.minsize(int(460 * scale), int(360 * scale))
     root.mainloop()
 
 
