@@ -5,15 +5,15 @@ REM The scoop `main` unshield package is a BCJ2-filtered .7z that the updater's
 REM py7zr backend can't decode, and the updater has no hook between download and
 REM unpack to re-fix it. So this script does it out-of-band: download the scoop
 REM .7z and extract it with the bundled full 7z (which handles BCJ2) straight
-REM into cli\bin\extractors\unshield. Run it whenever unshield needs refreshing.
+REM into src\cli\bin\extractors\unshield. Run it whenever unshield needs refreshing.
 REM
 REM Bump VER when scoop's unshield changes:
 REM   https://github.com/ScoopInstaller/Main/blob/master/bucket/unshield.json
 setlocal
 set "VER=1.6.2"
 set "URL=https://raw.githubusercontent.com/ScoopInstaller/Binary/master/unshield/unshield-%VER%-x64.7z"
-set "SEVENZIP=%~dp0..\..\cli\bin\extractors\7z\7z.exe"
-set "DEST=%~dp0..\..\cli\bin\extractors\unshield"
+set "SEVENZIP=%~dp0..\..\src\cli\bin\extractors\7z\7z.exe"
+set "DEST=%~dp0..\..\src\cli\bin\extractors\unshield"
 set "TMP=%~dp0_unshield_tmp"
 
 if not exist "%SEVENZIP%" ( echo update-unshield: bundled 7z.exe not found at "%SEVENZIP%" & exit /b 1 )

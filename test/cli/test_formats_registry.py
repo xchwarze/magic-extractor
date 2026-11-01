@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cli"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src", "cli"))
 import formats
 from formats.format_7z import Format7zHandler
 from formats.format_7z_ext import Format7zExtHandler
@@ -16,7 +16,7 @@ from formats.format_rar import FormatRarHandler
 # Absolute path to cli/data (holds the real handlers.json).
 DATA_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "cli", "data",
+    "src", "cli", "data",
 )
 
 

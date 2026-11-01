@@ -2,13 +2,13 @@
 
 magic-extractor's own source is MIT (see `LICENSE.txt`). It does **not**
 reimplement the archive formats — it detects a file and shells out to bundled
-third-party detector/extractor programs under `cli/bin/`. Each of those keeps
+third-party detector/extractor programs under `src/cli/bin/`. Each of those keeps
 its own license, listed below. **They are not covered by magic-extractor's MIT
 license.**
 
 > This file is informational, not legal advice, and licenses/versions can
 > change. Before redistributing the bundle, verify each tool's current terms
-> against its own `LICENSE`/`readme` in its `cli/bin/` folder.
+> against its own `LICENSE`/`readme` in its `src/cli/bin/` folder.
 
 ## Tools with usage conditions
 
@@ -69,7 +69,7 @@ the upstream project before relying on them.
 
 ## Bundled Python dependencies (pip)
 
-Not under `cli/bin/`, but compiled into the frozen `.exe`, so their licenses
+Not under `src/cli/bin/`, but compiled into the frozen `.exe`, so their licenses
 apply to the distributed build. All permissive.
 
 | Package | Used by | License |

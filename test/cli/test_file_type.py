@@ -1,9 +1,11 @@
 import os
+import sys
 import tempfile
 import unittest
 from unittest import mock
 
-from cli import file_type
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src", "cli"))
+import file_type  # noqa: E402
 
 
 class FastMagicCheckTest(unittest.TestCase):

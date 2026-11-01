@@ -13,7 +13,7 @@ import json
 import os
 import sys
 
-SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'cli'))
+SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src', 'cli'))
 DATA_PATH = os.path.join(SRC_PATH, 'data')
 sys.path.insert(0, SRC_PATH)
 

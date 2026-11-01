@@ -193,8 +193,8 @@ Brotli (`.br`) has no magic bytes, so it cannot be routed by detection.
 
 ## Tools
 
-Each handler shells out to a bundled helper binary under `cli/bin/extractors/`;
-the content detectors DIE, binwalk and Magika live under `cli/bin/detectors/`
+Each handler shells out to a bundled helper binary under `src/cli/bin/extractors/`;
+the content detectors DIE, binwalk and Magika live under `src/cli/bin/detectors/`
 (`puremagic` is a pip dependency, not a bundled binary). Tool paths are relative
 to those directories.
 

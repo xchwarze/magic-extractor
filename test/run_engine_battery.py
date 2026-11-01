@@ -42,7 +42,7 @@ import tempfile
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(TEST_DIR)
 SAMPLES_DIR = os.path.join(TEST_DIR, 'samples')
-sys.path.insert(0, os.path.join(REPO_ROOT, 'cli'))
+sys.path.insert(0, os.path.join(REPO_ROOT, 'src', 'cli'))
 
 from cli_paths import BIN_PATH  # noqa: E402
 from detection import PE_INSTALLER_FALLBACK  # noqa: E402
@@ -76,7 +76,7 @@ ENGINE_SAMPLES = {
 
 FOREIGN_TEXT = os.path.join(SAMPLES_DIR, 'test-file.txt')
 # Any PE that is neither an archive nor an installer.
-FOREIGN_PE = os.path.join(REPO_ROOT, 'cli', 'bin', 'extractors', 'plzip', 'plzip.exe')
+FOREIGN_PE = os.path.join(REPO_ROOT, 'src', 'cli', 'bin', 'extractors', 'plzip', 'plzip.exe')
 KEEP_NAME, KEEP_TEXT = 'keep-me.txt', 'existing content\n'
 
 

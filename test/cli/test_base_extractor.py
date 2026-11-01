@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "cli"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src", "cli"))
 from formats.base_extractor import BaseExtractor, merge_move
 from formats.format_kgb import FormatKgbHandler, KGB_MAGIC
 from formats.format_pea import FormatPeaHandler

@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install CLI dependencies
-        run: pip install -r cli/requirements.txt
+        run: pip install -r src/cli/requirements.txt
       - name: Run unit tests
         run: python test/run_battery.py --unit-only
 
@@ -31,6 +31,6 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install CLI dependencies
-        run: pip install -r cli/requirements.txt
+        run: pip install -r src/cli/requirements.txt
       - name: Run extraction battery
         run: python test/run_battery.py --battery-only

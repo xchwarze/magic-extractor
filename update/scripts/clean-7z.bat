@@ -5,7 +5,7 @@ REM updater's `merge` drops them in without disturbing Formats\ / Codecs\.
 REM Args passed by the updater: %1=tool_name  %2=unpack_folder  %3=version
 setlocal
 set "U=%~2"
-set "SEVENZIP=%~dp0..\..\cli\bin\extractors\7z\7z.exe"
+set "SEVENZIP=%~dp0..\..\src\cli\bin\extractors\7z\7z.exe"
 if not exist "%U%" exit /b 0
 if not exist "%SEVENZIP%" (
   echo clean-7z: bundled 7z.exe not found at "%SEVENZIP%"

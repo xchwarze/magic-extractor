@@ -2,14 +2,14 @@
 
 This folder vendors the [universal-tool-updater](https://github.com/xchwarze/universal-tool-updater)
 release (`updater.exe` + `unrar.exe`) configured to refresh the detector/extractor
-binaries under `../cli/bin/`. `tools.ini` holds the config; `scripts/` holds one
+binaries under `../src/cli/bin/`. `tools.ini` holds the config; `scripts/` holds one
 per-tool `post_unpack` cleanup that trims/rearranges each download into the exact
 layout magic-extractor expects.
 
 ## Usage (Windows)
 
 Run from **this** folder — the updater chdir's to its own location, so every
-`folder =` in `tools.ini` resolves relative to `update/` into `../cli/bin/`.
+`folder =` in `tools.ini` resolves relative to `update/` into `../src/cli/bin/`.
 
 ```
 updater.exe                     # check + update every tool

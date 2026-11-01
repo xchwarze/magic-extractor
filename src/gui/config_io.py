@@ -10,7 +10,7 @@ SECTION = "settings"
 # What the CLI does when a key is missing from config.ini: it treats a missing
 # boolean as off, except delete_to_recycle_bin (main.py falls back to True).
 CLI_DEFAULTS = {"delete_to_recycle_bin": True}
-TRUE_VALUES = ("true", "1", "t", "y", "yes", "on")  # same set as cli/config.py
+TRUE_VALUES = ("true", "1", "t", "y", "yes", "on")  # same set as src/cli/config.py
 
 
 def config_bool(values, key):

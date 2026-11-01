@@ -22,7 +22,7 @@ SOFTWARE.
 
 ---
 
-This tool bundles third-party detector and extractor programs under cli/bin/,
+This tool bundles third-party detector and extractor programs under src/cli/bin/,
 each governed by its own license (see their folders / readme). Those bundled
 binaries are NOT covered by the MIT license above; some are proprietary
 freeware. Verify each tool's redistribution terms before redistributing.

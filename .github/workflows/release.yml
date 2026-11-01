@@ -17,8 +17,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r cli/requirements.txt
-          pip install -r gui/requirements.txt
+          pip install -r src/cli/requirements.txt
+          pip install -r src/gui/requirements.txt
 
       - name: Install PyInstaller and pyinstaller-versionfile
         run: |
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           pyivf-make_version \
-            --outfile cli/version_info.txt \
+            --outfile src/cli/version_info.txt \
             --version ${{ env.PROJECT_VERSION }} \
             --company-name "DSR!" \
             --file-description "Magic Extractor - universal extraction tool" \
@@ -48,35 +48,35 @@ jobs:
             --original-filename "magic-extractor.exe" \
             --product-name "Magic Extractor"
           echo "Generated version file content:"
-          cat cli/version_info.txt
+          cat src/cli/version_info.txt
 
       - name: Build the .exe application
-        working-directory: ./cli
-        run: pyinstaller --onefile main.py --name magic-extractor --icon=../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic --hidden-import send2trash
+        working-directory: ./src/cli
+        run: pyinstaller --onefile main.py --name magic-extractor --icon=../../assets/appicon.ico --version-file=version_info.txt --collect-data puremagic --hidden-import send2trash
 
       - name: Build the GUI .exe application
-        working-directory: ./cli
-        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../assets/appicon.ico --version-file=version_info.txt --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --hidden-import gui.paths --hidden-import gui.settings --hidden-import gui.history --hidden-import gui.context_menu --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
+        working-directory: ./src/cli
+        run: pyinstaller --onefile ../gui/main.py --name magic-extractor-gui --noconsole --icon=../../assets/appicon.ico --version-file=version_info.txt --paths .. --hidden-import gui.app --hidden-import gui.runner --hidden-import gui.config_io --hidden-import gui.theme --hidden-import gui.menubar --hidden-import gui.paths --hidden-import gui.settings --hidden-import gui.history --hidden-import gui.context_menu --collect-all sv_ttk --collect-all darkdetect --hidden-import pywinstyles --collect-all tkinterdnd2
 
       - name: Bundle bin/, data/, config.ini, license and docs beside the exe
         shell: bash
         run: |
-          cp -r cli/bin  cli/dist/bin
-          cp -r cli/data cli/dist/data
-          cp cli/config.ini cli/dist/config.ini
-          cp gui/gui.ini cli/dist/gui.ini
-          cp VERSION cli/dist/VERSION
-          cp LICENSE.txt readme.md docs/formats.md docs/THIRD-PARTY-NOTICES.md cli/dist/
-          test -f cli/dist/magic-extractor-gui.exe
+          cp -r src/cli/bin  src/cli/dist/bin
+          cp -r src/cli/data src/cli/dist/data
+          cp src/cli/config.ini src/cli/dist/config.ini
+          cp src/gui/gui.ini src/cli/dist/gui.ini
+          cp VERSION src/cli/dist/VERSION
+          cp LICENSE.txt readme.md docs/formats.md docs/THIRD-PARTY-NOTICES.md src/cli/dist/
+          test -f src/cli/dist/magic-extractor-gui.exe
 
       - name: Smoke test (extract a bundled sample)
-        run: ./cli/dist/magic-extractor.exe extract test/samples/7z/test-file.7z
+        run: ./src/cli/dist/magic-extractor.exe extract test/samples/7z/test-file.7z
 
       - name: Upload the built application as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: magic-extractor
-          path: ./cli/dist
+          path: ./src/cli/dist
 
   create-release:
     needs: generate-build

@@ -34,9 +34,9 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 # VC90 runtime private-assembly manifests bundled with the extractors:
-!cli/bin/extractors/**/*.manifest
+!src/cli/bin/extractors/**/*.manifest
 *.spec
-cli/version_info.txt
+src/cli/version_info.txt
 # Release build stamps this from the git tag; dev checkouts have none (falls
 # back to "dev" in the GUI's About dialog).
 /VERSION
@@ -147,7 +147,7 @@ dmypy.json
 # reference UniExtract2 install (inspection only)
 UniExtract/
 # dgcac first-run generated config
-cli/bin/extractors/dgca/dgca.ini
+src/cli/bin/extractors/dgca/dgca.ini
 # TrID XML defs (reference source for tools/convert_trid_defs.py)
 triddefs_xml/
 # Release-note drafts and internal TODO (kept local, not committed)

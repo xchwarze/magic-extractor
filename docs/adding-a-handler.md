@@ -6,15 +6,15 @@ extraction "just work".
 
 ## How detection & routing works
 
-1. **Detectors** run over the file (in `cli/file_type.py`), cheapest first:
+1. **Detectors** run over the file (in `src/cli/file_type.py`), cheapest first:
    `puremagic` (MIME) → built-in signatures (`data/signatures.json`) → DIE →
    binwalk → Magika. Each emits MIME types and/or detection-name strings.
-2. **Filtering** (`cli/detection_filter.py`) drops generic noise via
+2. **Filtering** (`src/cli/detection_filter.py`) drops generic noise via
    `data/detection_blacklist.json` (e.g. `application/octet-stream`, `pe`).
-3. **Routing** (`cli/formats/__init__.py`): a MIME or detection string is looked
+3. **Routing** (`src/cli/formats/__init__.py`): a MIME or detection string is looked
    up (lowercased) in `data/handlers.json` (`mime_handlers` / `detection_handlers`)
    to find the handler class(es). A key claimed by several handlers maps to a
-   list, ordered by `_HANDLER_CLASSES` in `cli/formats/__init__.py`; all of them
+   list, ordered by `_HANDLER_CLASSES` in `src/cli/formats/__init__.py`; all of them
    become candidates and each is tried only if the previous one failed (e.g.
    `Format7zHandler` then the `Format7zZsHandler` fallback).
    First detector with a mapped handler wins (early-exit; `--bruteforce` tries all).
@@ -26,7 +26,7 @@ hand-edited. They are built from each handler's `detection_*` class methods by
 
 ## 1. Write the handler class
 
-Create `cli/formats/format_<name>.py`, subclassing `BaseExtractor`:
+Create `src/cli/formats/format_<name>.py`, subclassing `BaseExtractor`:
 
 ```python
 import os, subprocess, logging
@@ -63,7 +63,7 @@ class FormatFooHandler(BaseExtractor):
 ```
 
 - `self.target_file`, `self.extract_directory`, `self.extractors_path`
-  (= `cli/bin/extractors/`), `self.cli_args.password` are provided by the base.
+  (= `src/cli/bin/extractors/`), `self.cli_args.password` are provided by the base.
 - Any of the three `detection_*` methods may be omitted (base returns `[]`).
 - For a single command, prefer `return self.run_extraction(cmd, label="FOO")`
   (and `self.run_listing(cmd)` for `list_contents`): it maps exit codes and
@@ -117,8 +117,8 @@ DIE's real output string lives in its signature DB as `meta("<type>", "<name>")`
 Grep for your format:
 
 ```bash
-grep -rl -i "yourformat" cli/bin/detectors/die/db/
-grep -rhoE 'meta\("[^"]*", ?"[^"]*"\)' cli/bin/detectors/die/db/**/*yourformat*.sg
+grep -rl -i "yourformat" src/cli/bin/detectors/die/db/
+grep -rhoE 'meta\("[^"]*", ?"[^"]*"\)' src/cli/bin/detectors/die/db/**/*yourformat*.sg
 ```
 
 Use the lowercased `<name>` in `detection_names`.
@@ -151,7 +151,7 @@ Short keys / labels — the surest way is to run the CLI on a real sample and re
 what each detector prints:
 
 ```bash
-python cli/main.py identify --debug path/to/sample.foo
+python src/cli/main.py identify --debug path/to/sample.foo
 ```
 Copy the exact `[binwalk] detect` / `[Magika] detect|MIME` strings into
 `detection_names` / `detection_mimes`.
@@ -168,18 +168,18 @@ Copy the exact `[binwalk] detect` / `[Magika] detect|MIME` strings into
 
 ## 3. Register + regenerate
 
-- Add the class to `cli/formats/__init__.py`: import it and append to
+- Add the class to `src/cli/formats/__init__.py`: import it and append to
   `_HANDLER_CLASSES`.
 - Regenerate the data files:
   ```
   python tools/generate_data.py
   ```
-  This rewrites `cli/data/handlers.json` + `cli/data/signatures.json` from all
+  This rewrites `src/cli/data/handlers.json` + `src/cli/data/signatures.json` from all
   handlers. Commit those alongside the handler.
 
 ## 4. Bundle the extractor tool
 
-- Put the tool under `cli/bin/extractors/<tool>/` (matches the path your
+- Put the tool under `src/cli/bin/extractors/<tool>/` (matches the path your
   `extract()` builds). It ships beside the exe in the release zip.
 - **Windows runtime gotcha:** old tools may need a VC++ runtime via a
   side-by-side manifest (error `WinError 14001`). Ship the runtime **app-local**:
@@ -192,14 +192,14 @@ Copy the exact `[binwalk] detect` / `[Magika] detect|MIME` strings into
 
 If the format is handled by a 7-Zip plugin (tc4shell etc.) rather than a
 standalone tool, don't write a new handler — add the detection to
-`Format7zExtHandler` (`cli/formats/format_7z_ext.py`), which inherits 7-Zip's
-`extract()`. Drop the plugin DLL in `cli/bin/extractors/7z/Formats/` (or
+`Format7zExtHandler` (`src/cli/formats/format_7z_ext.py`), which inherits 7-Zip's
+`extract()`. Drop the plugin DLL in `src/cli/bin/extractors/7z/Formats/` (or
 `Codecs/`). Native 7-Zip formats go in `Format7zHandler` instead.
 
 ### PE installers
 
 Wrapped-exe installers can't be told apart by content. Add the class name to
-`PE_INSTALLER_FALLBACK` in `cli/main.py` — it's tried on any `MZ` file; the tool
+`PE_INSTALLER_FALLBACK` in `src/cli/detection.py` — it's tried on any `MZ` file; the tool
 self-validates and fails cleanly on a mismatch. (7-Zip is deliberately excluded.)
 
 ## 5. Test
@@ -223,11 +223,11 @@ self-validates and fails cleanly on a mismatch. (7-Zip is deliberately excluded.
 
 ## Checklist
 
-- [ ] `cli/formats/format_<name>.py` with `extract()` + `detection_*`
+- [ ] `src/cli/formats/format_<name>.py` with `extract()` + `detection_*`
 - [ ] Detection strings verified against DIE db / TrID (not guessed)
-- [ ] Registered in `cli/formats/__init__.py`
+- [ ] Registered in `src/cli/formats/__init__.py`
 - [ ] `python tools/generate_data.py` run; `handlers.json`/`signatures.json` committed
-- [ ] Tool bundled under `cli/bin/extractors/` (+ runtime if needed)
+- [ ] Tool bundled under `src/cli/bin/extractors/` (+ runtime if needed)
 - [ ] Extractor contract kept: writes only in `self.extract_directory`, returns
       `False` on failure even when the tool exits 0 (`failure_markers`)
 - [ ] Sample in `test/samples/<fmt>/` with real content, listed in `ENGINE_SAMPLES`;

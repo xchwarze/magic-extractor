@@ -34,7 +34,7 @@ See [Examples](#examples) for `identify`, `list`, `carve`, `--recursive` and `--
 
 The compiled build keeps `bin/`, `data/` and `config.ini` external to the exe so
 they can be updated with a file swap; the path resolver in `main.py` finds them
-beside the executable (frozen) or under `cli/` (dev).
+beside the executable (frozen) or under `src/cli/` (dev).
 
 ## How detection works
 For normal extraction, detectors run in this order with **early-exit** — the first
@@ -93,22 +93,22 @@ Python 3.12 or newer is required.
 ```bash
 git clone <repo-url>
 cd magic-extractor
-pip install -r cli/requirements.txt
+pip install -r src/cli/requirements.txt
 ```
 
 ## Usage
 Magic Extractor uses subcommands:
 ```bash
-python cli/main.py extract  <path> [output_dir] [options]   # detect and extract
-python cli/main.py identify <path>                          # report type + candidate handlers
-python cli/main.py list     <path>                          # list archive contents
-python cli/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
+python src/cli/main.py extract  <path> [output_dir] [options]   # detect and extract
+python src/cli/main.py identify <path>                          # report type + candidate handlers
+python src/cli/main.py list     <path>                          # list archive contents
+python src/cli/main.py carve    <path> [output_dir] [options]   # carve embedded archives (binwalk offsets)
 ```
 A bare path with no subcommand defaults to `extract` (backward compatible), and
 options may come before the path or the subcommand:
 ```bash
-python cli/main.py <path> <output_dir> [options]
-python cli/main.py --debug <path>
+python src/cli/main.py <path> <output_dir> [options]
+python src/cli/main.py --debug <path>
 ```
 
 `<path>` can be a folder for every subcommand: its files (not subfolders) are
@@ -145,7 +145,7 @@ folder, so a failed attempt never leaves partial files behind.
 fragment by index), `--raw` (carve every fragment, not only handler-known ones).
 
 > In the examples below, `magic-extractor` is the built `.exe`. From source, replace
-> it with `python cli/main.py` — the arguments are identical.
+> it with `python src/cli/main.py` — the arguments are identical.
 
 ## Examples
 
@@ -195,16 +195,16 @@ magic-extractor carve router-firmware.bin --fragment 1 # carve only fragment #1
 ```
 
 ## GUI
-An optional tkinter front-end (in `gui/`) wraps the CLI — a Universal-Extractor-style
+An optional tkinter front-end (in `src/gui/`) wraps the CLI — a Universal-Extractor-style
 window with `extract`, `scan` and `carve` modes, drag-and-drop, a batch queue, run
 history and a Preferences dialog. Bruteforce is available under Run options. It
 shells out to the same `main.py`, so detection and extraction behave identically.
 ```bash
-python gui/main.py                 # launch the window
-python gui/main.py <file> [outdir] # prefill the source (and destination)
-python gui/main.py <file> /scan    # prefill and start in identify mode
+python src/gui/main.py                 # launch the window
+python src/gui/main.py <file> [outdir] # prefill the source (and destination)
+python src/gui/main.py <file> /scan    # prefill and start in identify mode
 ```
-Drag-and-drop needs the optional `tkinterdnd2` package (`pip install -r gui/requirements.txt`);
+Drag-and-drop needs the optional `tkinterdnd2` package (`pip install -r src/gui/requirements.txt`);
 without it the window still works, minus drop support. It can also register an Explorer
 context-menu entry from its Preferences dialog.
 
@@ -218,7 +218,7 @@ CI does this automatically — see `.github/workflows/release.yml`.
 
 ## License
 MIT — see `LICENSE.txt`. Note: the bundled third-party extractor/detector
-binaries under `cli/bin/` keep their own licenses (some proprietary freeware)
+binaries under `src/cli/bin/` keep their own licenses (some proprietary freeware)
 and are not covered by MIT; verify their redistribution terms before shipping.
 
 ## Authors

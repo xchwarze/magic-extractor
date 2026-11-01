@@ -56,7 +56,7 @@ import unittest
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(TEST_DIR)
-MAIN_PY = os.path.join(REPO_ROOT, 'cli', 'main.py')
+MAIN_PY = os.path.join(REPO_ROOT, 'src', 'cli', 'main.py')
 GUI_TEST_DIR = os.path.join(TEST_DIR, 'gui')
 CLI_TEST_DIR = os.path.join(TEST_DIR, 'cli')
 SAMPLES_DIR = os.path.join(TEST_DIR, 'samples')
