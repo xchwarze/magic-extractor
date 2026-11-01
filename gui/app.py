@@ -230,7 +230,7 @@ class ExtractorApp:
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
 
         # Log pane
-        self.log = tk.Text(frm, height=14, state="disabled", wrap="none",
+        self.log = tk.Text(frm, height=14, state="disabled", wrap="word",
                            relief="flat", borderwidth=1, padx=8, pady=6)
         self.log.pack(fill="both", expand=True, **pad)
         self.log.tag_config("hint", foreground="#888888")
