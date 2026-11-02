@@ -3,7 +3,7 @@
 One muted line: a message that is too long ends in an ellipsis and its full text is a
 tooltip. Colour is never the only signal: the words say "failed" too.
 """
-import os
+import ntpath
 import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk
@@ -24,7 +24,10 @@ _GENERIC = ("Running", "succeeded", "failed", "error")
 
 
 def source_name(source):
-    return os.path.basename(source.rstrip("\\/")) or source
+    """The file name of a source path. ntpath, not os.path: the sources are Windows
+    paths, and ntpath splits on both separators on any OS (posixpath, which os.path is
+    on the Linux CI runner, ignores backslashes)."""
+    return ntpath.basename(source.rstrip("\\/")) or source
 
 
 def job_status(index, total, mode, source):
