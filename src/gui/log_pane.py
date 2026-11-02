@@ -154,9 +154,6 @@ class LogPane:
         scrolls once per burst of appends, when Tk next goes idle.
         """
         text = self.text
-        # An unmapped Text never updates its view fractions: keep following then.
-        at_end = (self._scroll_job is not None or self._empty or not text.winfo_viewable()
-                  or text.yview()[1] >= 1.0)
         if self._empty:
             text.delete("1.0", "end")
             self._empty = False
@@ -164,12 +161,15 @@ class LogPane:
         excess = int(text.index("end-1c").split(".")[0]) - 1 - self.max_lines
         if excess > 0:
             text.delete("1.0", f"{excess + 1}.0")
-        if at_end and self._scroll_job is None:
+        # The log is for watching what happens: new output always brings the view (and the
+        # text cursor) to the end, once per burst, even if the reader had scrolled up.
+        if self._scroll_job is None:
             self._scroll_job = text.after_idle(self._scroll_to_end)
 
     def _scroll_to_end(self):
         self._scroll_job = None
         try:
+            self.text.mark_set("insert", "end-1c")
             self.text.see("end")
         except tk.TclError:  # the pane was destroyed before the idle moment
             pass

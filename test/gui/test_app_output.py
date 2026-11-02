@@ -30,15 +30,19 @@ class LogPaneTest(AppTestCase):
         self.assertLessEqual(line_count(self.app.log), self.app.log_pane.max_lines)
         self.assertTrue(self.app.log.get("1.0", "2.0").startswith("line 1000"))  # oldest dropped first
 
-    def test_a_reader_scrolled_up_is_not_pulled_to_the_end(self):
+    def test_new_output_always_brings_the_view_and_the_cursor_to_the_end(self):
+        # The log is for watching what happens: every new line scrolls to it, even when
+        # the reader had scrolled up or clicked somewhere above.
         self.app._append("first")
-        self.root.update_idletasks()  # the first line's own scroll is done; the reader then moves up
+        self.root.update_idletasks()
+        self.app.log.mark_set("insert", "1.0")
         with mock.patch.object(self.app.log, "winfo_viewable", return_value=True), \
                 mock.patch.object(self.app.log, "yview", return_value=(0.1, 0.5)), \
                 mock.patch.object(self.app.log, "see") as see:
             self.app._append("new output")
             self.root.update_idletasks()
-        see.assert_not_called()
+        see.assert_called_once_with("end")
+        self.assertEqual(self.app.log.index("insert"), self.app.log.index("end-1c"))
 
     def test_a_reader_at_the_end_follows_it_once_per_burst(self):
         self.app._append("first")
@@ -212,7 +216,8 @@ class RunStatusTest(AppTestCase):
         self.assertEqual(self.app.status.full, "2 extracted, 1 failed")
         self.assertEqual(self.app.status.level, "warning")
         self.assertEqual(str(self.app.progress.cget("mode")), "determinate")
-        self.assertEqual(float(self.app.progress.cget("value")), 0.0)
+        # left full when the run ends (not emptied)
+        self.assertEqual(float(self.app.progress.cget("value")), float(self.app.progress.cget("maximum")))
 
     def test_a_single_run_names_the_file_in_both_phases(self):
         codes = {"only.zip": 0}

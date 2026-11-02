@@ -236,16 +236,18 @@ Explorer menu).
 - Lock the destination to keep one shared output folder: runs then extract into it
   (`--merge-output`); unlocked, an existing non-empty folder gets a dated sibling.
 - Options with side effects (deleting the source, Recursive, fixing extensions,
-  ...) show a warning under them in Run options and Preferences while they are on.
+  ...) have an info icon beside them in Run options and Preferences: hover, focus or
+  click it for the caveat. It turns into an amber warning while the option is on.
 - Keyboard: Enter runs OK; Ctrl+O / Ctrl+D pick the source / destination; Ctrl+R
   Run options; Ctrl+, Preferences; Ctrl+B Batch; Ctrl+L clear the log; Ctrl+T flip
   light/dark (and keep it); F1 About; Ctrl+Q exit; Escape closes a dialog. F10 enters
   the menu bar (arrows, Enter, Escape); dialogs are modal and Enter presses the
   focused button.
-- The log keeps the last 5000 lines and only follows new output while you are at the
-  bottom; right-click (or Shift+F10) it to copy, save or clear. A status line and
-  progress bar show "Extracting 2 of 5: …" during a run and a summary at the end
-  ("4 extracted, 1 failed"). Settings entries are disabled while a run is going.
+- The log keeps the last 5000 lines and always scrolls to new output; right-click (or
+  Shift+F10) it to copy, save or clear. A status line and progress bar show
+  "Extracting 2 of 5: …" during a run and a summary at the end ("4 extracted, 1
+  failed"); the bar is left full when the run ends. Settings entries are disabled
+  while a run is going.
 - Deleting sources is always confirmed with "Keep sources" as the default (Enter and
   Escape keep them).
 - Closing the window during a run asks first, then cancels it and stops every

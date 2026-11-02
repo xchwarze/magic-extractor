@@ -28,12 +28,16 @@ GLYPHS = {
     "menu_file": "folder",
     "menu_edit": "edit",
     "menu_help": "question-circle",
+    # option caveats: the tooltip button next to an option
+    "info": "info",                # the option has a caveat (hover / focus / click for it)
+    "warning": "warning",          # ... and it is in its risky state right now
 }
 
 NORMAL = ""
 DISABLED = "disabled"
 ACCENT = "accent"                  # on an Accent.TButton, whose text has another colour
 ACCENT_DISABLED = "accent-disabled"
+ALERT = "alert"                    # the amber of a warning (the option tip's warning icon)
 VARIANTS = (NORMAL, DISABLED)      # every icon has these two
 THEMES = ("light", "dark")
 
@@ -48,13 +52,15 @@ def variants_for(semantic):
         raise ValueError(f"unknown icon {semantic!r}")
     if semantic in ACCENT_ICONS:
         return VARIANTS + (ACCENT, ACCENT_DISABLED)
+    if semantic == "warning":
+        return VARIANTS + (ALERT,)
     return VARIANTS
 
 # Text colour of a ttk button per theme and state (sv-ttk 2.6 light/dark themes);
 # the PNGs are tinted with these so an icon matches its label.
 BUTTON_FOREGROUNDS = {
-    "dark": {NORMAL: "#fafafa", DISABLED: "#7a7a7a", ACCENT: "#000000", ACCENT_DISABLED: "#a5a5a5"},
-    "light": {NORMAL: "#1c1c1c", DISABLED: "#a2a2a2", ACCENT: "#ffffff", ACCENT_DISABLED: "#ffffff"},
+    "dark": {NORMAL: "#fafafa", DISABLED: "#7a7a7a", ACCENT: "#000000", ACCENT_DISABLED: "#a5a5a5", ALERT: "#ffc83d"},
+    "light": {NORMAL: "#1c1c1c", DISABLED: "#a2a2a2", ACCENT: "#ffffff", ACCENT_DISABLED: "#ffffff", ALERT: "#9a6700"},
 }
 
 

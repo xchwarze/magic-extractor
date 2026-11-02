@@ -12,6 +12,7 @@ import tkinter.font as tkfont
 from tkinter import filedialog, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs, geometry
+from gui.icons import catalog
 from gui.icons.catalog import COMPACT, DISABLED, NORMAL
 from gui import logging_setup
 from gui.log_pane import LogPane, copy_to_clipboard, save_text
@@ -45,7 +46,7 @@ GUI_LABELS = {
 THEME_CHOICES = (("auto", "System"), ("light", "Light"), ("dark", "Dark"))
 
 LOG_FILENAME = "magic-extractor.log"
-WARNING_SIGN = "\u26a0"  # shown at the start of an option's warning alert
+WARNING_SIGN = "\u26a0"  # the option tip's text sign when the icon assets are missing
 LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
 LOCK_TIP = ("Lock the destination: it is not filled in from the source, and files are extracted into it "
             "even when it already has content (files with the same name are overwritten).")
@@ -353,8 +354,9 @@ class ExtractorApp:
         # Progress bar + status line sit under the log (packed first so they keep their room)
         bottom = ttk.Frame(frm)
         bottom.pack(side="bottom", fill="x", padx=10, pady=(4, 0))
-        # Shown only during a run (_set_running): idle, an empty bar just draws a line.
-        self.progress = ttk.Progressbar(bottom, mode="determinate")
+        # Always shown: moving during a run, left full when it ends.
+        self.progress = ttk.Progressbar(bottom, mode="determinate", maximum=100, value=0)
+        self.progress.pack(fill="x")
         self.status = StatusLine(bottom)
         self.status.label.pack(fill="x", pady=(4, 0))
         self.status.set("Ready")
@@ -647,13 +649,10 @@ class ExtractorApp:
         self.batch_btn.config(state=state)
         self.menubar.set_entry_state(self.RUN_LOCKED_ENTRIES, state)
         if running:  # busy indicator: a run has no known length
-            self.progress.pack(fill="x", before=self.status.label)
-            self.progress.config(mode="indeterminate")
+            self.progress.config(mode="indeterminate", value=0)
             self.progress.start(15)
         else:
             self.progress.stop()
-            self.progress.config(mode="determinate", value=0)
-            self.progress.pack_forget()
 
     # ---- context menu ----------------------------------------------------
     def _context_menu_parts(self):
@@ -734,6 +733,7 @@ class ExtractorApp:
 
     def _on_run_finished(self, all_ok=True):
         self._set_running(False)
+        self.progress.config(mode="determinate", value=self.progress.cget("maximum"))  # left full
         if self._run_total:
             text, level = run_summary(self._run_results, self._run_total, self.cancel_flag.is_set())
             self._set_status(text, level)
@@ -964,51 +964,61 @@ class ExtractorApp:
         and make it modal."""
         dialogs.present(win, self.root, self.theme_mode, initial_focus=initial_focus)
 
-    def _add_option_alert(self, container, key, variable):
+    def _add_option_tip(self, container, key, variable):
         """
-        A Bootstrap-style warning alert under an option, shown while the option
-        is in a risky state (see gui/option_warnings.py) and hidden otherwise.
+        The tooltip button next to an option that has a caveat (gui/option_warnings.py):
+        an info icon whose tooltip explains it, turning into an amber warning icon while
+        the option is in its risky state. Hover, keyboard focus or a click shows the text.
+        (An inline alert under the option wrapped badly in the fixed-size dialogs.)
         """
         if key not in option_warnings.OPTION_WARNINGS:
-            return
-        colors = theme.alert_colors(self.theme_mode)
-        # Wrap by text width (about 60 characters), not fixed pixels, so it
-        # follows the font size and the display scaling.
-        wrap = tkfont.nametofont("TkDefaultFont").measure("0") * 60
-        alert = tk.Label(
-            container, justify="left", anchor="w", wraplength=wrap, padx=8, pady=6,
-            font=theme.body_font(container),
-            bg=colors["bg"], fg=colors["fg"], highlightthickness=1,
-            highlightbackground=colors["border"], highlightcolor=colors["border"],
-        )
+            return None
+        size = icons.icon_size(self.root, COMPACT)
+        info = self.icons.photo(self.theme_mode, "info", size)
+        warning = self.icons.photo(self.theme_mode, "warning", size, catalog.ALERT)
+        tip = ttk.Label(container, takefocus=1, cursor="hand2")
+        tip.option_key = key
+        tip.tooltip = Tooltip(tip, option_warnings.OPTION_WARNINGS[key][1])
+
+        def show_now(_event=None):
+            tip.tooltip.show(tip.winfo_rootx(), tip.winfo_rooty() + tip.winfo_height() + 4,
+                             above=tip.winfo_rooty())
+            return "break"
+
+        tip.bind("<ButtonRelease-1>", show_now, add="+")
+        tip.bind("<KeyPress-space>", show_now, add="+")
+        tip.bind("<KeyPress-Return>", show_now, add="+")
 
         def update(*_args):
-            text = option_warnings.warning_for(key, variable.get())
-            if text:
-                alert.config(text=WARNING_SIGN + "  " + text)
-                alert.pack(fill="x", padx=(22, 0), pady=(1, 6))
-            else:
-                alert.pack_forget()
+            risky = option_warnings.warning_for(key, variable.get()) is not None
+            image = warning if risky else info
+            if image is not None:
+                tip.config(image=image)
+            else:  # no icon assets: a text sign instead
+                tip.config(text=WARNING_SIGN if risky else "\u24d8")
 
         trace = variable.trace_add("write", update)
 
         def forget_trace(event):
             # the variable outlives the dialog; drop the callback with the widget
-            if event.widget is container:
+            if event.widget is tip:
                 try:
                     variable.trace_remove("write", trace)
                 except tk.TclError:
                     pass
 
-        container.bind("<Destroy>", forget_trace, add="+")
+        tip.bind("<Destroy>", forget_trace, add="+")
         update()
+        return tip
 
     def _option_check(self, parent, key, text, variable, pady=1):
-        """A Checkbutton with its warning alert (if it has one) right below it."""
+        """A Checkbutton with its tooltip button (if the option has a caveat) beside it."""
         row = ttk.Frame(parent)
         row.pack(fill="x", anchor="w")
-        ttk.Checkbutton(row, text=text, variable=variable).pack(anchor="w", pady=pady)
-        self._add_option_alert(row, key, variable)
+        ttk.Checkbutton(row, text=text, variable=variable).pack(side="left", anchor="w", pady=pady)
+        tip = self._add_option_tip(row, key, variable)
+        if tip is not None:
+            tip.pack(side="left", padx=(dialogs.XS, 0))
 
     def _open_run_options(self):
         if self._focus_open_dialog():
@@ -1032,8 +1042,14 @@ class ExtractorApp:
         for value, label in (("keep", "Keep the source file"),
                              ("ask", "Ask before deleting the source"),
                              ("delete", "Delete the source file")):
-            ttk.Radiobutton(after, text=label, variable=self.opt_delete, value=value).pack(anchor="w", pady=1)
-        self._add_option_alert(after, "delete_source", self.opt_delete)
+            radio_row = ttk.Frame(after)
+            radio_row.pack(fill="x", anchor="w")
+            ttk.Radiobutton(radio_row, text=label, variable=self.opt_delete, value=value).pack(
+                side="left", anchor="w", pady=1)
+            if value == "delete":  # the caveat belongs to the risky choice
+                tip = self._add_option_tip(radio_row, "delete_source", self.opt_delete)
+                if tip is not None:
+                    tip.pack(side="left", padx=(dialogs.XS, 0))
 
         row, close, _others = dialogs.button_row(body, self._icon, ("Close", "dismiss", lambda: dialogs.close_dialog(win)))
         row.pack(anchor="e", pady=(dialogs.LG, 0))
