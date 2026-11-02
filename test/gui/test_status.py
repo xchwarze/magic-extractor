@@ -6,7 +6,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src"))
 from gui import theme  # noqa: E402
 from gui.status import StatusLine, fit, job_status, run_summary  # noqa: E402
-from gui.surfaces import SURFACES  # noqa: E402
+from gui.surfaces import surface  # noqa: E402
 
 
 def results(*codes, mode="extract"):
@@ -126,7 +126,7 @@ class StatusLineTest(unittest.TestCase):
         self.line.set("careful", "warning")
         self.assertEqual(str(self.line.label.cget("foreground")), theme.alert_colors(mode)["fg"])
         self.line.set("broken", "error")
-        self.assertEqual(str(self.line.label.cget("foreground")), SURFACES[mode]["error"])
+        self.assertEqual(str(self.line.label.cget("foreground")), surface(mode)["error"])
         self.line.set("fine", "info")
         self.assertEqual(str(self.line.label.cget("foreground")), "")
 
@@ -148,17 +148,17 @@ class ContrastTest(unittest.TestCase):
 
     def test_status_colours_are_readable_in_both_themes(self):
         for mode in ("dark", "light"):
-            for name, color in (("warning", theme.alert_colors(mode)["fg"]), ("error", SURFACES[mode]["error"])):
+            for name, color in (("warning", theme.alert_colors(mode)["fg"]), ("error", surface(mode)["error"])):
                 for where, background in (("sv-ttk", self.SV_BG[mode]), ("log", theme.palette(mode)["bg"])):
                     self.assertGreaterEqual(contrast(color, background), 4.5, (mode, name, where))
 
     def test_popup_text_colours_are_readable_on_the_popup_surface(self):
         for mode in ("dark", "light"):
             background = theme.palette(mode)["bg"]
-            self.assertGreaterEqual(contrast(SURFACES[mode]["disabled"], background), 4.5, mode)
-            self.assertGreaterEqual(contrast(theme.palette(mode)["fg"], SURFACES[mode]["hover"]), 4.5, mode)
-            for where in (background, SURFACES[mode]["hover"]):  # shortcut hints, also on a hovered row
-                self.assertGreaterEqual(contrast(SURFACES[mode]["muted"], where), 4.5, (mode, where))
+            self.assertGreaterEqual(contrast(surface(mode)["disabled"], background), 4.5, mode)
+            self.assertGreaterEqual(contrast(theme.palette(mode)["fg"], surface(mode)["hover"]), 4.5, mode)
+            for where in (background, surface(mode)["hover"]):  # shortcut hints, also on a hovered row
+                self.assertGreaterEqual(contrast(surface(mode)["muted"], where), 4.5, (mode, where))
 
 
 if __name__ == "__main__":
