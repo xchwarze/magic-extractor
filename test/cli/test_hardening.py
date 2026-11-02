@@ -93,7 +93,7 @@ class ExitCodesTest(TempDirTest):
     def test_failed_source_deletion_fails_the_run(self):
         archive = self.write("a.zip")
         args = argparse.Namespace(file_path=archive, delete_source=True, delete_to_recycle_bin=True)
-        with mock.patch.object(extraction, "process_extraction", return_value=True), \
+        with mock.patch.object(extraction, "process_extraction", return_value=extraction.Outcome.OK), \
                 mock.patch.object(extraction, "delete_source", return_value=False):
             self.assertFalse(extraction.run_extract(args))
 

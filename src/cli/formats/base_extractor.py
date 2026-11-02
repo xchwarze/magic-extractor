@@ -252,11 +252,16 @@ class BaseExtractor:
         """
         Run extract() in a fresh, empty staging folder created for this attempt
         inside the output folder, and move what it extracted into the output
-        folder only if it succeeded. A failed attempt is discarded whole, so it
-        never leaves partial output behind for the next candidate, and every
-        tool works in the same context (a new empty folder) whatever it does
-        with existing folders. A tool that reports success but extracted
-        nothing counts as a failure.
+        folder only if it succeeded. Every tool works in the same context (a new
+        empty folder) whatever it does with existing folders, and a tool that
+        reports success but extracted nothing counts as a failure.
+
+        A failed attempt that still wrote files (e.g. 7z exit 2 because Windows
+        refused to create a symlink from a Linux image: everything else is
+        there) is not thrown away: its staging folder is kept as
+        ``self.partial_staging`` so the caller can use it when no handler fully
+        succeeds (adopt_partial / discard_partial). Any other failed attempt is
+        discarded whole.
 
         Returns:
             bool: True if the extraction succeeded and was moved into place.
@@ -266,24 +271,62 @@ class BaseExtractor:
         staging = os.path.join(final_dir, f'{STAGING_PREFIX}{os.getpid()}_{uuid.uuid4().hex}')
         os.makedirs(staging)
         self.extract_directory = staging
+        self.partial_staging = None
         try:
             if not self.extract():
+                if os.listdir(staging):
+                    self.partial_staging = staging  # kept: see adopt_partial()
                 return False
-            extracted = os.listdir(staging)
-            if not extracted:
+            if not os.listdir(staging):
                 logging.error(f"{type(self).__name__} reported success but extracted nothing")
                 return False
+            return self._move_into_place(staging, final_dir)
+        finally:
+            self.extract_directory = final_dir
+            if self.partial_staging is None:
+                shutil.rmtree(staging, ignore_errors=True)
+
+    def _move_into_place(self, staging, final_dir):
+        """Move the content of ``staging`` into ``final_dir`` (never replacing the
+        archive itself) and record the names it ended up with."""
+        try:
             self.extracted_names = [
                 os.path.basename(merge_move(os.path.join(staging, name), os.path.join(final_dir, name),
                                             protect=self.target_file))
-                for name in extracted
+                for name in os.listdir(staging)
             ]
             return True
         except OSError as exc:
             logging.error(f"{type(self).__name__}: could not move the extracted files into place: {exc}")
             return False
+
+    def partial_size(self):
+        """Total bytes in the kept partial staging folder (0 when there is none)."""
+        if not getattr(self, "partial_staging", None):
+            return 0
+        total = 0
+        for folder, _dirs, files in os.walk(self.partial_staging):
+            for name in files:
+                try:
+                    total += os.path.getsize(os.path.join(folder, name))
+                except OSError:
+                    pass
+        return total + 1  # a partial with only empty files still beats none
+
+    def adopt_partial(self):
+        """Move the kept partial extraction into the output folder; True on success."""
+        staging, self.partial_staging = self.partial_staging, None
+        if not staging:
+            return False
+        try:
+            return self._move_into_place(staging, self.extract_directory)
         finally:
-            self.extract_directory = final_dir
+            shutil.rmtree(staging, ignore_errors=True)
+
+    def discard_partial(self):
+        """Throw away a kept partial extraction (another handler did better)."""
+        staging, self.partial_staging = getattr(self, "partial_staging", None), None
+        if staging:
             shutil.rmtree(staging, ignore_errors=True)
 
     def iter_extracted(self):

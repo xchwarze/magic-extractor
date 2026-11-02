@@ -137,7 +137,10 @@ behind.
 
 Exit codes: `0` success; `1` failure — nothing could be extracted, a file of a
 folder run failed, a folder had no files, or `--delete-source` could not delete
-the source; `2` invalid arguments. With `--recursive`, nested archives that cannot
+the source; `2` invalid arguments; `3` extracted with errors — the tool reported a
+failure but most of the content was extracted (e.g. symbolic links in a Linux image
+cannot be created on Windows), so it is kept in the output folder and the source is
+not deleted. With `--recursive`, nested archives that cannot
 be extracted are reported as warnings and do not change the exit code (many
 extracted files, e.g. every DLL of an installer, look like candidates).
 

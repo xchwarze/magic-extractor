@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import enum
 import logging
 import os
 import pathlib
@@ -10,6 +11,22 @@ from cli_paths import BIN_PATH
 from detection import find_candidate_handlers
 from formats.base_extractor import STAGING_PREFIX, default_output_dir, remove_stale_staging
 from helpers import delete_source, run_per_file
+
+
+class Outcome(enum.Enum):
+    """How the extraction of one file (or a whole run) ended."""
+    OK = "ok"
+    PARTIAL = "partial"   # extracted, but some entries failed (e.g. symlinks on Windows)
+    FAILED = "failed"
+
+    def __bool__(self):
+        # Only a full success is truthy, so nothing treats a partial extraction as
+        # one (--delete-source, a batch's success, carve's result).
+        return self is Outcome.OK
+
+
+# Exit codes of `extract` (2 is argparse's "invalid arguments").
+EXIT_CODES = {Outcome.OK: 0, Outcome.FAILED: 1, Outcome.PARTIAL: 3}
 
 
 def _has_user_content(folder):
@@ -65,7 +82,7 @@ def process_extraction(args, depth=0, candidates=None):
         )
     if not candidates:
         logging.error(f"No handler succeeded for file: {args.file_path}")
-        return False
+        return Outcome.FAILED
 
     # One output folder for every attempt on this file; each attempt runs in
     # its own staging folder inside it (BaseExtractor.extract_atomically).
@@ -73,21 +90,45 @@ def process_extraction(args, depth=0, candidates=None):
         output_dir, created = resolve_output_dir(args)
     except OSError as exc:
         logging.error(f"Cannot prepare the output folder for {args.file_path}: {exc}")
-        return False
+        return Outcome.FAILED
     file_args = argparse.Namespace(**vars(args))
     file_args.output_dir = output_dir
 
-    for candidate in candidates:
-        logging.info(f"Trying handler: {candidate.__name__}")
-        handler = candidate(cli_args=file_args, bin_path=BIN_PATH)
-        handler.pre_extract_actions()
-        if handler.extract_atomically():
-            handler.post_extract_actions()
-            logging.info(f"Extraction completed successfully using handler: {candidate.__name__}")
-            if getattr(args, "recursive", False):
-                extract_nested(handler.extracted_files(), args, depth)
-            return True
-        logging.error(f"Extraction failed using handler: {candidate.__name__}")
+    partials = []  # handlers whose failed attempt still extracted files
+    try:
+        for candidate in candidates:
+            logging.info(f"Trying handler: {candidate.__name__}")
+            handler = candidate(cli_args=file_args, bin_path=BIN_PATH)
+            handler.pre_extract_actions()
+            if handler.extract_atomically():
+                handler.post_extract_actions()
+                logging.info(f"Extraction completed successfully using handler: {candidate.__name__}")
+                if getattr(args, "recursive", False):
+                    extract_nested(handler.extracted_files(), args, depth)
+                return Outcome.OK
+            if getattr(handler, "partial_staging", None):
+                partials.append(handler)
+                logging.warning(f"Extraction failed using handler: {candidate.__name__} "
+                                f"(but it extracted part of the content; kept in case nothing does better)")
+            else:
+                logging.error(f"Extraction failed using handler: {candidate.__name__}")
+
+        # Nothing fully succeeded: keep the biggest partial extraction rather than
+        # nothing (it used to be kept before attempts were staged).
+        best = max(partials, key=lambda partial: partial.partial_size(), default=None)
+        if best is not None:
+            partials.remove(best)
+            if best.adopt_partial():
+                best.post_extract_actions()
+                logging.warning(
+                    f"Extracted with errors using handler: {type(best).__name__}: some entries could not "
+                    f"be written (e.g. symbolic links on Windows); the rest is in {output_dir}")
+                if getattr(args, "recursive", False):
+                    extract_nested(best.extracted_files(), args, depth)
+                return Outcome.PARTIAL
+    finally:
+        for partial in partials:
+            partial.discard_partial()
 
     logging.error(f"No handler succeeded for file: {args.file_path}")
     if created:
@@ -95,7 +136,7 @@ def process_extraction(args, depth=0, candidates=None):
             os.rmdir(output_dir)  # only removes it if it is still empty
         except OSError:
             pass
-    return False
+    return Outcome.FAILED
 
 
 def extract_nested(files, args, depth):
@@ -143,15 +184,23 @@ def run_extract(args):
     delete_after = getattr(args, "delete_source", False)
     use_recycle_bin = getattr(args, "delete_to_recycle_bin", True)
 
-    def extract_one(file_args):
-        if not process_extraction(file_args):
-            return False
-        if delete_after and not delete_source(file_args.file_path, use_recycle_bin):
-            logging.error(f"Extracted, but the source could not be deleted as asked: {file_args.file_path}")
-            return False
-        return True
+    outcomes = []
 
-    return run_per_file(args, extract_one, output_name=batch_output_name)
+    def extract_one(file_args):
+        outcome = process_extraction(file_args)
+        if outcome is Outcome.OK and delete_after and not delete_source(file_args.file_path, use_recycle_bin):
+            logging.error(f"Extracted, but the source could not be deleted as asked: {file_args.file_path}")
+            outcome = Outcome.FAILED
+        elif outcome is Outcome.PARTIAL and delete_after:
+            logging.warning(f"Not deleting the source: it was only partly extracted: {file_args.file_path}")
+        outcomes.append(outcome)
+        return outcome is not Outcome.FAILED
+
+    # The run's outcome: any failure (or a folder with no files) fails it; else a
+    # partial extraction makes it partial.
+    if not run_per_file(args, extract_one, output_name=batch_output_name) or not outcomes:
+        return Outcome.FAILED
+    return Outcome.PARTIAL if Outcome.PARTIAL in outcomes else Outcome.OK
 
 
 def batch_output_name(item, items):

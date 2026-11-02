@@ -198,7 +198,7 @@ class ExtractionWorkflowTest(unittest.TestCase):
         self.assertEqual(self._tree(os.path.join(self.tmp, "archive_extracted")), ["good.txt"])
 
     def test_total_failure_removes_the_folder_it_created(self):
-        self.assertFalse(self._extract(make_handler_class("Broken", writes=["x"], result=False)))
+        self.assertFalse(self._extract(make_handler_class("Broken", writes=(), result=False)))
         self.assertFalse(os.path.exists(os.path.join(self.tmp, "archive_extracted")))
 
     def test_existing_output_gets_a_dated_sibling(self):
@@ -226,7 +226,7 @@ class ExtractionWorkflowTest(unittest.TestCase):
     def test_given_output_dir_is_removed_when_nothing_was_extracted(self):
         out = os.path.join(self.tmp, "out")  # given, not created by argparse
         with mock.patch.object(extraction, "find_candidate_handlers",
-                               return_value=[make_handler_class("Broken", writes=["x"], result=False)]):
+                               return_value=[make_handler_class("Broken", writes=(), result=False)]):
             self.assertFalse(extraction.process_extraction(self._args_with(output_dir=out)))
         self.assertFalse(os.path.exists(out))
 

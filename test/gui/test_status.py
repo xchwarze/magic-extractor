@@ -161,5 +161,17 @@ class ContrastTest(unittest.TestCase):
                 self.assertGreaterEqual(contrast(surface(mode)["muted"], where), 4.5, (mode, where))
 
 
+class PartialSummaryTest(unittest.TestCase):
+    """Exit code 3 = extracted with errors (e.g. symlinks a Linux image could not create)."""
+
+    def test_one_partial_extraction_is_a_warning(self):
+        self.assertEqual(run_summary([("extract", "C:/in/image.sqsh", 3)], 1),
+                         ("Extracted with errors: image.sqsh", "warning"))
+
+    def test_a_batch_counts_partial_extractions_apart(self):
+        results = [("extract", "a.zip", 0), ("extract", "b.sqsh", 3), ("extract", "c.zip", 1)]
+        self.assertEqual(run_summary(results, 3), ("1 extracted, 1 with errors, 1 failed", "warning"))
+
+
 if __name__ == "__main__":
     unittest.main()

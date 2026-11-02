@@ -26,6 +26,7 @@ from detection import (
 )
 from detection_filter import init_blacklist
 from extraction import (
+    EXIT_CODES,
     extract_nested,
     process_extraction,
     run_extract,
@@ -70,7 +71,7 @@ def main():
     args.delete_to_recycle_bin = config.get(
         "settings", "delete_to_recycle_bin", fallback=True, type=bool
     )
-    return 0 if run_extract(args) else 1
+    return EXIT_CODES[run_extract(args)]
 
 
 if __name__ == "__main__":

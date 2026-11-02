@@ -21,6 +21,9 @@ _MODES = {
     "carve": ("Carving", "carved", "failed", "error"),
 }
 _GENERIC = ("Running", "succeeded", "failed", "error")
+# The CLI's exit code for "extracted with errors": the content is there, but some
+# entries could not be written (e.g. symlinks from a Linux image on Windows).
+PARTIAL_EXIT = 3
 
 
 def source_name(source):
@@ -42,37 +45,47 @@ def run_summary(results, total, cancelled=False):
     """``(text, level)`` for a finished run.
 
     ``results`` is one ``(mode, source, exit_code)`` per job that ended, ``total`` how many were
-    planned. Level is "info", "warning" (some failed) or "error" (all failed); the exit code 0 is
-    success, and -1 on a cancelled run is the job that was interrupted, not a failure.
+    planned. Level is "info", "warning" (some failed, or extracted with errors) or "error" (all
+    failed); the exit code 0 is success, PARTIAL_EXIT is "extracted with errors", and -1 on a
+    cancelled run is the job that was interrupted, not a failure.
     """
     results = list(results)
     interrupted = 1 if cancelled and results and results[-1][2] == -1 else 0
     done = results[:len(results) - interrupted]
     good = sum(1 for _mode, _source, code in done if code == 0)
-    bad = len(done) - good
+    partial = sum(1 for _mode, _source, code in done if code == PARTIAL_EXIT)
+    bad = len(done) - good - partial
     modes = {mode for mode, _source, _code in done}
     _verb, good_word, bad_word, bad_level = _MODES.get(next(iter(modes)), _GENERIC) if len(modes) == 1 else _GENERIC
     if cancelled:
         if total == 1:
             return "Cancelled", "info"
         parts = [f"{good} {good_word}"] if good else []
+        if partial:
+            parts.append(f"{partial} with errors")
         if bad:
             parts.append(f"{bad} {bad_word}")
-        if total - good - bad:
-            parts.append(f"{total - good - bad} not run")
+        if total - good - partial - bad:
+            parts.append(f"{total - good - partial - bad} not run")
         return "Cancelled: " + ", ".join(parts), "info"
     if len(done) == 1 and total == 1:
         _mode, source, code = done[0]
         if code == 0:
             return f"{good_word.capitalize()}: {source_name(source)}", "info"
+        if code == PARTIAL_EXIT:
+            return f"{good_word.capitalize()} with errors: {source_name(source)}", "warning"
         detail = f" (exit code {code})" if code > 0 else ""
         return f"{bad_word.capitalize()}: {source_name(source)}{detail}", bad_level
     parts = [f"{good} {good_word}"] if good else []
+    if partial:
+        parts.append(f"{partial} with errors")
     if bad:
         parts.append(f"{bad} {bad_word}")
     if not parts:
         return "Nothing to do", "info"
-    return ", ".join(parts), ("info" if not bad else "warning" if good else bad_level)
+    if not bad:
+        return ", ".join(parts), "warning" if partial else "info"
+    return ", ".join(parts), "warning" if good or partial else bad_level
 
 
 def fit(text, width, measure):
