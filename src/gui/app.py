@@ -353,8 +353,8 @@ class ExtractorApp:
         # Progress bar + status line sit under the log (packed first so they keep their room)
         bottom = ttk.Frame(frm)
         bottom.pack(side="bottom", fill="x", padx=10, pady=(4, 0))
+        # Shown only during a run (_set_running): idle, an empty bar just draws a line.
         self.progress = ttk.Progressbar(bottom, mode="determinate")
-        self.progress.pack(fill="x")
         self.status = StatusLine(bottom)
         self.status.label.pack(fill="x", pady=(4, 0))
         self.status.set("Ready")
@@ -647,11 +647,13 @@ class ExtractorApp:
         self.batch_btn.config(state=state)
         self.menubar.set_entry_state(self.RUN_LOCKED_ENTRIES, state)
         if running:  # busy indicator: a run has no known length
+            self.progress.pack(fill="x", before=self.status.label)
             self.progress.config(mode="indeterminate")
             self.progress.start(15)
         else:
             self.progress.stop()
             self.progress.config(mode="determinate", value=0)
+            self.progress.pack_forget()
 
     # ---- context menu ----------------------------------------------------
     def _context_menu_parts(self):

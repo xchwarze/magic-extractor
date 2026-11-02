@@ -58,14 +58,16 @@ class TextStyleTest(AppTestCase):
             colors = theme.palette(mode)
             self.assertGreaterEqual(contrast(colors["select_fg"], colors["accent"]), 4.5, mode)
 
-    def test_the_text_has_a_flat_one_pixel_border_that_marks_focus(self):
+    def test_the_text_is_flat_and_shows_a_border_only_with_focus(self):
+        # Blended into the window: the 1 px frame is the background colour unless the
+        # Text has the keyboard focus, when it turns accent.
         for mode in ("dark", "light"):
             theme.restyle_text(self.app.log, mode)
             colors = theme.palette(mode)
             self.assertEqual(str(self.app.log.cget("relief")), "flat")
             self.assertEqual(int(self.app.log.cget("borderwidth")), 0)
             self.assertEqual(int(self.app.log.cget("highlightthickness")), 1)
-            self.assertEqual(self.app.log.cget("highlightbackground"), colors["border"])
+            self.assertEqual(self.app.log.cget("highlightbackground"), colors["bg"])
             self.assertEqual(self.app.log.cget("highlightcolor"), colors["accent"])
 
     def test_the_log_keeps_its_hint_colour(self):

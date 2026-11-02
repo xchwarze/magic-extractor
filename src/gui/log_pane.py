@@ -221,7 +221,8 @@ class LogPane:
         colors = surface(mode)
         self.text.config(
             relief="flat", borderwidth=0, highlightthickness=1,
-            highlightbackground=colors["border"], highlightcolor=colors["accent"],  # focus ring
+            # no visible border: the log blends into the window; the accent ring only with focus
+            highlightbackground=colors["bg"], highlightcolor=colors["accent"],
             selectbackground=colors["accent"], selectforeground=colors["select_fg"],
             # keep a selection readable while another widget (or a popup menu) has focus
             inactiveselectbackground=colors["border"],

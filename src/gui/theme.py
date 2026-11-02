@@ -161,9 +161,10 @@ def restyle_text(widget, mode):
         selectbackground=colors["accent"], selectforeground=colors["select_fg"],
         # a selection stays visible while another widget has the focus
         inactiveselectbackground=colors["border"],
-        # Tk's default 3D relief clashes with Sun Valley: a flat 1 px frame, accent when focused
+        # Flat, blended into the window (Tk's 3D relief clashes with Sun Valley): the 1 px
+        # frame takes the background colour, so it only shows, in the accent, with focus.
         relief="flat", borderwidth=0, highlightthickness=1,
-        highlightbackground=colors["border"], highlightcolor=colors["accent"],
+        highlightbackground=colors["bg"], highlightcolor=colors["accent"],
     )
     widget.tag_config("hint", foreground=colors["hint"])
 
