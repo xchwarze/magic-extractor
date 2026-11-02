@@ -22,6 +22,8 @@ GLYPHS = {
     "save": "save",                # Preferences: Save
     "delete": "delete",            # confirm dialog: delete the source
     "stop": "stop",                # confirm dialog: stop the run and close
+    "copy": "copy",                # log menu: Copy selection / Copy all
+    "clear": "broom",              # log menu: Clear (it empties, it deletes nothing)
     # menu bar titles
     "menu_file": "folder",
     "menu_edit": "edit",

@@ -12,9 +12,14 @@ import tkinter.font as tkfont
 from tkinter import filedialog, ttk
 
 from gui import runner, config_io, theme, paths, history, context_menu, option_warnings, icons, dialogs, geometry
-from gui.icons.catalog import COMPACT
+from gui.icons.catalog import COMPACT, DISABLED, NORMAL
+from gui import logging_setup
+from gui.log_pane import LogPane, copy_to_clipboard, save_text
+from gui.menu_popup import ICON_GAP, Item, show_context_menu
 from gui.settings import GuiSettings
 from gui.menubar import MenuBar
+from gui.status import StatusLine, job_status, run_summary, source_name
+from gui.tooltip import Tooltip
 
 # CLI config.ini flags surfaced in Preferences, with human-readable labels.
 CONFIG_LABELS = {
@@ -42,6 +47,11 @@ THEME_CHOICES = (("auto", "System"), ("light", "Light"), ("dark", "Dark"))
 LOG_FILENAME = "magic-extractor.log"
 WARNING_SIGN = "\u26a0"  # shown at the start of an option's warning alert
 LOG_PLACEHOLDER = "Ready. Extraction and detection output will appear here."
+LOCK_TIP = ("Lock the destination: it is not filled in from the source, and files are extracted into it "
+            "even when it already has content (files with the same name are overwritten).")
+BATCH_TIP = ("With a source filled in: adds it to the batch queue.\n"
+             "With the source empty: runs the queued files.\n"
+             "With the source empty and nothing queued: asks for several files and runs them. (Ctrl+B)")
 
 
 class ExtractorApp:
@@ -53,8 +63,12 @@ class ExtractorApp:
         self.root.withdraw()
         self.log_queue = queue.Queue()
         # The worker thread never touches Tk: it posts lines to log_queue and
-        # its final result here; _drain_log (main thread) picks both up.
+        # its final result here; _drain_log (main thread) picks both up. job_queue
+        # carries what each job is doing ("start") and how it ended ("exit") for the status line.
         self.done_queue = queue.Queue()
+        self.job_queue = queue.Queue()
+        self._run_total = 0
+        self._run_results = []  # (mode, source, exit code) of the jobs of this run that ended
         self._running = False
         self._closing = False       # a close was accepted; the window goes once the worker stops
         self._close_prompt = False  # the "extraction running" question is open
@@ -79,7 +93,7 @@ class ExtractorApp:
         self._build_body()
         theme.apply(self.root, self.theme_mode)
         theme.scale_theme_fonts(self.root)  # sv-ttk fonts follow the display scaling
-        theme.restyle_text(self.log, self.theme_mode)
+        self.log_pane.restyle(self.theme_mode)
         self.menubar.recolor(self.theme_mode)
         self._start_theme_watch()
         self._enable_dnd()
@@ -91,6 +105,8 @@ class ExtractorApp:
             self._autofill(force=True)
 
         self._bind_keys()
+        # Tk prints a failing callback to a stderr the windowed exe does not have.
+        self.root.report_callback_exception = self._report_callback_exception
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         self.root.after(100, self._drain_log)
         self.root.deiconify()  # geometry is set; reveal at the final position
@@ -226,7 +242,7 @@ class ExtractorApp:
             self.log_queue.put(f"[settings] could not save gui.ini: {exc}")
 
     # ---- UI construction -------------------------------------------------
-    # Keyboard access to every action (the self-drawn menu bar is mouse-only).
+    # Keyboard access to every action (F10 also enters the self-drawn menu bar).
     SHORTCUTS = (
         ("<Control-o>", "_browse_source"), ("<Control-d>", "_browse_dest"),
         ("<Control-l>", "_clear_log"), ("<Control-b>", "_on_batch"),
@@ -234,9 +250,19 @@ class ExtractorApp:
         ("<Control-t>", "_toggle_theme"), ("<F1>", "_about"), ("<Control-q>", "_on_close"),
     )
 
+    # Settings and system changes that wait for the run to finish: dimmed in the menu bar and
+    # their shortcuts ignored (a change meanwhile would not apply to the run anyway).
+    RUN_LOCKED_ENTRIES = ("Run options...", "Preferences...", "Add to Explorer menu", "Remove from Explorer menu")
+    RUN_LOCKED_SHORTCUTS = ("_open_run_options", "_open_preferences")
+
+    def _shortcut(self, method):
+        if self._running and method in self.RUN_LOCKED_SHORTCUTS:
+            return
+        getattr(self, method)()
+
     def _bind_keys(self):
         for sequence, method in self.SHORTCUTS:
-            self.root.bind(sequence, lambda _event, m=method: getattr(self, m)())
+            self.root.bind(sequence, lambda _event, m=method: self._shortcut(m))
         # Enter runs OK from the main window (not while a run is going).
         self.root.bind("<Return>", lambda _event: None if self._running else self._on_ok())
 
@@ -292,14 +318,17 @@ class ExtractorApp:
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.source_entry = ttk.Combobox(row, textvariable=self.source, values=self._src_hist)
         self.source_entry.pack(side="left", fill="x", expand=True)
-        self._icon(ttk.Button(row, text="...", width=3, command=self._browse_source),
-                   "browse_file", with_text=False).pack(side="left", padx=4)
+        self.source_btn = self._icon(ttk.Button(row, text="...", width=3, command=self._browse_source),
+                                     "browse_file", with_text=False)
+        self.source_btn.pack(side="left", padx=4)
+        Tooltip(self.source_btn, "Browse for the archive or installer (Ctrl+O)")
 
         # Destination row
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         ttk.Label(row, text="Destination directory:").pack(side="left")
         self.lock_chk = ttk.Checkbutton(row, text="lock", variable=self.lock_dest)
         self.lock_chk.pack(side="left", padx=4)
+        Tooltip(self.lock_chk, LOCK_TIP)
 
         row = ttk.Frame(frm); row.pack(fill="x", **pad)
         self.dest_entry = ttk.Combobox(row, textvariable=self.dest, values=self._dst_hist)
@@ -307,6 +336,7 @@ class ExtractorApp:
         self.dest_btn = self._icon(ttk.Button(row, text="...", width=3, command=self._browse_dest),
                                    "browse", with_text=False)
         self.dest_btn.pack(side="left", padx=4)
+        Tooltip(self.dest_btn, "Browse for the destination folder (Ctrl+D)")
 
         # Buttons
         row = ttk.Frame(frm); row.pack(fill="x", padx=10, pady=(8, 4))
@@ -316,16 +346,24 @@ class ExtractorApp:
                    "dismiss").pack(side="left", padx=8)
         self.batch_btn = self._icon(ttk.Button(row, text="Batch", width=10, command=self._on_batch), "batch")
         self.batch_btn.pack(side="left", padx=8)
+        Tooltip(self.batch_btn, BATCH_TIP)
 
         ttk.Separator(frm).pack(fill="x", pady=(8, 2), padx=10)
 
-        # Log pane
-        self.log = tk.Text(frm, height=14, state="disabled", wrap="word",
-                           relief="flat", borderwidth=1, padx=8, pady=6)
-        self.log.pack(fill="both", expand=True, **pad)
-        self.log.tag_config("hint", foreground=theme.palette(self.theme_mode)["hint"])
-        self._log_empty = True
-        self._show_placeholder()
+        # Progress bar + status line sit under the log (packed first so they keep their room)
+        bottom = ttk.Frame(frm)
+        bottom.pack(side="bottom", fill="x", padx=10, pady=(4, 0))
+        self.progress = ttk.Progressbar(bottom, mode="determinate")
+        self.progress.pack(fill="x")
+        self.status = StatusLine(bottom)
+        self.status.label.pack(fill="x", pady=(4, 0))
+        self.status.set("Ready")
+
+        # Log pane: read-only, scrollable, bounded (gui/log_pane.py)
+        self.log_pane = LogPane(frm, LOG_PLACEHOLDER, self.theme_mode)
+        self.log_pane.frame.pack(fill="both", expand=True, **pad)
+        self.log = self.log_pane.text
+        self.log_pane.bind_context_menu(self._show_log_menu)
         self._sync_mode()
 
     # ---- helpers ---------------------------------------------------------
@@ -369,12 +407,13 @@ class ExtractorApp:
             self.dest.set(os.path.normpath(path))
 
     def _enable_dnd(self):
-        """Register file drag-and-drop on the source entry + log (no-op without tkinterdnd2)."""
+        """Register file drag-and-drop on the whole window, the source entry and the log
+        (no-op without tkinterdnd2)."""
         try:
             from tkinterdnd2 import DND_FILES
         except Exception:
             return
-        for target in (self.source_entry, self.log):
+        for target in (self.root, self.source_entry, self.log):
             try:
                 target.drop_target_register(DND_FILES)
                 target.dnd_bind("<<Drop>>", self._on_drop)
@@ -398,6 +437,14 @@ class ExtractorApp:
             return
         self.source.set(dropped[0])
         self._autofill(force=True)
+        # Only one file fits the source box: the others wait in the batch queue.
+        extra = dropped[1:]
+        for path in extra:
+            self.batch_queue.append((self.mode.get(), os.path.normpath(path), ""))
+            self._append(f"[queued] {path}")
+        if extra:
+            count = len(extra)
+            self._set_status(f"{count} more file{'s' if count > 1 else ''} queued. Press Batch to run them.")
 
     def _max_depth(self, default=5):
         """The Max depth box as an int; an empty/non-numeric box makes IntVar.get()
@@ -469,26 +516,64 @@ class ExtractorApp:
         self.settings.set("history", "dests", history.join(self._dst_hist))
         self._save_gui_ini()
 
-    def _show_placeholder(self):
-        self.log.config(state="normal")
-        self.log.delete("1.0", "end")
-        self.log.insert("1.0", LOG_PLACEHOLDER, ("hint",))
-        self.log.config(state="disabled")
-        self._log_empty = True
-
     LOG_BATCH = 500  # lines per main-loop tick, so a flood never freezes the UI
 
     def _append(self, text):
-        self.log.config(state="normal")
-        if self._log_empty:
-            self.log.delete("1.0", "end")  # drop the placeholder on first real line
-            self._log_empty = False
-        self.log.insert("end", text + "\n")
-        self.log.see("end")
-        self.log.config(state="disabled")
+        self.log_pane.append(text)
 
     def _clear_log(self):
-        self._show_placeholder()
+        self.log_pane.clear()
+
+    # ---- log menu (right-click, Shift+F10, Menu key) ----------------------
+    def _popup_icon(self, semantic, mode, disabled):
+        """16 px icon for a popup row, its gap to the text padded into the image."""
+        return self.icons.photo(mode, semantic, icons.icon_size(self.root, COMPACT),
+                                DISABLED if disabled else NORMAL,
+                                gap=round(ICON_GAP * icons.dpi_scale(self.root)))
+
+    def _show_log_menu(self, x, y):
+        pane = self.log_pane
+        has_output = not pane.is_empty
+        show_context_menu(self.root, self.theme_mode, x, y, [
+            Item("Copy selection\tCtrl+C", self._copy_log_selection, "copy", bool(pane.selected_text())),
+            Item("Copy all", self._copy_log_all, "copy", has_output),
+            Item("Save as...", self._save_log_as, "save", has_output),
+            None,
+            Item("Clear\tCtrl+L", self._clear_log, "clear", has_output),
+        ], icon=self._popup_icon)
+
+    def _copy_log_selection(self):
+        self._copy_log(self.log_pane.selected_text())
+
+    def _copy_log_all(self):
+        self._copy_log(self.log_pane.get_all())
+
+    def _copy_log(self, text):
+        if not text:
+            return
+        if copy_to_clipboard(self.root, text):
+            self._set_status("Copied to the clipboard")
+        else:
+            message = "Could not copy: the clipboard is in use by another program"
+            self._append(f"[log] {message}")
+            self._set_status(message, "error")
+
+    def _save_log_as(self):
+        path = filedialog.asksaveasfilename(
+            parent=self.root, title="Save the log", defaultextension=".log",
+            initialfile="magic-extractor-gui.log",
+            filetypes=(("Log files", "*.log"), ("Text files", "*.txt"), ("All files", "*.*")))
+        if not path:
+            return  # cancelled
+        path = os.path.normpath(path)
+        try:
+            save_text(path, self.log_pane.get_all())
+        except OSError as exc:
+            logging.error(f"Could not save the log to {path}: {exc}")
+            self._append(f"[log] could not save {path}: {exc}")
+            self._set_status(f"Could not save the log: {exc}", "error")
+        else:
+            self._set_status(f"Log saved to {path}")
 
     def _open_log_folder(self):
         self._open_path(self._current_output_dir())
@@ -508,23 +593,65 @@ class ExtractorApp:
             pass
         if lines:
             self._append("\n".join(lines))
+        self._drain_jobs()
         if self.log_queue.empty():
             try:
                 all_ok = self.done_queue.get_nowait()
             except queue.Empty:
                 pass
             else:
+                self._drain_jobs()  # whatever the worker queued before it reported done
                 self._on_run_finished(all_ok)
         try:
             self.root.after(10 if not self.log_queue.empty() else 100, self._drain_log)
         except tk.TclError:
             pass  # window already destroyed
 
+    def _drain_jobs(self):
+        """Apply the job events the worker queued (main thread): the status line follows
+        the job being run and the results are kept for the end-of-run summary."""
+        try:
+            while True:
+                event = self.job_queue.get_nowait()
+                if event[0] == "start":
+                    _kind, index, total, mode, source = event
+                    self._set_status(job_status(index, total, mode, source))
+                elif event[0] == "exit":
+                    _kind, _index, mode, source, code = event
+                    self._run_results.append((mode, source, code))
+        except queue.Empty:
+            pass
+
+    def _set_status(self, text, level="info"):
+        """Show ``text`` in the status line ("info", "warning" or "error" level)."""
+        status = getattr(self, "status", None)
+        if status is not None:
+            status.set(text, level)
+
+    def _report_callback_exception(self, exc_type, exc, tb):
+        """Tk calls this when a callback raises: log the traceback and say so in the log
+        pane and the status line instead of losing it."""
+        logging.error("Unhandled error in a Tk callback", exc_info=(exc_type, exc, tb))
+        message = f"{exc_type.__name__}: {exc}"
+        where = logging_setup.log_path()
+        try:
+            self._append(f"[error] internal error: {message}" + (f" (details in {where})" if where else ""))
+            self._set_status(f"Internal error: {message}", "error")
+        except Exception:  # the error hook itself must never raise (e.g. window being destroyed)
+            logging.debug("could not show the callback error", exc_info=True)
+
     def _set_running(self, running):
         self._running = running
         state = "disabled" if running else "normal"
         self.ok_btn.config(state=state)
         self.batch_btn.config(state=state)
+        self.menubar.set_entry_state(self.RUN_LOCKED_ENTRIES, state)
+        if running:  # busy indicator: a run has no known length
+            self.progress.config(mode="indeterminate")
+            self.progress.start(15)
+        else:
+            self.progress.stop()
+            self.progress.config(mode="determinate", value=0)
 
     # ---- context menu ----------------------------------------------------
     def _context_menu_parts(self):
@@ -568,25 +695,30 @@ class ExtractorApp:
         for _, src, dest in jobs:
             self._push_history(src, dest)
         self.cancel_flag.clear()
+        self._run_total = len(jobs)
+        self._run_results = []
         self._set_running(True)
+        self._set_status(job_status(1, len(jobs), jobs[0][0], jobs[0][1]))
 
         def work():
             # Runs off the main thread: only queues here, never Tk (thread-safety).
             all_ok = True
             try:
-                for mode, src, dest in jobs:
+                for index, (mode, src, dest) in enumerate(jobs, 1):
+                    self.job_queue.put(("start", index, len(jobs), mode, src))
                     job_opts = dict(opts)
                     if mode == "extract":
                         job_opts["delete_source"] = delete_flag
                     self.log_queue.put(f"=== {mode}: {src} ===")
-                    argv = runner.build_command(prefix, mode, src, dest, job_opts)
-                    self.log_queue.put("$ " + " ".join(runner.display_command(argv)))
                     try:
+                        argv = runner.build_command(prefix, mode, src, dest, job_opts)
+                        self.log_queue.put("$ " + " ".join(runner.display_command(argv)))
                         code = runner.run_streaming(argv, self.log_queue.put, self.cancel_flag.is_set)
                     except Exception as exc:  # e.g. the backend exe is blocked or missing
                         self.log_queue.put(f"[error] could not run the backend: {exc}")
                         code = -1
                     self.log_queue.put(f"[exit {code}]")
+                    self.job_queue.put(("exit", index, mode, src, code))
                     all_ok = all_ok and code == 0
                     if self.cancel_flag.is_set():
                         self.log_queue.put("[cancelled]")
@@ -600,6 +732,10 @@ class ExtractorApp:
 
     def _on_run_finished(self, all_ok=True):
         self._set_running(False)
+        if self._run_total:
+            text, level = run_summary(self._run_results, self._run_total, self.cancel_flag.is_set())
+            self._set_status(text, level)
+            self._run_total = 0
         # "keep_open" off means auto-close on success: a failed or cancelled run
         # stays open so its log can be read.
         if all_ok and not self.keep_open.get():
@@ -623,6 +759,7 @@ class ExtractorApp:
         if src:
             self.batch_queue.append((self.mode.get(), src, self.dest.get()))
             self._append(f"[queued] {src}")
+            self._set_status(f"Queued {source_name(src)}: {len(self.batch_queue)} waiting. Press Batch to run them.")
             self.source.set("")
             if not self.lock_dest.get():
                 self.dest.set("")
@@ -653,10 +790,12 @@ class ExtractorApp:
     def _clear_batch(self):
         self.batch_queue.clear()
         self._append("[batch] queue cleared")
+        self._set_status("Batch queue cleared")
 
     def _on_cancel(self):
         if self._running:
             self.cancel_flag.set()
+            self._set_status("Cancelling...")
         else:
             self._on_close()
 
@@ -716,7 +855,7 @@ class ExtractorApp:
         theme.apply(self.root, self.theme_mode)
         theme.scale_theme_fonts(self.root)
         self.icons.retheme(self.theme_mode)
-        theme.restyle_text(self.log, self.theme_mode)
+        self.log_pane.restyle(self.theme_mode)
         self.menubar.recolor(self.theme_mode)
 
     def _toggle_theme(self):
