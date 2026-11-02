@@ -220,9 +220,10 @@ class LogPane:
         theme.restyle_text(self.text, mode)
         colors = surface(mode)
         self.text.config(
-            relief="flat", borderwidth=0, highlightthickness=1,
-            # no visible border: the log blends into the window; the accent ring only with focus
-            highlightbackground=colors["bg"], highlightcolor=colors["accent"],
+            # By design the log is blended into the window: no frame at all, not even a
+            # focus ring (it still takes focus for selecting and copying).
+            relief="flat", borderwidth=0, highlightthickness=0,
+            highlightbackground=colors["bg"], highlightcolor=colors["bg"],
             selectbackground=colors["accent"], selectforeground=colors["select_fg"],
             # keep a selection readable while another widget (or a popup menu) has focus
             inactiveselectbackground=colors["border"],

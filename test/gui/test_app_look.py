@@ -10,13 +10,13 @@ from gui import theme  # noqa: E402
 
 
 class LogBlendsInTest(AppTestCase):
-    def test_log_border_is_invisible_until_focused(self):
+    def test_log_never_draws_a_border_even_with_focus(self):
+        # By design the log is blended into the window: no frame, not even a focus ring.
         log = self.app.log
         for mode in ("dark", "light"):
             self.app.log_pane.restyle(mode)
-            self.assertEqual(str(log.cget("highlightbackground")), str(log.cget("background")), mode)
-            # keyboard focus still shows: the focus colour is the accent, not the background
-            self.assertNotEqual(str(log.cget("highlightcolor")), str(log.cget("background")), mode)
+            self.assertEqual(int(log.cget("highlightthickness")), 0, mode)
+            self.assertEqual(int(log.cget("borderwidth")), 0, mode)
 
     def test_other_text_widgets_follow_the_same_rule(self):
         import tkinter as tk
