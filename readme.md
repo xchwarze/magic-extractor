@@ -225,8 +225,10 @@ python src/gui/main.py <file> [outdir] # prefill the source (and destination)
 python src/gui/main.py <file> /scan    # prefill and start in identify mode
 ```
 Drag-and-drop needs the optional `tkinterdnd2` package (`pip install -r src/gui/requirements.txt`);
-without it the window still works, minus drop support. It can also register an Explorer
-context-menu entry (Edit → Add to Explorer menu).
+without it the window still works, minus drop support. Files can be dropped anywhere on
+the window; when several are dropped, the first fills the source and the others go to
+the batch queue. It can also register an Explorer context-menu entry (Edit → Add to
+Explorer menu).
 
 - Lock the destination to keep one shared output folder: runs then extract into it
   (`--merge-output`); unlocked, an existing non-empty folder gets a dated sibling.
@@ -234,11 +236,22 @@ context-menu entry (Edit → Add to Explorer menu).
   ...) show a warning under them in Run options and Preferences while they are on.
 - Keyboard: Enter runs OK; Ctrl+O / Ctrl+D pick the source / destination; Ctrl+R
   Run options; Ctrl+, Preferences; Ctrl+B Batch; Ctrl+L clear the log; Ctrl+T flip
-  light/dark (and keep it); F1 About; Ctrl+Q exit; Escape closes a dialog.
+  light/dark (and keep it); F1 About; Ctrl+Q exit; Escape closes a dialog. F10 enters
+  the menu bar (arrows, Enter, Escape); dialogs are modal and Enter presses the
+  focused button.
+- The log keeps the last 5000 lines and only follows new output while you are at the
+  bottom; right-click (or Shift+F10) it to copy, save or clear. A status line and
+  progress bar show "Extracting 2 of 5: …" during a run and a summary at the end
+  ("4 extracted, 1 failed"). Settings entries are disabled while a run is going.
+- Deleting sources is always confirmed with "Keep sources" as the default (Enter and
+  Escape keep them).
 - Closing the window during a run asks first, then cancels it and stops every
   extractor it started.
 - The theme follows the Windows light/dark setting while the window is open; pick
   System, Light or Dark under Preferences → Theme (Light/Dark keep it fixed).
+- The released GUI writes errors to `gui.log` beside the exe (or under
+  `%LOCALAPPDATA%\magic-extractor` when that folder is read-only), since it has no
+  console.
 
 ## Building (Windows)
 The release workflow (`.github/workflows/release.yml`) builds both executables from
